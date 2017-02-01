@@ -71,6 +71,10 @@ public class ApplicationManager : Manager< ApplicationManager > {
     private GameObject _dice_button_pref;
     private GameObject _complete_button_obj;
 	private GameObject _complete_button_pref;
+    private GameObject _configration_button_obj;
+    private GameObject _configration_button_pref;
+    private GameObject _go_title_obj;
+    private GameObject _go_title_pref;
     private Sprite _game_scene_back_ground;
 	[ SerializeField ]
 	private Sprite[ ] _small_num = new Sprite[ 10 ];
@@ -97,6 +101,8 @@ public class ApplicationManager : Manager< ApplicationManager > {
 	private bool _result_init = false;
     private bool _reject      = false;
     private bool _wait_play   = false;
+    private bool _push_config = false;
+    private bool _go_title    = false;
 	[ SerializeField ]
     private int _debug_player_num = 0;
 	[ SerializeField ]
@@ -1336,6 +1342,63 @@ public class ApplicationManager : Manager< ApplicationManager > {
         _complete_button_obj = null;
         _complete_button_pref = null;
     }
+    
+    /// <summary>
+    /// 完了ボタンを作成
+    /// </summary>
+    public void createConfigrationButton( ) {
+        _configration_button_pref = Resources.Load< GameObject >( "Prefabs/UI/ConfigurationButton" );
+        
+        _configration_button_obj = ( GameObject )Instantiate( _configration_button_pref );
+        _configration_button_obj.transform.SetParent( GameObject.Find( "Canvas" ).transform );
+        _configration_button_obj.GetComponent< RectTransform >( ).anchoredPosition = new Vector3( 0, 0, 0 );
+        _configration_button_obj.GetComponent< RectTransform >( ).localScale = new Vector3( 1, 1, 1 );
+
+        Vector3 pos = _configration_button_pref.GetComponent< RectTransform >( ).localPosition;
+        _configration_button_obj.GetComponent< RectTransform >( ).localPosition = pos;
+            
+        _configration_button_obj.GetComponent< Button >( ).onClick.AddListener( pushConfig );
+    }
+    
+    /// <summary>
+    /// 完了ボタンを削除
+    /// </summary>
+    private void destroyConfigrationButton( ) {
+        Destroy( _configration_button_obj );
+        _configration_button_obj = null;
+        _configration_button_pref = null;
+    }
+    
+    /// <summary>
+    /// 完了ボタンを作成
+    /// </summary>
+    public void createGoTitle( ) {
+        createLightOffObj( false );
+
+        _go_title_pref = Resources.Load< GameObject >( "Prefabs/UI/GoTitle" );
+        
+        _go_title_obj = ( GameObject )Instantiate( _go_title_pref );
+        _go_title_obj.transform.SetParent( GameObject.Find( "Canvas" ).transform );
+        _go_title_obj.GetComponent< RectTransform >( ).anchoredPosition = new Vector3( 0, 0, 0 );
+        _go_title_obj.GetComponent< RectTransform >( ).localScale = new Vector3( 1, 1, 1 );
+
+        Vector3 pos = _go_title_pref.GetComponent< RectTransform >( ).localPosition;
+        _go_title_obj.GetComponent< RectTransform >( ).localPosition = pos;
+            
+        GameObject yes = _go_title_obj.transform.GetChild( 0 ).transform.gameObject;
+        GameObject no = _go_title_obj.transform.GetChild( 0 ).transform.gameObject;
+        yes.GetComponent< Button >( ).onClick.AddListener( pushConfig );
+        no.GetComponent< Button >( ).onClick.AddListener( pushConfig );
+    }
+    
+    /// <summary>
+    /// 完了ボタンを削除
+    /// </summary>
+    private void destroyGoTitle( ) {
+        Destroy( _go_title_obj );
+        _go_title_obj  = null;
+        _go_title_pref = null;
+    }
 
     /// <summary>
     /// 暗くなる画面を生成
@@ -1647,5 +1710,19 @@ public class ApplicationManager : Manager< ApplicationManager > {
 	public SCENE getScene( ) {
 		return _scene;
 	}
+
+    public void pushConfig( ) {
+        if ( !_reject ) {
+            _push_config = true;
+        }
+    }
+
+    public void pushGoTitleYes( ) {
+        _go_title = true;
+    }
+
+    public void pushGoTitleNo( ) {
+        destroyGoTitle( );
+    }
 
 }
