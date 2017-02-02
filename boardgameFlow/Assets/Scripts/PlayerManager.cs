@@ -494,12 +494,17 @@ public class PlayerManager : MonoBehaviour {
                     _limit_value = 0;
 				    return getPlayerCount( ( int )_player_order, length );
 			    }
-		    } else {
-                if( _current_flag ){
-                    return getPlayerCount( ( int )_player_order, length ) - _limit_value;
-                } else {
-			        return getPlayerCount( ( int )_player_order, length ) - 1;
-                }
+			} else {
+				if ( getPlayerCount( ( int )_player_order, length ) - _limit_value >= 0 ) {
+					if ( _current_flag ) {
+						return getPlayerCount( ( int )_player_order, length ) - _limit_value;
+					} else {
+						return getPlayerCount( ( int )_player_order, length ) - 1;
+					}
+				} else {
+					_limit_value = 0;
+					return 0;
+				}
 		    }
         }
 

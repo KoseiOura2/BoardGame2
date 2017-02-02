@@ -18,7 +18,7 @@ public class Card : MonoBehaviour {
 	/// </summary>
 	/// <param name="card_data">Card data.</param>
 	public void setCardData( CARD_DATA card_data ) {
-		_front_material = Resources.Load<Material>( "Materials/Cards/" + card_data.name );
+		_front_material = Resources.Load< Material >( "Materials/Cards/" + card_data.name );
 		_front_object.GetComponent<Renderer>( ).material = _front_material;
 	}
 

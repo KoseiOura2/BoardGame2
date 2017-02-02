@@ -88,7 +88,7 @@ public class ParticleManager : MonoBehaviour {
                     _particle_init_time = 0;
                     int rand = Random.Range(0, 2);
                     GameObject road_particle = ( rand == 1 ) ? _fireworks_1 : _fireworks_2;
-                    _particle_obj.Add((GameObject)Instantiate(road_particle, new Vector3( Random.Range( 90, 110 ), Random.Range( 100, 105 ), 115f ),Quaternion.identity));
+                    _particle_obj.Add((GameObject)Instantiate(road_particle, new Vector3( Random.Range( 90, 110 ), Random.Range( 100, 105 ), 165f ),Quaternion.identity));
                     _particle_obj[_particle_init_count].transform.parent = GameObject.Find( "Canvas" ).transform;
                     _particle_init_count++;
                 }
@@ -101,16 +101,19 @@ public class ParticleManager : MonoBehaviour {
         _particle_type = particle_type;
     }
 
+	public void particlePhaseUpdate( ) {
+		if( _particle_time == 0 ) {
+			_particle_phase = 0;
+		} else if ( SPIRAL_TIME_ONE < _particle_time && _particle_time < SPIRAL_TIME_TWO ) {
+			_particle_phase = 1;
+		} else if (  SPIRAL_TIME_TWO < _particle_time && _particle_time< SPIRAL_TIME_THREE ) {
+			_particle_phase = 2;
+		} else if ( _particle_time > SPIRAL_TIME_FOUR ) {
+			_particle_phase = 3;
+		}
+	}
+
     public int isParticlePhase( ) {
-        if( _particle_time == 0 ) {
-            _particle_phase = 0;
-        } else if ( SPIRAL_TIME_ONE < _particle_time && _particle_time < SPIRAL_TIME_TWO ) {
-            _particle_phase = 1;
-        } else if (  SPIRAL_TIME_TWO < _particle_time && _particle_time< SPIRAL_TIME_THREE ) {
-            _particle_phase = 2;
-        } else if ( _particle_time > SPIRAL_TIME_FOUR ) {
-            _particle_phase = 3;
-        }
         return _particle_phase;
     }
 

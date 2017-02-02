@@ -13,6 +13,7 @@ public class ApplicationManager : Manager< ApplicationManager > {
 
     private const int GOAL_WAIT_TIME           = 360;
     private const int GOAL_PARTICLE_WAIT_TIME  = 30;
+	private const int MAX_EVENT_NUM            = 2;
 
 	[ SerializeField ]
 	private NetworkMNG _network_manager;
@@ -72,10 +73,10 @@ public class ApplicationManager : Manager< ApplicationManager > {
     private int _before_player_count;
     private int _worp_position = 0;
     
-    private int _goal_time;
-
-	public Text[ ] _reside_text = new Text[ ( int )PLAYER_ORDER.MAX_PLAYER_NUM ];    //残りマス用テキスト
-	public Text[ ] _environment = new Text[ ( int )PLAYER_ORDER.MAX_PLAYER_NUM ];    //環境情報用テキスト
+	private int _goal_time;
+	private GameObject _go_result_ui;
+	private ResultUIManeger _result_UI_maneger;
+	private bool _battle = true;
 
 	// Awake関数の代わり
 	protected override void initialize( ) {
@@ -293,7 +294,8 @@ public class ApplicationManager : Manager< ApplicationManager > {
 	/// </summary>
 	private void updateTitleScene( ) {
         if ( !_scene_init ) {
-            createTitle( );
+			createTitle( );
+			_phase_manager.createPhaseText( MAIN_GAME_PHASE.GAME_PHASE_NO_PLAY );
             _scene_init = true;
         }
 
@@ -360,8 +362,6 @@ public class ApplicationManager : Manager< ApplicationManager > {
 		        }
             }
         }
-
-        _phase_manager.createPhaseText( MAIN_GAME_PHASE.GAME_PHASE_NO_PLAY );
 	}
 
     private void connectTitleUpdate( ) {
@@ -503,14 +503,6 @@ public class ApplicationManager : Manager< ApplicationManager > {
 
         // プレイヤーのモーションを更新
         _player_manager.setPlayerMotion( );
-
-        // playerの環境情報を更新
-		for ( int i = 0; i < ( int )PLAYER_ORDER.MAX_PLAYER_NUM; i++ ) {
-			if ( _file_manager.getEnvironment( _player_manager.getPlayerCount( i, _stage_manager.getMassCount( ) ) ) != "" ) {
-				string environment = _file_manager.getEnvironment ( _player_manager.getPlayerCount( i, _stage_manager.getMassCount( ) ) );
-				playerEnvironment( environment, i );
-			}
-		}
 
         int[ ] count = getResideCount( );
         _player_manager.dicisionTopAndLowestPlayer( ref count );
@@ -762,8 +754,6 @@ public class ApplicationManager : Manager< ApplicationManager > {
         // プレイヤーの順番を更新
         _player_manager.updatePlayerOrder( );
 
-        // ゴールまでの残りマスを表示
-		resideCount( );
 
         // 両方の移動が終わったら次のフェイズへ
         if ( _player_manager.isAllPlayerMoveFinish( ) ) {
@@ -886,60 +876,91 @@ public class ApplicationManager : Manager< ApplicationManager > {
         }
 		if ( _mode == PROGRAM_MODE.MODE_TWO_CONNECT ) {
             if ( _client_data[ 0 ].getRecvData( ).battle_ready == true &&
-				 _client_data[ 1 ].getRecvData( ).battle_ready == true )  {
-				// 1Pのステータスを設定
-				for ( int i = 0; i < _client_data[ 0 ].getRecvData( ).used_card_list.Length; i++ ) {
-					_player_manager.adaptaCard( 0, _card_manager.getCardData( _client_data[ 0 ].getRecvData( ).used_card_list[ i ] ) );
-				}
-				_player_manager.endStatus( 0 );
-				Debug.Log( "1Pのpower:" + _player_manager.getPlayerPower( )[ 0 ].ToString( ) );
+				_client_data[ 1 ].getRecvData( ).battle_ready == true )  {
+				//バトルUIを作成する
+				if ( _go_result_ui == null ) { 
+					createResultUI( );
+					// 1Pのステータスを設定
+					for ( int i = 0; i < _client_data[ 0 ].getRecvData( ).used_card_list.Length; i++ ) {
+						_player_manager.adaptaCard( 0, _card_manager.getCardData( _client_data[ 0 ].getRecvData( ).used_card_list[ i ] ) );
+					}
+					_player_manager.endStatus( 0 );
+					Debug.Log( "1Pのpower:" + _player_manager.getPlayerPower( )[ 0 ].ToString( ) );
 
-				// 2Pのステータスを設定
-				for ( int i = 0; i < _client_data[ 1 ].getRecvData( ).used_card_list.Length; i++ ) {
-					_player_manager.adaptaCard( 1, _card_manager.getCardData( _client_data[ 1 ].getRecvData( ).used_card_list[ i ] ) );
-				}
-				_player_manager.endStatus( 1 );
-				Debug.Log( "2Pのpower:" + _player_manager.getPlayerPower( )[ 1 ].ToString( ) );
-				// プラスバリューの初期化
-				_player_manager.allPlusValueInit( );
+					// 2Pのステータスを設定
+					for ( int i = 0; i < _client_data[ 1 ].getRecvData( ).used_card_list.Length; i++ ) {
+						_player_manager.adaptaCard( 1, _card_manager.getCardData( _client_data[ 1 ].getRecvData( ).used_card_list[ i ] ) );
+					}
+					_player_manager.endStatus( 1 );
+					Debug.Log( "2Pのpower:" + _player_manager.getPlayerPower( )[ 1 ].ToString( ) );
+					// プラスバリューの初期化
+					_player_manager.allPlusValueInit( );
 
-                // 攻撃力を比較
-				_player_manager.attackTopAndLowestPlayer( _player_manager.getPlayerPower( ) );
+					// 攻撃力を比較
+					_player_manager.attackTopAndLowestPlayer( _player_manager.getPlayerPower( ) );
+
+					_result_UI_maneger.setCoroutine( 1, _player_manager.getPlayerResult( 0 ), _player_manager.getPlayerResult( 1 ) );
+				}
+				//UIの削除
                 // 次のフェイズへ
-                _phase_manager.changeMainGamePhase( MAIN_GAME_PHASE.GAME_PHASE_RESULT, "ResultPhase" );
-                _phase_init = false;
+                //_phase_manager.changeMainGamePhase( MAIN_GAME_PHASE.GAME_PHASE_RESULT, "ResultPhase" );
+                //_phase_init = false;
             }
 		} else if ( _mode == PROGRAM_MODE.MODE_ONE_CONNECT ) {
 			if ( _client_data[ 0 ].getRecvData( ).battle_ready == true )  {
-				// 1Pのステータスを設定
-				for ( int i = 0; i < _client_data[ 0 ].getRecvData( ).used_card_list.Length; i++ ) {
-					_player_manager.adaptaCard( 0, _card_manager.getCardData( _client_data[ 0 ].getRecvData( ).used_card_list[ i ] ) );
-				}
-				_player_manager.endStatus( 0 );
-				Debug.Log( "1Pのpower:" + _player_manager.getPlayerPower( )[ 0 ].ToString( ) );
+				//バトルUIを作成する
+				if (_go_result_ui == null) { 
+					createResultUI( );
+					// 1Pのステータスを設定
+					for ( int i = 0; i < _client_data[ 0 ].getRecvData( ).used_card_list.Length; i++ ) {
+						_player_manager.adaptaCard( 0, _card_manager.getCardData( _client_data[ 0 ].getRecvData( ).used_card_list[ i ] ) );
+					}
+					_player_manager.endStatus( 0 );
+					Debug.Log( "1Pのpower:" + _player_manager.getPlayerPower( )[ 0 ].ToString( ) );
 
-				// 2Pのステータスを設定
-				for ( int i = 0; i < _client_data[ 0 ].getRecvData( ).used_card_list.Length; i++ ) {
-					_player_manager.adaptaCard( 1, _card_manager.getCardData( _client_data[ 0 ].getRecvData( ).used_card_list[ i ] ) );
-				}
-				_player_manager.endStatus( 1 );
-				Debug.Log( "2Pのpower:" + _player_manager.getPlayerPower( )[ 1 ].ToString( ) );
-				// プラスバリューの初期化
-				_player_manager.allPlusValueInit( );
+					// 2Pのステータスを設定
+					for ( int i = 0; i < _client_data[ 0 ].getRecvData( ).used_card_list.Length; i++ ) {
+						_player_manager.adaptaCard( 1, _card_manager.getCardData( _client_data[ 0 ].getRecvData( ).used_card_list[ i ] ) );
+					}
+					_player_manager.endStatus( 1 );
+					Debug.Log( "2Pのpower:" + _player_manager.getPlayerPower( )[ 1 ].ToString( ) );
+					// プラスバリューの初期化
+					_player_manager.allPlusValueInit( );
 
-                // 攻撃力を比較
-				_player_manager.attackTopAndLowestPlayer( _player_manager.getPlayerPower( ) );
+					// 攻撃力を比較
+					int[ ] attack = new int[ ( int )PLAYER_ORDER.MAX_PLAYER_NUM ];
+					for ( int i = 0; i < attack.Length; i++ ) {
+						attack[ i ] = ( int )Random.Range( 10, 20 );
+					}
+					_player_manager.attackTopAndLowestPlayer( attack );
+				}
+				_result_UI_maneger.setCoroutine( 1, _player_manager.getPlayerResult( 0 ), _player_manager.getPlayerResult( 1 ) );
                 // 次のフェイズへ
-                _phase_manager.changeMainGamePhase( MAIN_GAME_PHASE.GAME_PHASE_RESULT, "ResultPhase" );
-                _phase_init = false;
+                //_phase_manager.changeMainGamePhase( MAIN_GAME_PHASE.GAME_PHASE_RESULT, "ResultPhase" );
+                //_phase_init = false;
             }
 		} else if ( _mode == PROGRAM_MODE.MODE_NO_CONNECT ) {
 			if ( Input.GetKeyDown( KeyCode.A ) )  {
+				//バトルUIを作成する
+				if ( _go_result_ui == null ) { 
+					createResultUI( );
+				}
 				// 次のフェイズへ
-				_phase_manager.changeMainGamePhase( MAIN_GAME_PHASE.GAME_PHASE_RESULT, "ResultPhase" );
-                _phase_init = false;
+				BATTLE_RESULT[ ] result = new BATTLE_RESULT[ 2 ]{ BATTLE_RESULT.WIN, BATTLE_RESULT.LOSE };
+				_result_UI_maneger.setCoroutine( 1, result[ 0 ], result[ 1 ] );
+				//_phase_manager.changeMainGamePhase( MAIN_GAME_PHASE.GAME_PHASE_RESULT, "ResultPhase" );
+                //_phase_init = false;
 			}
 		}
+	}
+
+	public void setChangeMainGamePhase( ) {
+		_phase_manager.changeMainGamePhase( MAIN_GAME_PHASE.GAME_PHASE_RESULT, "ResultPhase" );
+		_phase_init = false;
+	}
+
+	public void setbattleFlag( bool battle ) {
+		_battle = battle;
 	}
 
 	/// <summary>
@@ -951,7 +972,7 @@ public class ApplicationManager : Manager< ApplicationManager > {
             // 行動順1Pをに設定する
             _player_manager.setDefalutStatus( );
             _player_manager.startPlayerOrder( );
-
+			_go_result_ui = null;
             _phase_init = true;
         }
 
@@ -1054,9 +1075,6 @@ public class ApplicationManager : Manager< ApplicationManager > {
         int[ ] num = getResideCount( );
         _player_manager.movePhaseUpdate( ref num, _stage_manager.getTargetMass( _player_manager.getTargetMassID( _stage_manager.getMassCount( ) ) ) );
 
-        // ゴールまでの残りマスを表示
-		resideCount( );
-        
         // プレイヤーの順番を更新
         _player_manager.updatePlayerOrder( );
 
@@ -1135,25 +1153,30 @@ public class ApplicationManager : Manager< ApplicationManager > {
                  _player_manager.getEventType( ) == EVENT_TYPE.EVENT_TRAP_ONE ||
                  _player_manager.getEventType( ) == EVENT_TYPE.EVENT_TRAP_TWO ) {
 			    if ( _player_manager.isMoveFinish( ) ) {
-                    // イベント開始＆移動状態を初期化
-                    _player_manager.setEventType( ( int )_player_manager.getPlayerOrder( ), EVENT_TYPE.EVENT_NONE );
-				    _player_manager.setEventStart( false );
-				    _player_manager.movedRefresh( );
+					if ( _event_count[ ( int )_player_manager.getPlayerOrder( ) ] < MAX_EVENT_NUM ) {
+						// イベント開始＆移動状態を初期化
+						_player_manager.setEventType( ( int )_player_manager.getPlayerOrder( ), EVENT_TYPE.EVENT_NONE );
+						_player_manager.setEventStart( false );
+						_player_manager.movedRefresh( );
+						_event_type[ ( int )_player_manager.getPlayerOrder( ) ]++;
+					} else {
+						_player_manager.setEventFinish( true );
+						_event_type[ ( int )_player_manager.getPlayerOrder( ) ] = 0;
+					}
 			    }
             }
         }
 
-        // ゴールまでの残りマスを表示
-        resideCount( );
-
         // パーティクルの更新
 		if( _particle_manager.getParticle( ) != null ) {
             _particle_manager.particleUpdate( );
+			_particle_manager.particlePhaseUpdate( );
 		}
 
         if( _particle_manager.isParticleEnd( ) ) {
             _player_manager.setEventFinish( true );
-            _particle_manager.resetParticleEnd();
+            _particle_manager.resetParticleEnd( );
+			_player_manager.setEventType( ( int )_player_manager.getPlayerOrder( ), EVENT_TYPE.EVENT_NONE );
         }
 
         // イベント終了処理
@@ -1161,6 +1184,7 @@ public class ApplicationManager : Manager< ApplicationManager > {
             if ( _player_manager.isEventStart( ) && _player_manager.isEventFinish( ) ) {
                 // 行動プレイヤーを変える
                 _player_manager.changePlayerOrder( );
+				_particle_manager.refreshParticle( );
 		    }
         }
         // プレイヤーの順番を更新
@@ -1459,7 +1483,8 @@ public class ApplicationManager : Manager< ApplicationManager > {
 				}
                 _player_manager.setEventType( id, EVENT_TYPE.EVENT_CHANGE );
                 break;
-            case EVENT_TYPE.EVENT_WORP:
+		case EVENT_TYPE.EVENT_WORP:
+			Debug.Log( _particle_manager.isParticlePhase() );
                 _player_manager.setEventType( id, EVENT_TYPE.EVENT_WORP );
 				 // パーティクルを検索
 				if( _particle_manager.getParticle() == null ) {
@@ -1590,26 +1615,7 @@ public class ApplicationManager : Manager< ApplicationManager > {
 	public SCENE getScene( ) {
 		return _scene;
 	}
-
-
-	/// <summary>
-	/// プレイヤーの現在位置（環境）
-	/// </summary>
-	/// <param name="environment"></param>
-	/// <param name="num"></param>
-	public void playerEnvironment( string environment, int num ) {
-		_environment[ num ].text = "プレイヤー" + ( num + 1 ) + ":" + environment;
-	}
-
-	/// <summary>
-	/// ゴールまでの残りマスを表示
-	/// </summary>
-	public void resideCount( ) {
-		for ( int i = 0; i < ( int )PLAYER_ORDER.MAX_PLAYER_NUM; i++ ) {
-			_reside_text[ i ].text = "プレイヤー" + i.ToString( ) + "：残り" + getResideCount( )[ i ].ToString( ) + "マス";
-		}
-	}
-    
+   
     /// <summary>
     /// ゴールまでどれくらい残っているか取得
     /// </summary>
@@ -1626,4 +1632,41 @@ public class ApplicationManager : Manager< ApplicationManager > {
 		_event_count[ id ] = count;
 	}
 
+	private void createResultUI() { 
+		if (_mode == PROGRAM_MODE.MODE_TWO_CONNECT) {
+			_go_result_ui = (GameObject)Resources.Load( "Prefabs/ResultUI" );
+			GameObject go = (GameObject)Instantiate(_go_result_ui, new Vector3(0,0,0),Quaternion.identity);
+			_result_UI_maneger = go.GetComponent<ResultUIManeger>();
+			List<int> use_card_id = new List<int>();
+			for (var i = 0; i < (int)PLAYER_ORDER.MAX_PLAYER_NUM; i++) {
+				int player_id = i;
+				for ( int j = 0; j < _client_data[ player_id ].getRecvData( ).used_card_list.Length; j++ ) {
+					Debug.Log(_client_data[ player_id ].getRecvData( ).used_card_list[ j ]+"");
+					if ( _client_data[ player_id ].getRecvData( ).used_card_list[ j ] > 0) {
+						use_card_id.Add( _client_data[ player_id ].getRecvData( ).used_card_list[ j ] );
+					}
+				}
+				_result_UI_maneger.Init(use_card_id , player_id);
+				if (use_card_id.Count > 0){
+					use_card_id.Clear();
+				}
+			}
+		} else {
+			_go_result_ui = (GameObject)Resources.Load("Prefabs/ResultUI");
+			GameObject go = (GameObject)Instantiate(_go_result_ui, new Vector3(0,0,0),Quaternion.identity);
+			_result_UI_maneger = go.GetComponent<ResultUIManeger>();
+			List<int> use_card_id = new List<int>();
+			for (var i = 0; i < (int)PLAYER_ORDER.MAX_PLAYER_NUM; i++) {
+				int player_id = i;
+				// debug用
+				for ( int j = 1; j < 4; j++ ) {
+					use_card_id.Add(j);
+				}
+				_result_UI_maneger.Init(use_card_id , player_id);
+				if (use_card_id.Count > 0){
+					use_card_id.Clear();
+				}
+			}
+		}
+	}
 }
