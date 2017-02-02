@@ -111,12 +111,10 @@ public class ClientPlayerManager : MonoBehaviour {
 	private int _hand_num = 0;
 	[ SerializeField ]
 	private int _hand_obj_num = 0;
-
-	#if UNITY_EDITOR
+    
 	private bool _debug_inst_flag;
 	[ SerializeField ]
 	private bool _auto_inst_flag = false;	// オートで生成したくない場合はfalseに
-	#endif
 
 	public GameObject _card_obj;
 
@@ -199,7 +197,6 @@ public class ClientPlayerManager : MonoBehaviour {
 	/// <summary>
     /// エディタ上でのみデバッグ機能が実行される
     /// </summary>
-	#if UNITY_EDITOR
 	void Update( ) {
         /*
         // カードデータの追加
@@ -227,7 +224,6 @@ public class ClientPlayerManager : MonoBehaviour {
 
 
 	}
-	#endif
 
     public void createProfileCard( int player_num ) {
         _profile_card_pref = Resources.Load< GameObject >( "Prefabs/PlayerCard" );

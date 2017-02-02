@@ -158,6 +158,7 @@ namespace Common {
         public EVENT_TYPE[ ] event_type;
 		public bool send_result;
         public int[ ] mass_count;
+        public bool game_finish;
 	};
 
 	/// <summary>
@@ -176,6 +177,8 @@ namespace Common {
 		public MASS_ADJUST mass_adjust;
         public bool ok_event;
         public bool connect_ready;
+        public bool go_title;
+        public bool finish_game;
 	};
 
 	/// <summary>

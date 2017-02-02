@@ -47,6 +47,9 @@ public class HostData : NetworkBehaviour {
     // 勝敗結果を送ったかどうか
 	[ SyncVar ]
 	public bool _network_send_result;
+    // ゲームが終了したかどうか
+	[ SyncVar ]
+	public bool _network_game_finish;
 
     private NETWORK_FIELD_DATA _field_data;
 
@@ -63,6 +66,7 @@ public class HostData : NetworkBehaviour {
         _network_change_scene      = false;
         _network_change_phase      = false;
         _network_send_result       = false;
+        _network_game_finish       = false;
 
         _field_data.player_num      = _network_player_num;
         _field_data.scene           = ( SCENE )_network_scene_data;
@@ -70,6 +74,7 @@ public class HostData : NetworkBehaviour {
         _field_data.change_scene    = _network_change_scene;
         _field_data.change_phase    = _network_change_phase;
         _field_data.send_result     = _network_send_result;
+        _field_data.game_finish     = _network_game_finish;
         
     }
 
@@ -125,6 +130,7 @@ public class HostData : NetworkBehaviour {
                 _network_change_scene      = _field_data.change_scene;
                 _network_change_phase      = _field_data.change_phase;
                 _network_send_result       = _field_data.send_result;
+                _network_game_finish       = _field_data.game_finish;
 
                 for ( int i = 0; i < ( int )PLAYER_ORDER.MAX_PLAYER_NUM; i++ ) {
                     _network_battle_result[ i ] = ( int )_field_data.result_player[ i ];
@@ -312,6 +318,15 @@ public class HostData : NetworkBehaviour {
         _connect[ ( int )player_num ] = true;
     }
 
+	[ Server ]
+    public void setSendGameFinish( bool flag ) {
+        _field_data.game_finish = flag;
+        
+        for ( int i = 0; i < _connect.Length; i++ ) {
+            _connect[ i ] = true;
+        }
+    }
+
     [ Client ]
     public NETWORK_FIELD_DATA getRecvData ( ) {
         _field_data.player_num        = _network_player_num;
@@ -320,6 +335,7 @@ public class HostData : NetworkBehaviour {
         _field_data.change_scene      = _network_change_scene;
         _field_data.change_phase      = _network_change_phase;
         _field_data.send_result       = _network_send_result;
+        _field_data.game_finish       = _network_game_finish;
 
         for ( int i = 0; i < ( int )PLAYER_ORDER.MAX_PLAYER_NUM; i++ ) {
             _field_data.send_status[ i ]   = _network_send_status[ i ];

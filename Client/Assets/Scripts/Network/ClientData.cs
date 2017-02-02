@@ -28,6 +28,7 @@ public class ClientData : NetworkBehaviour {
         _player_data.mass_adjust      = MASS_ADJUST.NO_ADJUST;
         _player_data.ok_event         = false;
         _player_data.connect_ready    = false;
+        _player_data.go_title         = false;
     }
 
 	// Use this for initialization
@@ -196,6 +197,26 @@ public class ClientData : NetworkBehaviour {
 	[ Client ]
     public void setOkEvent( bool ok ) { 
         _player_data.ok_event = ok;
+    }
+    
+	[ Command ]
+    public void CmdSetSendGoTitle( bool flag ) { 
+        _player_data.go_title = flag;
+    }
+    
+	[ Client ]
+    public void setGoTitle( bool flag ) { 
+        _player_data.go_title = flag;
+    }
+    
+	[ Command ]
+    public void CmdSetSendFinishGame( bool flag ) { 
+        _player_data.finish_game = flag;
+    }
+    
+	[ Client ]
+    public void setFinishGame( bool flag ) { 
+        _player_data.finish_game = flag;
     }
 
 	public NETWORK_PLAYER_DATA getRecvData( ) {

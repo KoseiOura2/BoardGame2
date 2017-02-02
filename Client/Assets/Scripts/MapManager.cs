@@ -290,6 +290,7 @@ public class MapManager : MonoBehaviour {
     }
 
     public void bindSprite( PLAYER_ORDER player_num ) {
+        _player_point.transform.GetChild( 0 ).gameObject.GetComponent< Image >( ).enabled = true;
         if ( player_num == PLAYER_ORDER.PLAYER_ONE ) {
             _player_icon = Resources.Load< Sprite >( "Graphics/UI/Player/ui_location_player_1P" );
         } else if ( player_num == PLAYER_ORDER.PLAYER_TWO ) {
@@ -303,7 +304,7 @@ public class MapManager : MonoBehaviour {
     }
 
     public void freeSprite( ) {
-        _player_point.transform.GetChild( 0 ).gameObject.GetComponent< Image >( ).sprite = null;
+        _player_point.transform.GetChild( 0 ).gameObject.GetComponent< Image >( ).enabled = false;
     }
 
 	public void changeGoalImageNum( GameObject ten_digit, GameObject digit ) {
@@ -349,6 +350,10 @@ public class MapManager : MonoBehaviour {
 		return _create_mass_count;
 	}
 
+    public void initMassCount( ) {
+        _create_mass_count = 0;
+    }
+
     public int getPlayerPosNum( ) {
         return _player_pos_num;
     }
@@ -385,6 +390,9 @@ public class MapManager : MonoBehaviour {
 
     public void destroyObj( ) {
         for ( int i = 0; i < _mass_obj.Count; i++ ) {
+            if ( i < _mass_obj.Count - 1 ) {
+                Destroy( _mass_obj[ i ].transform.GetChild( 0 ).transform.gameObject );
+            }
             Destroy( _mass_obj[ i ] );
         }
         freeSprite( );

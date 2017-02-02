@@ -67,15 +67,11 @@ public class CardManager : MonoBehaviour {
 	void Start( ) {
 
 	}
-
-	#if UNITY_EDITOR
+    
 	// Update is called once per frame
 	void Update( ) {
-		if ( _card_datas.Count == 0 ) {
-			loadCardDataFile( );
-		}
+
 	}
-	#endif 
 
 	/// <summary>
 	/// デッキの読み込み
