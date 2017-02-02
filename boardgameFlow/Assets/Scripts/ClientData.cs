@@ -192,6 +192,26 @@ public class ClientData : NetworkBehaviour {
     public void setOkEvent( bool ok ) { 
         _player_data.ok_event = ok;
     }
+    
+	[ Command ]
+    public void CmdSetSendGoTitle( bool flag ) { 
+        _player_data.go_title = flag;
+    }
+    
+	[ Client ]
+    public void setGoTitle( bool flag ) { 
+        _player_data.go_title = flag;
+    }
+    
+	[ Command ]
+    public void CmdSetSendFinishGame( bool flag ) { 
+        _player_data.finish_game = flag;
+    }
+    
+	[ Client ]
+    public void setFinishGame( bool flag ) { 
+        _player_data.finish_game = flag;
+    }
 
 	public NETWORK_PLAYER_DATA getRecvData( ) {
 		return _player_data;

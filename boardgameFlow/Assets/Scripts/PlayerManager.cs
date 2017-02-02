@@ -14,8 +14,6 @@ public class PlayerManager : MonoBehaviour {
 	private Player[ ] _players = new Player[ ( int )PLAYER_ORDER.MAX_PLAYER_NUM ];
     // プレイヤーのモデルをロード
 	private GameObject[ ] _player_pref = new GameObject[ ( int )PLAYER_ORDER.MAX_PLAYER_NUM ];
-	private GameObject _firstest_player;
-	private GameObject _latest_player;
 	private GameObject _winner_player;
 	private GameObject _loser_player;
     
@@ -81,7 +79,6 @@ public class PlayerManager : MonoBehaviour {
 
             // プレイヤーの最大数を超えたらNoneに戻す
             if ( num >= ( int )PLAYER_ORDER.MAX_PLAYER_NUM ) {
-                Debug.Log("aaaaaaaa");
                 num = -1;
             }
 
@@ -102,7 +99,7 @@ public class PlayerManager : MonoBehaviour {
                 _players[ ( int )_player_order ].startMove( );
                 if ( !_move_flag ) {
                     if ( _current_flag ) {
-                        _time = 0.5f;
+                        _time = 0.8f;
                     } else { 
                         _time = 0.3f;
                     }

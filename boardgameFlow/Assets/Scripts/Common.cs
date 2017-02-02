@@ -131,6 +131,13 @@ namespace Common {
 		EVENT_DISCARD,        //9
     }
 
+    public enum PARTICLE_TYPE {
+        PARTICLE_NONE,
+        PARTICLE_OCEANCURRENT,
+        PARTICLE_SPIRAL,
+        PARTICLE_FIREWORKS
+    }
+
 	public enum FIELD_ENVIRONMENT {
 		SHOAL_FIELD,
 		OPEN_SEA_FIELD,
@@ -158,6 +165,7 @@ namespace Common {
         public EVENT_TYPE[ ] event_type;
 		public bool send_result;
         public int[ ] mass_count;
+        public bool game_finish;
 	};
 
 	/// <summary>
@@ -176,6 +184,8 @@ namespace Common {
 		public MASS_ADJUST mass_adjust;
         public bool ok_event;
         public bool connect_ready;
+        public bool go_title;
+        public bool finish_game;
 	};
 
 	/// <summary>
@@ -236,4 +246,31 @@ namespace Common {
             this.rarity = rarity;
         }
     }
+
+    public enum BGM_LIST {
+        NONE_BGM,
+        FIELD_BGM,
+        TILTE_BGM,
+        GAME_END1_BGM,
+        GAME_END2_BGM,
+    };
+
+    public enum SE_LIST {
+        NONE_SE,
+        BUFF_SE,
+        BUTTLE_SE,
+        CHOICE1_SE,
+        CHOICE2_SE,
+        DRAW_SE,
+        FISH1_SE,
+        FISH2_SE,
+        MASS_SE,
+        PHASE_SE,
+        TRESURE_SE,
+    };
+
+    public enum VOICE_LIST {
+        NONE_VOICE,
+    };
+
 }

@@ -41,7 +41,7 @@ public class StageManager : MonoBehaviour {
 			_mass_prefab = ( GameObject )Resources.Load( "Prefabs/Mass/mass_mini" );
 			Vector3 pos = Vector3.Lerp( _mass_list[ i ].transform.localPosition, _mass_list[ i + 1 ].transform.localPosition, 0.5f );
 			GameObject obj = ( GameObject )Instantiate( _mass_prefab, pos, _mass_prefab.transform.localRotation );
-			obj.transform.parent = transform;
+			obj.transform.SetParent( _mass_list[ i ].transform );
 		}
 
 		GameObject light = GameObject.Find( "MainLight" ); 
@@ -158,6 +158,10 @@ public class StageManager : MonoBehaviour {
 		return _create_mass_count;
 	}
 
+    public void initMassCount( ) {
+        _create_mass_count = 0;
+    }
+
 	public void setEnvironment( FIELD_ENVIRONMENT environment ) {
 		_environment = environment;
 	}
@@ -174,13 +178,13 @@ public class StageManager : MonoBehaviour {
     public bool resetMassColor ( int i ) {
         bool flag = false;
 
-        if ( getTargetMass ( i ).transform.localScale.x > 0.3f || getTargetMass( i ).transform.localScale.z > 0.3f ) {
-            getTargetMass ( i ).GetComponent< Renderer >( ).material.SetColor( "_Color", new Color ( 0.4f, 0.4f, 0.4f, 1f ) );
-            getTargetMass ( i ).transform.localScale = new Vector3 ( getTargetMass ( i ).transform.localScale.x - 0.05f,
+        if ( getTargetMass( i ).transform.localScale.x > 0.3f || getTargetMass( i ).transform.localScale.z > 0.3f ) {
+            getTargetMass( i ).GetComponent< Renderer >( ).material.SetColor( "_Color", new Color ( 0.4f, 0.4f, 0.4f, 1f ) );
+            getTargetMass( i ).transform.localScale = new Vector3 ( getTargetMass ( i ).transform.localScale.x - 0.05f,
                                                                      getTargetMass ( i ).transform.localScale.y,
                                                                      getTargetMass ( i ).transform.localScale.z - 0.05f );
         } else {
-            getTargetMass ( i ).transform.localScale = new Vector3 ( 0.3f, getTargetMass ( i ).transform.localScale.y, 0.3f );
+            getTargetMass( i ).transform.localScale = new Vector3 ( 0.3f, getTargetMass ( i ).transform.localScale.y, 0.3f );
             flag = false;
         }
 
@@ -189,8 +193,12 @@ public class StageManager : MonoBehaviour {
 
     public void destroyObj( ) {
         Destroy( _ground );
+        Destroy( _background );
 
         for ( int i = 0; i < _mass_list.Count; i++ ) {
+            if ( i < _mass_list.Count - 1 ) {
+                Destroy( _mass_list[ i ].transform.GetChild( 0 ).gameObject );
+            }
             Destroy( _mass_list[ i ] );
         }
         _mass_list.Clear( );

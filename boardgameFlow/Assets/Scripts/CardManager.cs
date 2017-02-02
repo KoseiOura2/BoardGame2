@@ -23,6 +23,7 @@ public class CardManager : Manager< CardManager > {
         }
         
         public void addToCard( CARD_DATA card ) {
+            Debug.Log( "hairimahsita" );
             _cards_list.Add( card );
             _card_num++;
             _max_card_num = _card_num;
