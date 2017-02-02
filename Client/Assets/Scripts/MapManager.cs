@@ -6,7 +6,7 @@ using Common;
 
 public class MapManager : MonoBehaviour {
 
-    private const int MASS_TYPE_NUM = 5;
+    private const int MASS_TYPE_NUM = 6;
 
     public struct MASS_DATA {
         public MASS_TYPE mass_type;
@@ -67,6 +67,9 @@ public class MapManager : MonoBehaviour {
         GameObject pref = null;
 		// タイプによるリソース分け
 		switch ( mass_type ) {
+			case MASS_TYPE.MASS_NONE:
+				pref = _mass_pref[ 5 ];
+                break;
 			case MASS_TYPE.MASS_START:
 			case MASS_TYPE.MASS_GOAL:
 				pref = _mass_pref[ 4 ];
