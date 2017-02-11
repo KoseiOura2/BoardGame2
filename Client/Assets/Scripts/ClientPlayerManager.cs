@@ -18,6 +18,7 @@ public class ClientPlayerManager : MonoBehaviour {
         ACTION_NONE,
         MOVE_FOR_GET_ACTION,
         ROTATE_ACTION,
+		SHINING_ACTION,
         MOVE_FOR_HAND_ACTION,
     }
 

@@ -267,9 +267,11 @@ public class ApplicationManager : Manager< ApplicationManager > {
 			updateTitleScene( );
 			break;
 		case SCENE.SCENE_GAME:
-            if ( _host_data.getRecvData( ).game_finish ) {
-                _phase_init = true;
-            }
+			if ( _mode != PROGRAM_MODE.MODE_NO_CONNECT ) {
+				if ( _host_data.getRecvData ( ).game_finish ) {
+					_phase_init = true;
+				}
+			}
             if ( !_go_title_processing ) {
 			    updateGameScene( );
             }
