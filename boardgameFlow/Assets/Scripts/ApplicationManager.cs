@@ -280,8 +280,8 @@ public class ApplicationManager : Manager< ApplicationManager > {
         _title_back_obj.GetComponent< RectTransform >( ).offsetMin = new Vector2( 0, 0 );
 
         GameObject logo = _title_back_obj.transform.GetChild( 0 ).transform.gameObject;
-        //logo.GetComponent< RectTransform >( ).offsetMax = new Vector2( -Screen.width / 5, -Screen.height / 3 );
-        //logo.GetComponent< RectTransform >( ).offsetMin = new Vector2( Screen.width / 5, Screen.height / 3 );
+        logo.GetComponent< RectTransform >( ).offsetMax = new Vector2( -Screen.width / 5, -Screen.height / 3 );
+        logo.GetComponent< RectTransform >( ).offsetMin = new Vector2( Screen.width / 5, Screen.height / 3 );
     }
 
     private void destroyTitleObj( ) {

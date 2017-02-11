@@ -107,7 +107,6 @@ public class PhaseManager : MonoBehaviour {
 		_phase_image_obj.GetComponent< RectTransform >( ).anchoredPosition3D = new Vector3( 0, ( Screen.height / 2 ) - _phase_image_height / 2, 0 );
 	}
     
-    /// ///////////////////////////////////////
     public void setGoalImagePos( ) {
 		_phase_image_height = Screen.height / 6;
 		_phase_image_obj.GetComponent< RectTransform >( ).SetSizeWithCurrentAnchors( RectTransform.Axis.Vertical, _phase_image_height );
@@ -118,9 +117,8 @@ public class PhaseManager : MonoBehaviour {
 	public void deletePhaseImage( ) {
 		Destroy( _phase_image_obj );
 		_phase_image_move_finish = false;
-        _back_ground.GetComponent<Image>().enabled = false;
+        _back_ground.GetComponent< Image >( ).enabled = false;
 	}
-    ////////////////////////////////////////////////////
 
 	/// <summary>
 	/// MainGamePhaseの取得
