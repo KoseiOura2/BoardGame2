@@ -239,4 +239,31 @@ namespace Common {
             this.rarity = rarity;
         }
     }
+
+	public enum BGM_LIST {
+		NONE_BGM,
+		FIELD_BGM,
+		TILTE_BGM,
+		GAME_END1_BGM,
+		GAME_END2_BGM,
+	};
+
+	public enum SE_LIST {
+		NONE_SE,
+		BUFF_SE,
+		BUTTLE_SE,
+		CHOICE1_SE,
+		CHOICE2_SE,
+		DRAW_SE,
+		FISH1_SE,
+		FISH2_SE,
+		MASS_SE,
+		PHASE_SE,
+		TRESURE_SE,
+	};
+
+	public enum VOICE_LIST {
+		NONE_VOICE,
+	};
+
 }
