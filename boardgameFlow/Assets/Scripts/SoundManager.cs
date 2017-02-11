@@ -4,19 +4,19 @@ using System.Collections;
 using System;
 
 // 音量クラス
-[SerializeField]
+[ Serializable ]
 public class SoundVolume{
- public float bgm = 1.0f;
- public float voice = 1.0f;
- public float se = 1.0f;
- public bool mute = false;
-  
- public void init( ){
-  bgm = 1.0f;
-  voice = 1.0f;
-  se = 1.0f;
-  mute = false;
- }
+	public float bgm = 1.0f;
+	public float voice = 1.0f;
+	public float se = 1.0f;
+	public bool mute = false;
+	 
+	public void init( ) {
+		bgm = 1.0f;
+		voice = 1.0f;
+		se = 1.0f;
+		mute = false;
+	}
 }
 
 public class SoundManager : Manager< SoundManager > {
@@ -28,9 +28,9 @@ public class SoundManager : Manager< SoundManager > {
     // BGM
     private AudioSource _bgm_source;
     // SE
-    private AudioSource[ ] _se_sources = new AudioSource[ 16 ];
+    private AudioSource[ ] _se_sources = new AudioSource[ 10 ];
     // 音声(多分使わない）
-    private AudioSource[ ] _voice_sources = new AudioSource[ 16 ];
+    private AudioSource[ ] _voice_sources = new AudioSource[ 2 ];
      
     // === AudioClip ===
     // BGM
@@ -59,12 +59,12 @@ public class SoundManager : Manager< SoundManager > {
         // BGMはループを有効にする
         _bgm_source.loop = true;
         // SE AudioSource
-        for( int i = 0 ; i < _se_sources.Length ; i++ ){
+        for( int i = 0 ; i < _se_sources.Length ; i++ ) {
          _se_sources[ i ] = gameObject.AddComponent< AudioSource >( );
         }
          
         // 音声 AudioSource
-        for( int i = 0 ; i < _voice_sources.Length ; i++ ){
+        for( int i = 0 ; i < _voice_sources.Length ; i++ ) {
          _voice_sources[ i ] = gameObject.AddComponent< AudioSource >( );
         }
     }
@@ -106,19 +106,19 @@ public class SoundManager : Manager< SoundManager > {
     void soundConfig( ) {
         // ミュート設定
         _bgm_source.mute = _volume.mute;
-        foreach( AudioSource source in _se_sources ){
+        foreach( AudioSource source in _se_sources ) {
             source.mute = _volume.mute;
         }
-        foreach( AudioSource source in _voice_sources ){
+        foreach( AudioSource source in _voice_sources ) {
             source.mute = _volume.mute;
         }
    
         // ボリューム設定
         _bgm_source.volume = _volume.bgm;
-        foreach( AudioSource source in _se_sources ){
+        foreach( AudioSource source in _se_sources ) {
             source.volume = _volume.se;
         }
-        foreach( AudioSource source in _voice_sources ){
+        foreach( AudioSource source in _voice_sources ) {
             source.volume = _volume.voice;
         }
     }
@@ -128,34 +128,40 @@ public class SoundManager : Manager< SoundManager > {
     }
 
     // ***** BGM再生 *****
-    // BGM再生
-    public void playBGM(BGM_LIST play_bgm){
+	/// <summary>
+	/// BGM再生( 実行したいＢＧＭリストの中の曲 )
+	/// </summary>
+    public void playBGM( BGM_LIST play_bgm ) {
         int play_index = ( int )play_bgm;
 
         if ( BGM_LIST.NONE_BGM > play_bgm ) {
          return;
         }
         // 同じBGMの場合は何もしない
-        if( _bgm_source.clip == _bgm[play_index] ){
+        if( _bgm_source.clip == _bgm[ play_index ] ) {
          return;
         }
         _bgm_source.Stop( );
-        _bgm_source.clip = _bgm[play_index];
+        _bgm_source.clip = _bgm[ play_index ];
         _bgm_source.Play( );
     }
     
-     // BGM停止
-     public void stopBGM( ){
-      _bgm_source.Stop( );
-      _bgm_source.clip = null;
+	/// <summary>
+	/// 全てのBGMを停止します
+	/// </summary>
+     public void stopBGM( ) {
+     	_bgm_source.Stop( );
+     	_bgm_source.clip = null;
      }
-      
+     
      // ***** SE再生 *****
-     // SE再生
-     public void playSE( SE_LIST play_se ){
+	/// <summary>
+	/// SE再生( 実行したいSEリストの中の曲 )
+	/// </summary>
+     public void playSE( SE_LIST play_se ) {
         int play_index = ( int )play_se;
 
-        if( SE_LIST.NONE_SE > play_se ){
+        if( SE_LIST.NONE_SE > play_se ) {
             return;
         }
 
@@ -169,8 +175,10 @@ public class SoundManager : Manager< SoundManager > {
         }
     }
   
-    // SE停止
-    public void stopSE( ){
+	/// <summary>
+	/// 全てのＳＥを停止します
+	/// </summary>
+    public void stopSE( ) {
         // 全てのSE用のAudioSouceを停止する
         foreach( AudioSource source in _se_sources ) {
            source.Stop( );
@@ -179,15 +187,17 @@ public class SoundManager : Manager< SoundManager > {
     }
       
      // ***** 音声再生 *****
-     // 音声再生
-     public void PlayVoice( VOICE_LIST play_voice ){
+	/// <summary>
+	/// 音声再生( 実行したい音声リストの中の曲 )
+	/// </summary>
+     public void playVoice( VOICE_LIST play_voice ) {
         int play_index = ( int )play_voice;
 
         if( VOICE_LIST.NONE_VOICE > play_voice ){
             return;
         }
         // 再生中で無いAudioSouceで鳴らす
-        foreach( AudioSource source in _voice_sources ){
+        foreach( AudioSource source in _voice_sources ) {
             if( false == source.isPlaying ){
                 source.clip = _voice[ play_index ];
                 source.Play( );
@@ -196,10 +206,12 @@ public class SoundManager : Manager< SoundManager > {
         }
      }
       
-     // 音声停止
-     public void StopVoice( ){
+	/// <summary>
+	/// 全ての音声を停止します
+	/// </summary>
+     public void stopVoice( ) {
         // 全ての音声用のAudioSouceを停止する
-        foreach( AudioSource source in _voice_sources ){
+        foreach( AudioSource source in _voice_sources ) {
             source.Stop( );
             source.clip = null;
         }
