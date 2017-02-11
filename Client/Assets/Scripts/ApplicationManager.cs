@@ -1145,25 +1145,26 @@ public class ApplicationManager : Manager< ApplicationManager > {
 			if ( !_battle_manager.isResultOpen( ) ) {
 				// 勝ちか引き分け時
 				if ( battle_result == ( int )BATTLE_RESULT.WIN ||
-				    battle_result == ( int )BATTLE_RESULT.DRAW ) {
+				     battle_result == ( int )BATTLE_RESULT.DRAW ) {
 					// マス調整の処理
 					int num = _map_manager.isSelect( );
 
-					if ( num == _map_manager.getPlayerPosNum( ) + 1 ) {
+					if ( num == _map_manager.getPlayerPosNum( ) + 1 && num >= 0 ) {
 						adjust = MASS_ADJUST.ADVANCE;
 						flag = true;
 						for ( int i = 0; i < _map_manager.getMassCount( ); i++ ) {
 							_map_manager.setMassColor( i, new Color( 0.5f, 0.5f, 0.5f ) );
 							_map_manager.allMassReject( );
 						}
-					} else if ( num == _map_manager.getPlayerPosNum( ) - 1 ) {
+					} else if ( num == _map_manager.getPlayerPosNum( ) - 1 && num >= 0 ) {
 						adjust = MASS_ADJUST.BACK;
+                        Debug.Log( "hairimashita" );
 						flag = true;
 						for ( int i = 0; i < _map_manager.getMassCount( ); i++ ) {
 							_map_manager.setMassColor( i, new Color( 0.5f, 0.5f, 0.5f ) );
 							_map_manager.allMassReject( );
 						}
-					} else if ( num == _map_manager.getPlayerPosNum( ) ) {
+					} else if ( num == _map_manager.getPlayerPosNum( ) && num >= 0 ) {
 						adjust = MASS_ADJUST.NO_ADJUST;
 						flag = true;
 						for ( int i = 0; i < _map_manager.getMassCount( ); i++ ) {
@@ -1354,13 +1355,38 @@ public class ApplicationManager : Manager< ApplicationManager > {
                 num = _file_manager.getMassValue( _map_manager.getPlayerPosNum( ) )[ 0 ];
             }
 
-            if ( num > 0 && num >= _player_manager.getPlayerCardNum( ) ) {
+            if ( num > 0 && num <= _player_manager.getPlayerCardNum( ) ) {
+                List< int > count = new List< int >( );
                 for ( int i = 0; i < num; i++ ) {
-                    int throw_num = ( int )( Random.Range( 0, _player_manager.getPlayerCardNum( ) ) );
+                    int throw_num = 0;
+                    while ( true ) {
+                        throw_num = ( int )( Random.Range( 0, _player_manager.getPlayerCardNum( ) ) );
+
+                        if ( !count.Contains( throw_num ) ) {
+                            count.Add( throw_num );
+                            break;
+                        }
+                    }
                     _player_manager.addThrowCard( throw_num );
                 }
             } else {
+                // 足りない分ステータスを下げる
                 _player_manager.setPower( _player_manager.getPlayerData( ).power + ( _player_manager.getPlayerCardNum( ) - num ) );
+                // カードを捨てる
+                num = _player_manager.getPlayerCardNum( );
+                List< int > count = new List< int >( );
+                for ( int i = 0; i < num; i++ ) {
+                    int throw_num = 0;
+                    while ( true ) {
+                        throw_num = ( int )( Random.Range( 0, _player_manager.getPlayerCardNum( ) ) );
+
+                        if ( !count.Contains( throw_num ) ) {
+                            count.Add( throw_num );
+                            break;
+                        }
+                    }
+                    _player_manager.addThrowCard( throw_num );
+                }
             }
         } else {
             // カードを動かす処理
