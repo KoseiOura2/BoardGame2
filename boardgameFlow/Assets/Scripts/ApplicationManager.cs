@@ -1158,7 +1158,7 @@ public class ApplicationManager : Manager< ApplicationManager > {
 						_player_manager.setEventType( ( int )_player_manager.getPlayerOrder( ), EVENT_TYPE.EVENT_NONE );
 						_player_manager.setEventStart( false );
 						_player_manager.movedRefresh( );
-						_event_type[ ( int )_player_manager.getPlayerOrder( ) ]++;
+						_event_count[ ( int )_player_manager.getPlayerOrder( ) ]++;
 					} else {
 						_player_manager.setEventFinish( true );
 						_event_type[ ( int )_player_manager.getPlayerOrder( ) ] = 0;

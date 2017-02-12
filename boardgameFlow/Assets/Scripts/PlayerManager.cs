@@ -557,7 +557,7 @@ public class PlayerManager : MonoBehaviour {
     }
 
     public bool isChangeCount( PLAYER_ORDER player_num ) {
-        if ( _players[ ( int )_player_order ].isChangeCount( ) ) {
+        if ( _players[ ( int )player_num ].isChangeCount( ) ) {
             return true;
         }
         return false;
