@@ -37,7 +37,7 @@ public class ParticleManager : MonoBehaviour {
 	
 	}
 
-    public void init () {
+    public void init( ) {
         loadParticle( );
     }
 	

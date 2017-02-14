@@ -59,6 +59,7 @@ public class ApplicationManager : Manager< ApplicationManager > {
     private float _animation_time = 0.0f;
     private bool _game_playing      = false;
     private bool _go_finish_scene   = false;
+    [ SerializeField ]
     private bool _goal_flag         = false;
 	private bool _refresh_card_list = false;
     private bool _network_init      = false;
@@ -72,11 +73,19 @@ public class ApplicationManager : Manager< ApplicationManager > {
     private bool _send_status = false;
     private int _before_player_count;
     private int _worp_position = 0;
+    private int _count_tmp      = 0;
+	private Vector3 _vector_tmp = Vector3.zero;
     
 	private int _goal_time;
 	private GameObject _go_result_ui;
 	private ResultUIManeger _result_UI_maneger;
 	private bool _battle = true;
+
+    [ SerializeField ]
+    private int[ ] _debug_use_card = new int[ 6 ];
+
+    [ SerializeField ]
+    private bool _debug_mode = false;
 
 	// Awake関数の代わり
 	protected override void initialize( ) {
@@ -115,6 +124,7 @@ public class ApplicationManager : Manager< ApplicationManager > {
 		referManager( );
 
 		_card_manager.init( );
+        _particle_manager.init( );
 	}
 
 	void referManager( ) {
@@ -157,6 +167,12 @@ public class ApplicationManager : Manager< ApplicationManager > {
         if ( _network_manager != null && !_network_init ) {
             _network_manager.setProgramMode( _mode );
             _network_init = true;
+        }
+
+        if ( _client_data[ 1 ] != null ) {
+            for ( int i = 0; i < _debug_use_card.Length; i++ ) {
+                _debug_use_card[ i ] = _client_data[ 1 ].getRecvData( ).used_card_list[ i ];
+            }
         }
         
 		if ( _mode == PROGRAM_MODE.MODE_ONE_CONNECT ) {
@@ -294,7 +310,9 @@ public class ApplicationManager : Manager< ApplicationManager > {
 	/// </summary>
 	private void updateTitleScene( ) {
         if ( !_scene_init ) {
-			createTitle( );
+            if ( _title_back_obj == null ) {
+			    createTitle( );
+            }
 			_phase_manager.createPhaseText( MAIN_GAME_PHASE.GAME_PHASE_NO_PLAY );
             _scene_init = true;
         }
@@ -342,7 +360,7 @@ public class ApplicationManager : Manager< ApplicationManager > {
 		    }
         } else if ( _mode == PROGRAM_MODE.MODE_ONE_CONNECT ) {
             if ( _client_data[ 0 ] != null ) {
-		        if ( _client_data[ 0 ].getRecvData( ).ready ) {
+		        if ( _client_data[ 0 ].getRecvData( ).start_game ) {
                     if ( _host_data.getRecvData( ).game_finish ) {
                         _host_data.setSendGameFinish( false );
                     }
@@ -352,8 +370,8 @@ public class ApplicationManager : Manager< ApplicationManager > {
             }
         } else if ( _mode == PROGRAM_MODE.MODE_TWO_CONNECT ) {
             if ( _client_data[ 0 ] != null && _client_data[ 1 ] != null ) {
-		        if ( _client_data[ 0 ].getRecvData( ).ready && 
-                     _client_data[ 1 ].getRecvData( ).ready ) {
+		        if ( _client_data[ 0 ].getRecvData( ).start_game && 
+                     _client_data[ 1 ].getRecvData( ).start_game ) {
                     if ( _host_data.getRecvData( ).game_finish ) {
                         _host_data.setSendGameFinish( false );
                     }
@@ -416,6 +434,10 @@ public class ApplicationManager : Manager< ApplicationManager > {
 	/// FinishSceneの更新
 	/// </summary>
 	private void updateFinishScene( ) {
+        if ( !_scene_init ) {
+            createTitle( );
+            _scene_init = true;
+        }
         _connect_wait_time++;
 
         if ( _connect_wait_time >= CONNECT_WAIT_TIME ) {
@@ -462,6 +484,11 @@ public class ApplicationManager : Manager< ApplicationManager > {
 	private void updateGameScene( ) {
         if ( !_scene_init ) {
             _game_playing = true;
+            if ( _host_data != null ) {
+                for ( int i = 0; i < ( int )PLAYER_ORDER.MAX_PLAYER_NUM; i++ ) {
+                    _host_data.setSendMassCount( ( PLAYER_ORDER )i, 0 );
+                }
+            }
             _scene_init = true;
         }
         if ( _game_playing && !_go_finish_scene ) {
@@ -697,7 +724,11 @@ public class ApplicationManager : Manager< ApplicationManager > {
             if ( !_player_manager.isMoveStart( ) ) {
                 // プレイヤーを動かす
 				if ( _player_manager.getPlayerOnMove( ) ) {
-					_player_manager.setLimitValue( _dice_value[ ( int )_player_manager.getPlayerOrder( ) ] );
+                    if ( _debug_mode ) {
+                        _player_manager.setLimitValue( _debug_dice_value );
+                    } else {
+					    _player_manager.setLimitValue( _dice_value[ ( int )_player_manager.getPlayerOrder( ) ] );
+                    }
 					_player_manager.setAdvanceFlag( true );
 				} else {
 					_player_manager.setPlayerOnMove( true );
@@ -713,7 +744,11 @@ public class ApplicationManager : Manager< ApplicationManager > {
             if ( !_player_manager.isMoveStart( ) ) {
                 // プレイヤーを動かす
 				if ( _player_manager.getPlayerOnMove( ) ) {
-					_player_manager.setLimitValue( _dice_value[ ( int )_player_manager.getPlayerOrder( ) ] );
+                    if ( _debug_mode ) {
+                        _player_manager.setLimitValue( _debug_dice_value );
+                    } else {
+					    _player_manager.setLimitValue( _dice_value[ ( int )_player_manager.getPlayerOrder( ) ] );
+                    }
 					_player_manager.setAdvanceFlag( true );
 				} else {
 					_player_manager.setPlayerOnMove( true );
@@ -909,7 +944,7 @@ public class ApplicationManager : Manager< ApplicationManager > {
 		} else if ( _mode == PROGRAM_MODE.MODE_ONE_CONNECT ) {
 			if ( _client_data[ 0 ].getRecvData( ).battle_ready == true )  {
 				//バトルUIを作成する
-				if (_go_result_ui == null) { 
+				if ( _go_result_ui == null ) { 
 					createResultUI( );
 					// 1Pのステータスを設定
 					for ( int i = 0; i < _client_data[ 0 ].getRecvData( ).used_card_list.Length; i++ ) {
@@ -1088,7 +1123,7 @@ public class ApplicationManager : Manager< ApplicationManager > {
                 BATTLE_RESULT[ ] result = new BATTLE_RESULT[ ]{ BATTLE_RESULT.BATTLE_RESULT_NONE, BATTLE_RESULT.BATTLE_RESULT_NONE };
 				_host_data.setSendBattleResult( result, false );
 			}
-            _player_manager.refreshPlayerResult( );
+            
             _phase_manager.changeMainGamePhase( MAIN_GAME_PHASE.GAME_PHASE_EVENT, "EventPhase" );
             _player_manager.allMovedRefresh( );
 
@@ -1233,13 +1268,13 @@ public class ApplicationManager : Manager< ApplicationManager > {
                     _host_data.refreshCardList( player_two );
                 }
             }
-
+            _player_manager.refreshPlayerResult( );
 			_phase_manager.changeMainGamePhase( MAIN_GAME_PHASE.GAME_PHASE_DICE, "DisePhase" );
 			_phase_manager.createPhaseText( MAIN_GAME_PHASE.GAME_PHASE_DICE );
 		}
 
 	}
-///////////////////////////////////////////////////////////////
+
 	/// <summary>
 	/// マスイベントの処理
 	/// </summary>
@@ -1269,8 +1304,6 @@ public class ApplicationManager : Manager< ApplicationManager > {
                 _player_manager.setEventType( id, _event_type[ id ] );
 
                 value = _file_manager.getMassValue( mass_count )[ 0 ];
-                Debug.Log( "マスの数は" + mass_count );
-                Debug.Log( "入手カード数は" + value );
                 if ( !_animation_running ) {
                     _player_manager.setEventStart( true );
                     for ( int j = 0; j < value; j++ ) {
@@ -1280,7 +1313,6 @@ public class ApplicationManager : Manager< ApplicationManager > {
                         }
                         int num = _card_manager.distributeCard( ).id;
                         _draw_card_list.Add( num );
-                        Debug.Log( "cardID:" + num );
                         _player_manager.addDrawCard( num );
                     }
                     _animation_running = true;
@@ -1314,7 +1346,7 @@ public class ApplicationManager : Manager< ApplicationManager > {
                 }
                 Debug.Log( _file_manager.getMassValue( mass_count )[ 0 ] + "マス進む" );
 				if( _particle_manager.getParticle( ) == null ) {
-					_particle_manager.setParticle( GameObject.Find("OceanCurrent") );
+					_particle_manager.setParticle( GameObject.Find( "OceanCurrent" ) );
                     _particle_manager.getParticle( ).GetComponent< ParticleEmitter >( ).emit = true;
                     _particle_manager.setParticleType( PARTICLE_TYPE.PARTICLE_OCEANCURRENT );
 				}
@@ -1346,7 +1378,10 @@ public class ApplicationManager : Manager< ApplicationManager > {
                 break;
             case EVENT_TYPE.EVENT_TRAP_TWO:
                 // カードドロー
-                _event_type[ id ] = EVENT_TYPE.EVENT_DRAW;
+                _event_type[ id ] = EVENT_TYPE.EVENT_TRAP_TWO;
+                if ( _mode != PROGRAM_MODE.MODE_NO_CONNECT ) {
+                    _host_data.setSendEventType( _player_manager.getPlayerOrder( ), _event_type[ id ] );
+                }
                 _player_manager.setEventType( id, _event_type[ id ] );
                 value = _file_manager.getMassValue( mass_count )[ 0 ];
                 if ( !_animation_running ) {
@@ -1392,7 +1427,6 @@ public class ApplicationManager : Manager< ApplicationManager > {
 				    _player_manager.setLimitValue( _file_manager.getMassValue( mass_count )[ 1 ] );
 				    _player_manager.setCurrentFlag( true );
 				    _player_manager.setAdvanceFlag( false );
-                    _event_type[ id ] = EVENT_TYPE.EVENT_TRAP_TWO;
                     _player_manager.setEventType( id, _event_type[ id ] );
                 }
                 break;
@@ -1443,9 +1477,6 @@ public class ApplicationManager : Manager< ApplicationManager > {
                 */
             case EVENT_TYPE.EVENT_CHANGE:
                 Debug.Log ( "チェンジ" );
-					
-				int count_tmp      = _player_manager.getPlayerCount( id, _stage_manager.getMassCount( ) );
-				Vector3 vector_tmp = _stage_manager.getTargetMass( count_tmp ).transform.localPosition;
                 // パーティクルを検索
 				if( _particle_manager.getParticle() == null ) {
 					_particle_manager.setParticle( GameObject.Find( "Spiral" ) );
@@ -1455,6 +1486,8 @@ public class ApplicationManager : Manager< ApplicationManager > {
 					_before_player_count = _player_manager.getPlayerCount( id, _stage_manager.getMassCount( ) );
 					// パーティクルの開始
 					_particle_manager.getParticle( ).GetComponent< ParticleEmitter >( ).emit = true;
+                    _count_tmp      = _player_manager.getPlayerCount( id, _stage_manager.getMassCount( ) );
+                    _vector_tmp = _stage_manager.getTargetMass( _count_tmp ).transform.localPosition;
 				}
                 if ( _particle_manager.isParticlePhase() == 1 ) {
                     // パーティクルを停止
@@ -1464,27 +1497,27 @@ public class ApplicationManager : Manager< ApplicationManager > {
 						_player_manager.setPlayerPosition( ( int )PLAYER_ORDER.PLAYER_ONE,
                             _stage_manager.getTargetMass( _player_manager.getPlayerCount( ( int )PLAYER_ORDER.PLAYER_TWO,
                                 _stage_manager.getMassCount( ) ) ).transform.localPosition );
-						_player_manager.setPlayerPosition( ( int )PLAYER_ORDER.PLAYER_TWO, vector_tmp );
+						_player_manager.setPlayerPosition( ( int )PLAYER_ORDER.PLAYER_TWO, _vector_tmp );
 						_player_manager.setPlayerCount( ( int )PLAYER_ORDER.PLAYER_ONE,
                                                         _player_manager.getPlayerCount( ( int )PLAYER_ORDER.PLAYER_TWO,
                                                                                         _stage_manager.getMassCount( ) ) );
-						_player_manager.setPlayerCount( ( int )PLAYER_ORDER.PLAYER_TWO, count_tmp );
+						_player_manager.setPlayerCount( ( int )PLAYER_ORDER.PLAYER_TWO, _count_tmp );
                         _player_manager.setEventStart( true );
 					} else if ( id == ( int )PLAYER_ORDER.PLAYER_TWO ) {
 						_player_manager.setPlayerPosition( ( int )PLAYER_ORDER.PLAYER_TWO,
                             _stage_manager.getTargetMass( _player_manager.getPlayerCount( ( int )PLAYER_ORDER.PLAYER_ONE,
                                 _stage_manager.getMassCount( ) ) ).transform.localPosition );
-						_player_manager.setPlayerPosition( ( int )PLAYER_ORDER.PLAYER_ONE, vector_tmp );
+						_player_manager.setPlayerPosition( ( int )PLAYER_ORDER.PLAYER_ONE, _vector_tmp );
 						_player_manager.setPlayerCount( ( int )PLAYER_ORDER.PLAYER_TWO,
                             _player_manager.getPlayerCount( ( int )PLAYER_ORDER.PLAYER_ONE, _stage_manager.getMassCount ( ) ) ); 
-						_player_manager.setPlayerCount( ( int )PLAYER_ORDER.PLAYER_ONE, count_tmp );
+						_player_manager.setPlayerCount( ( int )PLAYER_ORDER.PLAYER_ONE, _count_tmp );
 					}
 					int[ ] count = getResideCount( );
 					_player_manager.dicisionTopAndLowestPlayer( ref count );
 				}
                 _player_manager.setEventType( id, EVENT_TYPE.EVENT_CHANGE );
                 break;
-		case EVENT_TYPE.EVENT_WORP:
+		    case EVENT_TYPE.EVENT_WORP:
                 _player_manager.setEventType( id, EVENT_TYPE.EVENT_WORP );
 				 // パーティクルを検索
 				if( _particle_manager.getParticle() == null ) {
@@ -1650,23 +1683,24 @@ public class ApplicationManager : Manager< ApplicationManager > {
 		_event_count[ id ] = count;
 	}
 
-	private void createResultUI() { 
-		if (_mode == PROGRAM_MODE.MODE_TWO_CONNECT) {
-			_go_result_ui = (GameObject)Resources.Load( "Prefabs/ResultUI" );
-			GameObject go = (GameObject)Instantiate(_go_result_ui, new Vector3(0,0,0),Quaternion.identity);
-			_result_UI_maneger = go.GetComponent<ResultUIManeger>();
-			List<int> use_card_id = new List<int>();
-			for (var i = 0; i < (int)PLAYER_ORDER.MAX_PLAYER_NUM; i++) {
+	private void createResultUI( ) { 
+		if ( _mode == PROGRAM_MODE.MODE_TWO_CONNECT ) {
+			_go_result_ui = ( GameObject )Resources.Load( "Prefabs/ResultUI" );
+			GameObject go = ( GameObject )Instantiate( _go_result_ui, new Vector3( 0, 0, 0 ), Quaternion.identity );
+			_result_UI_maneger = go.GetComponent< ResultUIManeger >( );
+			List< int > use_card_id = new List< int >( );
+
+			for ( var i = 0; i < ( int )PLAYER_ORDER.MAX_PLAYER_NUM; i++ ) {
 				int player_id = i;
 				for ( int j = 0; j < _client_data[ player_id ].getRecvData( ).used_card_list.Length; j++ ) {
-					Debug.Log(_client_data[ player_id ].getRecvData( ).used_card_list[ j ]+"");
-					if ( _client_data[ player_id ].getRecvData( ).used_card_list[ j ] > 0) {
+					Debug.Log( _client_data[ player_id ].getRecvData( ).used_card_list[ j ] + "" );
+					if ( _client_data[ player_id ].getRecvData( ).used_card_list[ j ] > 0 ) {
 						use_card_id.Add( _client_data[ player_id ].getRecvData( ).used_card_list[ j ] );
 					}
 				}
-				_result_UI_maneger.Init(use_card_id , player_id);
-				if (use_card_id.Count > 0){
-					use_card_id.Clear();
+				_result_UI_maneger.Init( use_card_id , player_id );
+				if ( use_card_id.Count > 0 ) {
+					use_card_id.Clear( );
 				}
 			}
 		} else {

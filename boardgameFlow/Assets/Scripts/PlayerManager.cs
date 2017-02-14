@@ -205,7 +205,7 @@ public class PlayerManager : MonoBehaviour {
 			float winner = Mathf.Max( attack[ ( int )PLAYER_ORDER.PLAYER_ONE ], attack[ ( int )PLAYER_ORDER.PLAYER_TWO ] );
 
             Debug.Log( "P1:" + attack[ ( int )PLAYER_ORDER.PLAYER_ONE ] );
-            Debug.Log( "P1:" + attack[ ( int )PLAYER_ORDER.PLAYER_TWO ] );
+            Debug.Log( "P2:" + attack[ ( int )PLAYER_ORDER.PLAYER_TWO ] );
             Debug.Log( "winner:" + winner );
 
 			if ( winner == attack[ ( int )PLAYER_ORDER.PLAYER_ONE ] ) {
@@ -539,7 +539,6 @@ public class PlayerManager : MonoBehaviour {
     }
     public void addDrawCard( int num ) {
         _players[ ( int )_player_order ].addDrawCard( num );
-        Debug.Log( "中継cardID:" + num );
     }
 
     public List< int > getDrawCard( ) {

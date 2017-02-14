@@ -185,6 +185,7 @@ namespace Common {
         public bool ok_event;
         public bool connect_ready;
         public bool go_title;
+        public bool start_game;
         public bool finish_game;
 	};
 
