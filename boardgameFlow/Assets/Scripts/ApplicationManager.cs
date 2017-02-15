@@ -1182,21 +1182,31 @@ public class ApplicationManager : Manager< ApplicationManager > {
         int[ ] num = getResideCount( );
         _player_manager.movePhaseUpdate( ref num, _stage_manager.getTargetMass( _player_manager.getTargetMassID( _stage_manager.getMassCount( ) ) ) );
 
+        // イベント終了処理
+        if ( _player_manager.getPlayerOrder( ) != PLAYER_ORDER.NO_PLAYER ) {
+            if ( _player_manager.isEventStart( ) && _player_manager.isEventFinish( ) ) {
+                // 行動プレイヤーを変える
+                _player_manager.changePlayerOrder( );
+				_player_manager.setEventType( ( int )_player_manager.getPlayerOrder( ), EVENT_TYPE.EVENT_NONE );
+				_particle_manager.refreshParticle( );
+		    }
+        }
+
 		// マス移動終了時にイベントフラグをfalseにしてもう一度イベントが発生するようにする
         if ( _player_manager.getPlayerOrder( ) != PLAYER_ORDER.NO_PLAYER ) {
             if ( _player_manager.getEventType( ) == EVENT_TYPE.EVENT_MOVE        ||
                  _player_manager.getEventType( ) == EVENT_TYPE.EVENT_TRAP_ONE ||
                  _player_manager.getEventType( ) == EVENT_TYPE.EVENT_TRAP_TWO ) {
 			    if ( _player_manager.isMoveFinish( ) ) {
+                    _player_manager.setEventType( ( int )_player_manager.getPlayerOrder( ), EVENT_TYPE.EVENT_NONE );
+                    _player_manager.movedRefresh( );
 					if ( _event_count[ ( int )_player_manager.getPlayerOrder( ) ] < MAX_EVENT_NUM ) {
 						// イベント開始＆移動状態を初期化
-						_player_manager.setEventType( ( int )_player_manager.getPlayerOrder( ), EVENT_TYPE.EVENT_NONE );
 						_player_manager.setEventStart( false );
-						_player_manager.movedRefresh( );
 						_event_count[ ( int )_player_manager.getPlayerOrder( ) ]++;
 					} else {
 						_player_manager.setEventFinish( true );
-						_event_type[ ( int )_player_manager.getPlayerOrder( ) ] = 0;
+						_event_count[ ( int )_player_manager.getPlayerOrder( ) ] = 0;
 					}
 			    }
             }
@@ -1209,19 +1219,13 @@ public class ApplicationManager : Manager< ApplicationManager > {
 		}
 
         if( _particle_manager.isParticleEnd( ) ) {
-            _player_manager.setEventFinish( true );
+            if( _player_manager.getEventType( ) == EVENT_TYPE.EVENT_CHANGE ) {
+                _player_manager.setEventAllFinish( true );
+            } else {
+                _player_manager.setEventFinish( true );
+            }
             _particle_manager.resetParticleEnd( );
 			_player_manager.setEventType( ( int )_player_manager.getPlayerOrder( ), EVENT_TYPE.EVENT_NONE );
-        }
-
-        // イベント終了処理
-        if ( _player_manager.getPlayerOrder( ) != PLAYER_ORDER.NO_PLAYER ) {
-            if ( _player_manager.isEventStart( ) && _player_manager.isEventFinish( ) ) {
-                // 行動プレイヤーを変える
-                _player_manager.changePlayerOrder( );
-				_player_manager.setEventType( ( int )_player_manager.getPlayerOrder( ), EVENT_TYPE.EVENT_NONE );
-				_particle_manager.refreshParticle( );
-		    }
         }
         // プレイヤーの順番を更新
         _player_manager.updatePlayerOrder( );
@@ -1494,21 +1498,24 @@ public class ApplicationManager : Manager< ApplicationManager > {
 					_particle_manager.getParticle( ).GetComponent< ParticleEmitter >( ).emit = false;
 				} else if ( _particle_manager.isParticlePhase() == 2 ) {
 					if ( id == ( int )PLAYER_ORDER.PLAYER_ONE ) {
+                        Debug.Log(_vector_tmp);
+                        Debug.Log("aaaaaaaaaaaaaaaaa");
 						_player_manager.setPlayerPosition( ( int )PLAYER_ORDER.PLAYER_ONE,
                             _stage_manager.getTargetMass( _player_manager.getPlayerCount( ( int )PLAYER_ORDER.PLAYER_TWO,
                                 _stage_manager.getMassCount( ) ) ).transform.localPosition );
 						_player_manager.setPlayerPosition( ( int )PLAYER_ORDER.PLAYER_TWO, _vector_tmp );
-						_player_manager.setPlayerCount( ( int )PLAYER_ORDER.PLAYER_ONE,
+                        _player_manager.setPlayerCount( ( int )PLAYER_ORDER.PLAYER_ONE,
                                                         _player_manager.getPlayerCount( ( int )PLAYER_ORDER.PLAYER_TWO,
                                                                                         _stage_manager.getMassCount( ) ) );
 						_player_manager.setPlayerCount( ( int )PLAYER_ORDER.PLAYER_TWO, _count_tmp );
-                        _player_manager.setEventStart( true );
 					} else if ( id == ( int )PLAYER_ORDER.PLAYER_TWO ) {
+                        Debug.Log(_vector_tmp);
+                         Debug.Log("uuuuuuuuuuuuuuuuuuuu");
 						_player_manager.setPlayerPosition( ( int )PLAYER_ORDER.PLAYER_TWO,
                             _stage_manager.getTargetMass( _player_manager.getPlayerCount( ( int )PLAYER_ORDER.PLAYER_ONE,
                                 _stage_manager.getMassCount( ) ) ).transform.localPosition );
 						_player_manager.setPlayerPosition( ( int )PLAYER_ORDER.PLAYER_ONE, _vector_tmp );
-						_player_manager.setPlayerCount( ( int )PLAYER_ORDER.PLAYER_TWO,
+                        _player_manager.setPlayerCount( ( int )PLAYER_ORDER.PLAYER_TWO,
                             _player_manager.getPlayerCount( ( int )PLAYER_ORDER.PLAYER_ONE, _stage_manager.getMassCount ( ) ) ); 
 						_player_manager.setPlayerCount( ( int )PLAYER_ORDER.PLAYER_ONE, _count_tmp );
 					}

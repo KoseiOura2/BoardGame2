@@ -384,6 +384,12 @@ public class PlayerManager : MonoBehaviour {
         _players[ ( int )_player_order ].setEventFinish( flag );
     }
 
+    public void setEventAllFinish( bool flag ) {
+        for ( int i = 0; i < _players.Length; i++ ) {
+            _players[ i ].setEventFinish( flag );
+        }
+    }
+
     public void setEventStart( bool flag ) {
         _players[ ( int )_player_order ].setEventStart( flag );
 	}
@@ -604,7 +610,7 @@ public class PlayerManager : MonoBehaviour {
     }
 
     public void setPlayerPosition( int id, Vector3 position ) {
-        _players[ ( int )_player_order ].getData( ).obj.transform.localPosition = _players[ ( int )_player_order ].adjustPos( ref position );
+        _players[ id ].getData( ).obj.transform.localPosition = _players[ id ].adjustPos( ref position );
     }
 
     public Vector3 isPlayerPosition( ) {

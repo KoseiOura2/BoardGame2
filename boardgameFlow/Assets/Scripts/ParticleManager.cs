@@ -111,7 +111,9 @@ public class ParticleManager : MonoBehaviour {
 			_particle_phase = 2;
 		} else if ( _particle_time > SPIRAL_TIME_FOUR ) {
 			_particle_phase = 3;
-		}
+		} else {
+            _particle_phase = 4;
+        }
 	}
 
     public int isParticlePhase( ) {
