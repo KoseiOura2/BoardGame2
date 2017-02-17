@@ -8,25 +8,12 @@ using UnityEngine.Events;
 public class ApplicationManager : Manager< ApplicationManager > {
     
     private const int CONNECT_WAIT_TIME        = 120;
-<<<<<<< HEAD
-	private const int SECOND_CONNECT_WAIT_TIME = 180;
-	private const int MAX_DRAW_VALUE           = 4;
-
-    // パーティクル関係
-    private const float OCEAN_CURRENT_STOP_TIME    = 60.0f;
-    private const float OCEAN_CURRENT_DESTROY_TIME = 90.0f;
-    private const float SPIRAL_TIME_ONE            = 10.0f;
-    private const float SPIRAL_TIME_TWO            = 360.0f;
-    private const float SPIRAL_TIME_THREE          = 362.0f;
-    private const float SPIRAL_TIME_FOUR           = 480.0f;
-=======
 	private const int SECOND_CONNECT_WAIT_TIME = 240;
 	private const int MAX_DRAW_VALUE           = 4;
 
     private const int GOAL_WAIT_TIME           = 360;
     private const int GOAL_PARTICLE_WAIT_TIME  = 30;
 	private const int MAX_EVENT_NUM            = 2;
->>>>>>> beta_0203
 
 	[ SerializeField ]
 	private NetworkMNG _network_manager;
@@ -40,11 +27,8 @@ public class ApplicationManager : Manager< ApplicationManager > {
     private PlayerManager _player_manager;
     [ SerializeField ]
     private StageManager _stage_manager;
-<<<<<<< HEAD
-=======
     [ SerializeField ]
 	private ParticleManager _particle_manager;
->>>>>>> beta_0203
 	[ SerializeField ]
 	private CameraManager _camera_manager;
 
@@ -74,11 +58,8 @@ public class ApplicationManager : Manager< ApplicationManager > {
     private int _anim_card_num = 0;
     private float _animation_time = 0.0f;
     private bool _game_playing      = false;
-<<<<<<< HEAD
-=======
     private bool _go_finish_scene   = false;
     [ SerializeField ]
->>>>>>> beta_0203
     private bool _goal_flag         = false;
 	private bool _refresh_card_list = false;
     private bool _network_init      = false;
@@ -91,17 +72,6 @@ public class ApplicationManager : Manager< ApplicationManager > {
     [ SerializeField ]
     private bool _send_status = false;
     private int _before_player_count;
-<<<<<<< HEAD
-    
-	[ SerializeField ]
-	private GameObject _particle;
-	[ SerializeField ]
-	private float _particle_time = 0;
-
-	public Text _scene_text;
-	public Text[ ] _reside_text = new Text[ ( int )PLAYER_ORDER.MAX_PLAYER_NUM ];    //残りマス用テキスト
-	public Text[ ] _environment = new Text[ ( int )PLAYER_ORDER.MAX_PLAYER_NUM ];    //環境情報用テキスト
-=======
     private int _worp_position = 0;
     private int _count_tmp      = 0;
 	private Vector3 _vector_tmp = Vector3.zero;
@@ -116,7 +86,6 @@ public class ApplicationManager : Manager< ApplicationManager > {
 
     [ SerializeField ]
     private bool _debug_mode = false;
->>>>>>> beta_0203
 
 	// Awake関数の代わり
 	protected override void initialize( ) {
@@ -155,10 +124,7 @@ public class ApplicationManager : Manager< ApplicationManager > {
 		referManager( );
 
 		_card_manager.init( );
-<<<<<<< HEAD
-=======
         _particle_manager.init( );
->>>>>>> beta_0203
 	}
 
 	void referManager( ) {
@@ -178,12 +144,9 @@ public class ApplicationManager : Manager< ApplicationManager > {
 			if ( _stage_manager == null ) {
 				_stage_manager = GameObject.Find( "StageManager" ).GetComponent< StageManager >( );
 			}
-<<<<<<< HEAD
-=======
             if ( _particle_manager == null ) {
 				_particle_manager = GameObject.Find( "ParticleManager" ).GetComponent< ParticleManager >( );
 			}
->>>>>>> beta_0203
 			if ( _camera_manager == null ) {
 				_camera_manager = Camera.main.GetComponent< CameraManager >( );
 			}
@@ -205,15 +168,12 @@ public class ApplicationManager : Manager< ApplicationManager > {
             _network_manager.setProgramMode( _mode );
             _network_init = true;
         }
-<<<<<<< HEAD
-=======
 
         if ( _client_data[ 1 ] != null ) {
             for ( int i = 0; i < _debug_use_card.Length; i++ ) {
                 _debug_use_card[ i ] = _client_data[ 1 ].getRecvData( ).used_card_list[ i ];
             }
         }
->>>>>>> beta_0203
         
 		if ( _mode == PROGRAM_MODE.MODE_ONE_CONNECT ) {
 			if ( _host_data == null && _network_manager.getHostObj( ) != null ) {
@@ -293,20 +253,12 @@ public class ApplicationManager : Manager< ApplicationManager > {
 		if ( _mode == PROGRAM_MODE.MODE_NO_CONNECT ) {
 			if ( Input.GetKeyDown( KeyCode.A ) ) {
 				_scene = SCENE.SCENE_TITLE;
-<<<<<<< HEAD
-				_scene_text.text = "SCENE_TITLE";
-=======
->>>>>>> beta_0203
 				_network_gui_controll.setShowGUI( false );
                 _scene_init = false;
 			}
 		} else if ( _mode == PROGRAM_MODE.MODE_ONE_CONNECT ) {
 			if ( _network_manager.getPlayerNum( ) >= 1 ) {
 				_scene = SCENE.SCENE_TITLE;
-<<<<<<< HEAD
-				_scene_text.text = "SCENE_TITLE";
-=======
->>>>>>> beta_0203
 				_network_gui_controll.setShowGUI( false );
 				try {
 					_host_data.setSendScene( _scene );
@@ -319,10 +271,6 @@ public class ApplicationManager : Manager< ApplicationManager > {
 		} else if ( _mode == PROGRAM_MODE.MODE_TWO_CONNECT ) {
 			if ( _network_manager.getPlayerNum( ) >= 2 ) {
 				_scene = SCENE.SCENE_TITLE;
-<<<<<<< HEAD
-				_scene_text.text = "SCENE_TITLE";
-=======
->>>>>>> beta_0203
 				_network_gui_controll.setShowGUI( false );
 				try {
 					_host_data.setSendScene( _scene );
@@ -346,13 +294,10 @@ public class ApplicationManager : Manager< ApplicationManager > {
         _title_back_obj.GetComponent< RectTransform >( ).localPosition = pos;
         _title_back_obj.GetComponent< RectTransform >( ).offsetMax = new Vector2( 0, 0 );
         _title_back_obj.GetComponent< RectTransform >( ).offsetMin = new Vector2( 0, 0 );
-<<<<<<< HEAD
-=======
 
         GameObject logo = _title_back_obj.transform.GetChild( 0 ).transform.gameObject;
         logo.GetComponent< RectTransform >( ).offsetMax = new Vector2( -Screen.width / 5, -Screen.height / 3 );
         logo.GetComponent< RectTransform >( ).offsetMin = new Vector2( Screen.width / 5, Screen.height / 3 );
->>>>>>> beta_0203
     }
 
     private void destroyTitleObj( ) {
@@ -365,24 +310,16 @@ public class ApplicationManager : Manager< ApplicationManager > {
 	/// </summary>
 	private void updateTitleScene( ) {
         if ( !_scene_init ) {
-<<<<<<< HEAD
-            createTitle( );
-=======
             if ( _title_back_obj == null ) {
 			    createTitle( );
             }
 			_phase_manager.createPhaseText( MAIN_GAME_PHASE.GAME_PHASE_NO_PLAY );
->>>>>>> beta_0203
             _scene_init = true;
         }
 
         if ( _mode == PROGRAM_MODE.MODE_NO_CONNECT ) {
 		    if ( Input.GetKeyDown( KeyCode.A ) ) {
 			    _scene = SCENE.SCENE_GAME;
-<<<<<<< HEAD
-			    _scene_text.text = "SCENE_GAME";
-=======
->>>>>>> beta_0203
 
                 Vector3 pos = _file_manager.getMassCoordinate( 0 );
 			    _player_manager.init( ref pos );
@@ -423,30 +360,21 @@ public class ApplicationManager : Manager< ApplicationManager > {
 		    }
         } else if ( _mode == PROGRAM_MODE.MODE_ONE_CONNECT ) {
             if ( _client_data[ 0 ] != null ) {
-<<<<<<< HEAD
-		        if ( _client_data[ 0 ].getRecvData( ).ready ) {
-=======
 		        if ( _client_data[ 0 ].getRecvData( ).start_game ) {
                     if ( _host_data.getRecvData( ).game_finish ) {
                         _host_data.setSendGameFinish( false );
                     }
->>>>>>> beta_0203
 			       connectTitleUpdate( );
                    _send_status = true;
 		        }
             }
         } else if ( _mode == PROGRAM_MODE.MODE_TWO_CONNECT ) {
             if ( _client_data[ 0 ] != null && _client_data[ 1 ] != null ) {
-<<<<<<< HEAD
-		        if ( _client_data[ 0 ].getRecvData( ).ready && 
-                     _client_data[ 1 ].getRecvData( ).ready ) {
-=======
 		        if ( _client_data[ 0 ].getRecvData( ).start_game && 
                      _client_data[ 1 ].getRecvData( ).start_game ) {
                     if ( _host_data.getRecvData( ).game_finish ) {
                         _host_data.setSendGameFinish( false );
                     }
->>>>>>> beta_0203
 			       connectTitleUpdate( );
                    _send_status = true;
 		        }
@@ -456,20 +384,13 @@ public class ApplicationManager : Manager< ApplicationManager > {
 
     private void connectTitleUpdate( ) {
         _scene = SCENE.SCENE_GAME;
-<<<<<<< HEAD
-		_scene_text.text = "SCENE_GAME";
-=======
->>>>>>> beta_0203
         
         Vector3 pos = _file_manager.getMassCoordinate( 0 );
 		_player_manager.init( ref pos );
 
 
         // ステージの生成
-<<<<<<< HEAD
-=======
         _stage_manager.initMassCount( );
->>>>>>> beta_0203
         _stage_manager.loadGraph( );
         _stage_manager.createBackGroundObj( );
 		//マスの生成
@@ -513,21 +434,6 @@ public class ApplicationManager : Manager< ApplicationManager > {
 	/// FinishSceneの更新
 	/// </summary>
 	private void updateFinishScene( ) {
-<<<<<<< HEAD
-		if ( Input.GetKeyDown( KeyCode.A ) ) {
-			_scene = SCENE.SCENE_TITLE;
-			_scene_text.text = "SCENE_TITLE";
-			if ( _mode != PROGRAM_MODE.MODE_NO_CONNECT ) {
-				try {
-					_host_data.setSendScene( _scene );
-					_host_data.setSendChangeFieldScene( true );
-				} catch {
-					Debug.Log( "通信に失敗しまいました" );
-				}
-			}
-            _scene_init = false;
-		}
-=======
         if ( !_scene_init ) {
             createTitle( );
             _scene_init = true;
@@ -570,42 +476,12 @@ public class ApplicationManager : Manager< ApplicationManager > {
             }
             _connect_wait_time = 0;
         }
->>>>>>> beta_0203
 	}
 
 	/// <summary>
 	/// GameSceneの更新
 	/// </summary>
 	private void updateGameScene( ) {
-<<<<<<< HEAD
-		// フェイズごとの更新
-		switch( _phase_manager.getMainGamePhase( ) ) {
-            case MAIN_GAME_PHASE.GAME_PHASE_NO_PLAY:
-                updateNoPlayPhase( );
-                break;
-		    case MAIN_GAME_PHASE.GAME_PHASE_DICE:
-			    updateDicePhase( );
-			    break;
-		    case MAIN_GAME_PHASE.GAME_PHASE_MOVE_CHARACTER:
-			    updateMovePhase( );
-			    break;
-		    case MAIN_GAME_PHASE.GAME_PHASE_DRAW_CARD:
-			    updateDrawPhase( );
-			    break;
-		    case MAIN_GAME_PHASE.GAME_PHASE_BATTLE:
-			    updateButtlePhase( );
-			    break;
-		    case MAIN_GAME_PHASE.GAME_PHASE_RESULT:
-			    updateResultPhase( );
-			    break;
-		    case MAIN_GAME_PHASE.GAME_PHASE_EVENT:
-			    updateEventPhase( );
-			    break;
-		    case MAIN_GAME_PHASE.GAME_PHASE_FINISH:
-			    updateFinishPhase( );
-			    break;
-		}
-=======
         if ( !_scene_init ) {
             _game_playing = true;
             if ( _host_data != null ) {
@@ -644,7 +520,6 @@ public class ApplicationManager : Manager< ApplicationManager > {
 			        break;
 		    }
         }
->>>>>>> beta_0203
 
 		// 通信データのセット
 		if ( _phase_manager.isPhaseChanged( ) && _mode != PROGRAM_MODE.MODE_NO_CONNECT ) {
@@ -656,17 +531,6 @@ public class ApplicationManager : Manager< ApplicationManager > {
         // プレイヤーのモーションを更新
         _player_manager.setPlayerMotion( );
 
-<<<<<<< HEAD
-        // playerの環境情報を更新
-		for ( int i = 0; i < ( int )PLAYER_ORDER.MAX_PLAYER_NUM; i++ ) {
-			if ( _file_manager.getEnvironment( _player_manager.getPlayerCount( i, _stage_manager.getMassCount( ) ) ) != "" ) {
-				string environment = _file_manager.getEnvironment ( _player_manager.getPlayerCount( i, _stage_manager.getMassCount( ) ) );
-				playerEnvironment( environment, i );
-			}
-		}
-
-=======
->>>>>>> beta_0203
         int[ ] count = getResideCount( );
         _player_manager.dicisionTopAndLowestPlayer( ref count );
 
@@ -703,10 +567,6 @@ public class ApplicationManager : Manager< ApplicationManager > {
 
             _send_status = false;
         }
-<<<<<<< HEAD
-	}
-
-=======
         // タイトルへ戻るが送られて来たらタイトルへ
         if ( _game_playing ) {
             if ( _mode == PROGRAM_MODE.MODE_ONE_CONNECT ) {
@@ -775,7 +635,6 @@ public class ApplicationManager : Manager< ApplicationManager > {
         }
     }
 
->>>>>>> beta_0203
 	/// <summary>
 	/// NoPlayPhaseの更新
 	/// </summary>
@@ -783,10 +642,6 @@ public class ApplicationManager : Manager< ApplicationManager > {
         // サイコロフェイズへの移行
 		StartCoroutine( "gameStart" );
         _send_status = true;
-<<<<<<< HEAD
-        _phase_manager.changeMainGamePhase( MAIN_GAME_PHASE.GAME_PHASE_DICE, "DicePhase" );
-        _phase_manager.createPhaseText( MAIN_GAME_PHASE.GAME_PHASE_DICE );
-=======
         if ( _phase_manager.isFinishMovePhaseImage( ) == false ) {
 			_phase_manager.movePhaseImage( );
 		} else {
@@ -794,7 +649,6 @@ public class ApplicationManager : Manager< ApplicationManager > {
             _phase_manager.deletePhaseImage( );
             _phase_manager.createPhaseText( MAIN_GAME_PHASE.GAME_PHASE_DICE );
         }
->>>>>>> beta_0203
 	}
     
     private IEnumerator gameStart( ) {
@@ -870,15 +724,11 @@ public class ApplicationManager : Manager< ApplicationManager > {
             if ( !_player_manager.isMoveStart( ) ) {
                 // プレイヤーを動かす
 				if ( _player_manager.getPlayerOnMove( ) ) {
-<<<<<<< HEAD
-					_player_manager.setLimitValue( _dice_value[ ( int )_player_manager.getPlayerOrder( ) ] );
-=======
                     if ( _debug_mode ) {
                         _player_manager.setLimitValue( _debug_dice_value );
                     } else {
 					    _player_manager.setLimitValue( _dice_value[ ( int )_player_manager.getPlayerOrder( ) ] );
                     }
->>>>>>> beta_0203
 					_player_manager.setAdvanceFlag( true );
 				} else {
 					_player_manager.setPlayerOnMove( true );
@@ -894,15 +744,11 @@ public class ApplicationManager : Manager< ApplicationManager > {
             if ( !_player_manager.isMoveStart( ) ) {
                 // プレイヤーを動かす
 				if ( _player_manager.getPlayerOnMove( ) ) {
-<<<<<<< HEAD
-					_player_manager.setLimitValue( _dice_value[ ( int )_player_manager.getPlayerOrder( ) ] );
-=======
                     if ( _debug_mode ) {
                         _player_manager.setLimitValue( _debug_dice_value );
                     } else {
 					    _player_manager.setLimitValue( _dice_value[ ( int )_player_manager.getPlayerOrder( ) ] );
                     }
->>>>>>> beta_0203
 					_player_manager.setAdvanceFlag( true );
 				} else {
 					_player_manager.setPlayerOnMove( true );
@@ -943,11 +789,6 @@ public class ApplicationManager : Manager< ApplicationManager > {
         // プレイヤーの順番を更新
         _player_manager.updatePlayerOrder( );
 
-<<<<<<< HEAD
-        // ゴールまでの残りマスを表示
-		resideCount( );
-=======
->>>>>>> beta_0203
 
         // 両方の移動が終わったら次のフェイズへ
         if ( _player_manager.isAllPlayerMoveFinish( ) ) {
@@ -1065,68 +906,11 @@ public class ApplicationManager : Manager< ApplicationManager > {
                 _host_data.refreshCardList( 0 );
                 _host_data.refreshCardList( 1 );
             }
-<<<<<<< HEAD
-=======
             _player_manager.setDefalutStatus( );
->>>>>>> beta_0203
             _phase_init = true;
         }
 		if ( _mode == PROGRAM_MODE.MODE_TWO_CONNECT ) {
             if ( _client_data[ 0 ].getRecvData( ).battle_ready == true &&
-<<<<<<< HEAD
-				 _client_data[ 1 ].getRecvData( ).battle_ready == true )  {
-				// 1Pのステータスを設定
-				for ( int i = 0; i < _client_data[ 0 ].getRecvData( ).used_card_list.Length; i++ ) {
-					_player_manager.adaptaCard( 0, _card_manager.getCardData( _client_data[ 0 ].getRecvData( ).used_card_list[ i ] ) );
-				}
-				_player_manager.endStatus( 0 );
-				Debug.Log( "1Pのpower:" + _player_manager.getPlayerPower( )[ 0 ].ToString( ) );
-
-				// 2Pのステータスを設定
-				for ( int i = 0; i < _client_data[ 1 ].getRecvData( ).used_card_list.Length; i++ ) {
-					_player_manager.adaptaCard( 1, _card_manager.getCardData( _client_data[ 1 ].getRecvData( ).used_card_list[ i ] ) );
-				}
-				_player_manager.endStatus( 1 );
-				Debug.Log( "2Pのpower:" + _player_manager.getPlayerPower( )[ 1 ].ToString( ) );
-				// プラスバリューの初期化
-				_player_manager.allPlusValueInit( );
-
-                // 攻撃力を比較
-				_player_manager.attackTopAndLowestPlayer( _player_manager.getPlayerPower( ) );
-                // 次のフェイズへ
-                _phase_manager.changeMainGamePhase( MAIN_GAME_PHASE.GAME_PHASE_RESULT, "ResultPhase" );
-                _phase_init = false;
-            }
-		} else if ( _mode == PROGRAM_MODE.MODE_ONE_CONNECT ) {
-			if ( _client_data[ 0 ].getRecvData( ).battle_ready == true )  {
-				// 1Pのステータスを設定
-				for ( int i = 0; i < _client_data[ 0 ].getRecvData( ).used_card_list.Length; i++ ) {
-					_player_manager.adaptaCard( 0, _card_manager.getCardData( _client_data[ 0 ].getRecvData( ).used_card_list[ i ] ) );
-				}
-				_player_manager.endStatus( 0 );
-				Debug.Log( "1Pのpower:" + _player_manager.getPlayerPower( )[ 0 ].ToString( ) );
-
-				// 2Pのステータスを設定
-				for ( int i = 0; i < _client_data[ 0 ].getRecvData( ).used_card_list.Length; i++ ) {
-					_player_manager.adaptaCard( 1, _card_manager.getCardData( _client_data[ 0 ].getRecvData( ).used_card_list[ i ] ) );
-				}
-				_player_manager.endStatus( 1 );
-				Debug.Log( "2Pのpower:" + _player_manager.getPlayerPower( )[ 1 ].ToString( ) );
-				// プラスバリューの初期化
-				_player_manager.allPlusValueInit( );
-
-                // 攻撃力を比較
-				_player_manager.attackTopAndLowestPlayer( _player_manager.getPlayerPower( ) );
-                // 次のフェイズへ
-                _phase_manager.changeMainGamePhase( MAIN_GAME_PHASE.GAME_PHASE_RESULT, "ResultPhase" );
-                _phase_init = false;
-            }
-		} else if ( _mode == PROGRAM_MODE.MODE_NO_CONNECT ) {
-			if ( Input.GetKeyDown( KeyCode.A ) )  {
-				// 次のフェイズへ
-				_phase_manager.changeMainGamePhase( MAIN_GAME_PHASE.GAME_PHASE_RESULT, "ResultPhase" );
-                _phase_init = false;
-=======
 				_client_data[ 1 ].getRecvData( ).battle_ready == true )  {
 				//バトルUIを作成する
 				if ( _go_result_ui == null ) { 
@@ -1201,13 +985,10 @@ public class ApplicationManager : Manager< ApplicationManager > {
 				_result_UI_maneger.setCoroutine( 1, result[ 0 ], result[ 1 ] );
 				//_phase_manager.changeMainGamePhase( MAIN_GAME_PHASE.GAME_PHASE_RESULT, "ResultPhase" );
                 //_phase_init = false;
->>>>>>> beta_0203
 			}
 		}
 	}
 
-<<<<<<< HEAD
-=======
 	public void setChangeMainGamePhase( ) {
 		_phase_manager.changeMainGamePhase( MAIN_GAME_PHASE.GAME_PHASE_RESULT, "ResultPhase" );
 		_phase_init = false;
@@ -1217,7 +998,6 @@ public class ApplicationManager : Manager< ApplicationManager > {
 		_battle = battle;
 	}
 
->>>>>>> beta_0203
 	/// <summary>
 	/// ResultPhaseの更新
 	/// </summary>
@@ -1227,11 +1007,7 @@ public class ApplicationManager : Manager< ApplicationManager > {
             // 行動順1Pをに設定する
             _player_manager.setDefalutStatus( );
             _player_manager.startPlayerOrder( );
-<<<<<<< HEAD
-
-=======
 			_go_result_ui = null;
->>>>>>> beta_0203
             _phase_init = true;
         }
 
@@ -1334,12 +1110,6 @@ public class ApplicationManager : Manager< ApplicationManager > {
         int[ ] num = getResideCount( );
         _player_manager.movePhaseUpdate( ref num, _stage_manager.getTargetMass( _player_manager.getTargetMassID( _stage_manager.getMassCount( ) ) ) );
 
-<<<<<<< HEAD
-        // ゴールまでの残りマスを表示
-		resideCount( );
-        
-=======
->>>>>>> beta_0203
         // プレイヤーの順番を更新
         _player_manager.updatePlayerOrder( );
 
@@ -1353,11 +1123,7 @@ public class ApplicationManager : Manager< ApplicationManager > {
                 BATTLE_RESULT[ ] result = new BATTLE_RESULT[ ]{ BATTLE_RESULT.BATTLE_RESULT_NONE, BATTLE_RESULT.BATTLE_RESULT_NONE };
 				_host_data.setSendBattleResult( result, false );
 			}
-<<<<<<< HEAD
-            _player_manager.refreshPlayerResult( );
-=======
             
->>>>>>> beta_0203
             _phase_manager.changeMainGamePhase( MAIN_GAME_PHASE.GAME_PHASE_EVENT, "EventPhase" );
             _player_manager.allMovedRefresh( );
 
@@ -1387,19 +1153,12 @@ public class ApplicationManager : Manager< ApplicationManager > {
 
         // ゴール処理
         if ( _player_manager.isAllPlayerEventFinish( ) && 
-<<<<<<< HEAD
-             _goal_flag && _connect_wait_time >= CONNECT_WAIT_TIME && _particle == null ) {
-=======
              _goal_flag && _connect_wait_time >= CONNECT_WAIT_TIME && _particle_manager.getParticle() == null ) {
->>>>>>> beta_0203
             _connect_wait_time = 0;
 			_player_manager.eventRefresh( );
             _player_manager.allMovedRefresh( );
             _phase_manager.changeMainGamePhase( MAIN_GAME_PHASE.GAME_PHASE_FINISH, "FinishPhase" );
-<<<<<<< HEAD
-=======
             _phase_manager.createPhaseText( MAIN_GAME_PHASE.GAME_PHASE_FINISH );
->>>>>>> beta_0203
             return;
         }
 
@@ -1409,11 +1168,7 @@ public class ApplicationManager : Manager< ApplicationManager > {
         int player_one = ( int )PLAYER_ORDER.PLAYER_ONE;
         int player_two = ( int )PLAYER_ORDER.PLAYER_TWO;
 
-<<<<<<< HEAD
-		if ( _player_manager.getPlayerOrder( ) != PLAYER_ORDER.NO_PLAYER && !_player_manager.isEventFinish( ) ) {
-=======
 		if ( _player_manager.getPlayerOrder( ) != PLAYER_ORDER.NO_PLAYER && !_player_manager.isEventFinish( ) && !_player_manager.isMoveStart( ) ) {
->>>>>>> beta_0203
             // 1Pのイベント処理
             if ( _player_manager.getEventType( ) != EVENT_TYPE.EVENT_WORP && 
                  _player_manager.getEventType( ) != EVENT_TYPE.EVENT_CHANGE ) {
@@ -1422,24 +1177,11 @@ public class ApplicationManager : Manager< ApplicationManager > {
 				massEvent( _before_player_count );
             }
 		} 
-<<<<<<< HEAD
-
-        if ( _player_manager.getPlayerOrder( ) != PLAYER_ORDER.NO_PLAYER ) {
-            Debug.Log( ( int )_player_manager.getPlayerOrder( ) + "move_start:" + _player_manager.isMoveFinish( ) );
-            Debug.Log( ( int )_player_manager.getPlayerOrder( ) + "move_finish:" + _player_manager.isMoveFinish( ) );
-            Debug.Log( ( int )_player_manager.getPlayerOrder( ) + "event_type:" + _player_manager.getEventType( ) );
-            Debug.Log( ( int )_player_manager.getPlayerOrder( ) + "event_start:" + _player_manager.isEventStart( ) );
-            Debug.Log( ( int )_player_manager.getPlayerOrder( ) + "event_finish:" + _player_manager.isEventFinish( ) );
-        }
-=======
->>>>>>> beta_0203
        
         // プレイヤーの移動
         int[ ] num = getResideCount( );
         _player_manager.movePhaseUpdate( ref num, _stage_manager.getTargetMass( _player_manager.getTargetMassID( _stage_manager.getMassCount( ) ) ) );
 
-<<<<<<< HEAD
-=======
         // イベント終了処理
         if ( _player_manager.getPlayerOrder( ) != PLAYER_ORDER.NO_PLAYER ) {
             if ( _player_manager.isEventStart( ) && _player_manager.isEventFinish( ) ) {
@@ -1450,18 +1192,12 @@ public class ApplicationManager : Manager< ApplicationManager > {
 		    }
         }
 
->>>>>>> beta_0203
 		// マス移動終了時にイベントフラグをfalseにしてもう一度イベントが発生するようにする
         if ( _player_manager.getPlayerOrder( ) != PLAYER_ORDER.NO_PLAYER ) {
             if ( _player_manager.getEventType( ) == EVENT_TYPE.EVENT_MOVE        ||
                  _player_manager.getEventType( ) == EVENT_TYPE.EVENT_TRAP_ONE ||
                  _player_manager.getEventType( ) == EVENT_TYPE.EVENT_TRAP_TWO ) {
 			    if ( _player_manager.isMoveFinish( ) ) {
-<<<<<<< HEAD
-                    // イベント開始＆移動状態を初期化
-				    _player_manager.setEventStart( false );
-				    _player_manager.movedRefresh( );
-=======
                     _player_manager.setEventType( ( int )_player_manager.getPlayerOrder( ), EVENT_TYPE.EVENT_NONE );
                     _player_manager.movedRefresh( );
 					if ( _event_count[ ( int )_player_manager.getPlayerOrder( ) ] < MAX_EVENT_NUM ) {
@@ -1472,45 +1208,10 @@ public class ApplicationManager : Manager< ApplicationManager > {
 						_player_manager.setEventFinish( true );
 						_event_count[ ( int )_player_manager.getPlayerOrder( ) ] = 0;
 					}
->>>>>>> beta_0203
 			    }
             }
         }
 
-<<<<<<< HEAD
-        // ゴールまでの残りマスを表示
-        resideCount( );
-
-        // パーティクルの更新
-		if( _particle != null ) {
-			if( _particle.gameObject.name == "OceanCurrent" ) {
-				_particle_time++;
-				if( _particle_time > OCEAN_CURRENT_STOP_TIME ) {
-                    //　パーティクルの停止
-					_particle.GetComponent< ParticleEmitter >( ).emit = false;
-				}
-				if( _particle_time > OCEAN_CURRENT_DESTROY_TIME ) {
-                    // パーティクルの削除
-					_particle_time = 0.0f;
-					_particle = null;
-				}
-			} else if( _particle.gameObject.name == "Spiral" ) {
-				_particle_time++;
-                if ( _particle_time > SPIRAL_TIME_FOUR ) {
-					_player_manager.setEventFinish( true );
-					_particle_time = 0.0f;
-					_particle = null;
-                }
-			}
-		}
-
-        // イベント終了処理
-        if ( _player_manager.getPlayerOrder( ) != PLAYER_ORDER.NO_PLAYER ) {
-            if ( _player_manager.isEventStart( ) && _player_manager.isEventFinish( ) ) {
-                // 行動プレイヤーを変える
-                _player_manager.changePlayerOrder( );
-		    }
-=======
         // パーティクルの更新
 		if( _particle_manager.getParticle( ) != null ) {
             _particle_manager.particleUpdate( );
@@ -1525,18 +1226,13 @@ public class ApplicationManager : Manager< ApplicationManager > {
             }
             _particle_manager.resetParticleEnd( );
 			_player_manager.setEventType( ( int )_player_manager.getPlayerOrder( ), EVENT_TYPE.EVENT_NONE );
->>>>>>> beta_0203
         }
         // プレイヤーの順番を更新
         _player_manager.updatePlayerOrder( );
 
         // イベント終了時の処理
 		if ( _player_manager.isAllPlayerEventFinish( ) &&
-<<<<<<< HEAD
-             _goal_flag == false && _connect_wait_time >= CONNECT_WAIT_TIME && _particle == null ) {
-=======
              _goal_flag == false && _connect_wait_time >= CONNECT_WAIT_TIME && _particle_manager.getParticle( ) == null ) {
->>>>>>> beta_0203
             // カードドロー完了したら
             if ( _mode == PROGRAM_MODE.MODE_ONE_CONNECT ) {
                 if ( !_client_data[ player_one ].getRecvData( ).ok_event &&
@@ -1576,11 +1272,7 @@ public class ApplicationManager : Manager< ApplicationManager > {
                     _host_data.refreshCardList( player_two );
                 }
             }
-<<<<<<< HEAD
-
-=======
             _player_manager.refreshPlayerResult( );
->>>>>>> beta_0203
 			_phase_manager.changeMainGamePhase( MAIN_GAME_PHASE.GAME_PHASE_DICE, "DisePhase" );
 			_phase_manager.createPhaseText( MAIN_GAME_PHASE.GAME_PHASE_DICE );
 		}
@@ -1616,11 +1308,6 @@ public class ApplicationManager : Manager< ApplicationManager > {
                 _player_manager.setEventType( id, _event_type[ id ] );
 
                 value = _file_manager.getMassValue( mass_count )[ 0 ];
-<<<<<<< HEAD
-                Debug.Log( "マスの数は" + mass_count );
-                Debug.Log( "入手カード数は" + value );
-=======
->>>>>>> beta_0203
                 if ( !_animation_running ) {
                     _player_manager.setEventStart( true );
                     for ( int j = 0; j < value; j++ ) {
@@ -1630,10 +1317,6 @@ public class ApplicationManager : Manager< ApplicationManager > {
                         }
                         int num = _card_manager.distributeCard( ).id;
                         _draw_card_list.Add( num );
-<<<<<<< HEAD
-                        Debug.Log( "cardID:" + num );
-=======
->>>>>>> beta_0203
                         _player_manager.addDrawCard( num );
                     }
                     _animation_running = true;
@@ -1666,18 +1349,11 @@ public class ApplicationManager : Manager< ApplicationManager > {
                     _host_data.setSendEventType( _player_manager.getPlayerOrder( ), _event_type[ id ] );
                 }
                 Debug.Log( _file_manager.getMassValue( mass_count )[ 0 ] + "マス進む" );
-<<<<<<< HEAD
-				if ( _particle == null ) {
-					_particle = GameObject.Find( "OceanCurrent" );
-				}
-                _particle.GetComponent< ParticleEmitter >( ).emit = true;
-=======
 				if( _particle_manager.getParticle( ) == null ) {
 					_particle_manager.setParticle( GameObject.Find( "OceanCurrent" ) );
                     _particle_manager.getParticle( ).GetComponent< ParticleEmitter >( ).emit = true;
                     _particle_manager.setParticleType( PARTICLE_TYPE.PARTICLE_OCEANCURRENT );
 				}
->>>>>>> beta_0203
 				_player_manager.setLimitValue( _file_manager.getMassValue( mass_count )[ 0 ] );
 				_player_manager.setCurrentFlag( true );
 				_player_manager.setAdvanceFlag( true );
@@ -1692,19 +1368,11 @@ public class ApplicationManager : Manager< ApplicationManager > {
                     _host_data.setSendEventType( _player_manager.getPlayerOrder( ), _event_type[ id ] );
                 }
 
-<<<<<<< HEAD
-				if( _particle == null ) {
-					_particle = GameObject.Find("OceanCurrent");
-				}
-				_player_manager.setEventStart( true );
-				_particle.GetComponent< ParticleEmitter >( ).emit = true;
-=======
 				if( _particle_manager.getParticle( ) == null ) {
 					_particle_manager.setParticle( GameObject.Find("OceanCurrent") );
                     _particle_manager.getParticle( ).GetComponent< ParticleEmitter >( ).emit = true;
                     _particle_manager.setParticleType( PARTICLE_TYPE.PARTICLE_OCEANCURRENT );
 				}
->>>>>>> beta_0203
 				_player_manager.setLimitValue( _file_manager.getMassValue ( mass_count )[ 0 ] );
 				_player_manager.setCurrentFlag( true );
 				_player_manager.setAdvanceFlag( true );
@@ -1714,13 +1382,10 @@ public class ApplicationManager : Manager< ApplicationManager > {
                 break;
             case EVENT_TYPE.EVENT_TRAP_TWO:
                 // カードドロー
-<<<<<<< HEAD
-=======
                 _event_type[ id ] = EVENT_TYPE.EVENT_TRAP_TWO;
                 if ( _mode != PROGRAM_MODE.MODE_NO_CONNECT ) {
                     _host_data.setSendEventType( _player_manager.getPlayerOrder( ), _event_type[ id ] );
                 }
->>>>>>> beta_0203
                 _player_manager.setEventType( id, _event_type[ id ] );
                 value = _file_manager.getMassValue( mass_count )[ 0 ];
                 if ( !_animation_running ) {
@@ -1737,15 +1402,12 @@ public class ApplicationManager : Manager< ApplicationManager > {
                     massAnimation( mass_count, _draw_card_list[ _anim_card_num ] );
                     _animation_running = true;
                 }
-<<<<<<< HEAD
-=======
 
                 massAnimation( mass_count, _draw_card_list[ _anim_card_num ] );
                 if ( _anim_card_num >= _draw_card_list.Count ) {
                     _animation_end = true;
                 }
 
->>>>>>> beta_0203
                 // カードリストを初期化
                 if ( _animation_end ) {
                     // カードを送信
@@ -1757,23 +1419,6 @@ public class ApplicationManager : Manager< ApplicationManager > {
                     }
                     _anim_card_num = 0;
                     _draw_card_list.Clear( );
-<<<<<<< HEAD
-                    _player_manager.setEventFinish( true );
-                    _animation_end = false;
-                    _animation_running = false;
-                }
-				if ( _particle == null ) {
-					_particle = GameObject.Find( "OceanCurrent" );
-				}
-				_player_manager.setEventStart( true );
-				_particle.GetComponent< ParticleEmitter >( ).emit = true;
-				_player_manager.setLimitValue( _file_manager.getMassValue( mass_count )[ 1 ] );
-				_player_manager.setCurrentFlag( true );
-				_player_manager.setAdvanceFlag( false );
-				_player_manager.setEventStart( true );
-                _before_player_count = _player_manager.getPlayerCount( id, _stage_manager.getMassCount( ) );
-                _player_manager.setEventType( id, EVENT_TYPE.EVENT_TRAP_TWO );
-=======
                     _animation_end = false;
                     _animation_running = false;
                     if( _particle_manager.getParticle( ) == null ) {
@@ -1788,33 +1433,21 @@ public class ApplicationManager : Manager< ApplicationManager > {
 				    _player_manager.setAdvanceFlag( false );
                     _player_manager.setEventType( id, _event_type[ id ] );
                 }
->>>>>>> beta_0203
                 break;
             case EVENT_TYPE.EVENT_GOAL:
 				_player_manager.setEventStart( true );
                 if ( _player_manager.getPlayerResult( id ) == BATTLE_RESULT.WIN ) {
-<<<<<<< HEAD
-                    _phase_manager.changeMainGamePhase ( MAIN_GAME_PHASE.GAME_PHASE_FINISH, "FinishPhase" );
-=======
->>>>>>> beta_0203
                     Debug.Log ( "プレイヤー" + ( id + 1 ) + ":Goal!!" );
                     _goal_flag = true;
                     _player_manager.setEventFinish( true );
                     _player_manager.setEventType( id, EVENT_TYPE.EVENT_GOAL );
                 } else if ( _player_manager.getPlayerResult( id ) == BATTLE_RESULT.LOSE ||
                             _player_manager.getPlayerResult( id ) == BATTLE_RESULT.DRAW ) {
-<<<<<<< HEAD
-                    if( _particle == null ) {
-						_particle = GameObject.Find( "OceanCurrent" );
-					}
-					_particle.GetComponent< ParticleEmitter >( ).emit = true;
-=======
                     if( _particle_manager.getParticle( ) == null ) {
 					    _particle_manager.setParticle( GameObject.Find("OceanCurrent") );
                         _particle_manager.getParticle( ).GetComponent< ParticleEmitter >( ).emit = true;
                         _particle_manager.setParticleType( PARTICLE_TYPE.PARTICLE_OCEANCURRENT );
 				    }
->>>>>>> beta_0203
 					_player_manager.setLimitValue ( 1 );
 					_player_manager.setCurrentFlag ( true );
 					_player_manager.setAdvanceFlag ( false );
@@ -1848,43 +1481,6 @@ public class ApplicationManager : Manager< ApplicationManager > {
                 */
             case EVENT_TYPE.EVENT_CHANGE:
                 Debug.Log ( "チェンジ" );
-<<<<<<< HEAD
-					
-				int count_tmp      = _player_manager.getPlayerCount( id, _stage_manager.getMassCount( ) );
-				Vector3 vector_tmp = _stage_manager.getTargetMass( count_tmp ).transform.localPosition;
-                // パーティクルを検索
-				if( _particle == null ) {
-					_particle = GameObject.Find( "Spiral" );
-				}
-				if( _particle_time == 0 ) {
-                    // プレイヤーの位置を保持
-					_before_player_count = _player_manager.getPlayerCount( id, _stage_manager.getMassCount( ) );
-					// パーティクルの開始
-					_particle.GetComponent< ParticleEmitter >( ).emit = true;
-
-				} else if ( SPIRAL_TIME_ONE < _particle_time && _particle_time < SPIRAL_TIME_TWO ) {
-                    // パーティクルを停止
-					_particle.GetComponent< ParticleEmitter >( ).emit = false;
-				} else if (  SPIRAL_TIME_TWO < _particle_time && _particle_time< SPIRAL_TIME_THREE ) {
-					if ( id == ( int )PLAYER_ORDER.PLAYER_ONE ) {
-						_player_manager.setPlayerPosition( ( int )PLAYER_ORDER.PLAYER_ONE,
-                            _stage_manager.getTargetMass( _player_manager.getPlayerCount( ( int )PLAYER_ORDER.PLAYER_TWO,
-                                _stage_manager.getMassCount( ) ) ).transform.localPosition );
-						_player_manager.setPlayerPosition( ( int )PLAYER_ORDER.PLAYER_TWO, vector_tmp );
-						_player_manager.setPlayerCount( ( int )PLAYER_ORDER.PLAYER_ONE,
-                                                        _player_manager.getPlayerCount( ( int )PLAYER_ORDER.PLAYER_TWO,
-                                                                                        _stage_manager.getMassCount( ) ) );
-						_player_manager.setPlayerCount( ( int )PLAYER_ORDER.PLAYER_TWO, count_tmp );
-                        _player_manager.setEventStart( true );
-					} else if ( id == ( int )PLAYER_ORDER.PLAYER_TWO ) {
-						_player_manager.setPlayerPosition( ( int )PLAYER_ORDER.PLAYER_TWO,
-                            _stage_manager.getTargetMass( _player_manager.getPlayerCount( ( int )PLAYER_ORDER.PLAYER_ONE,
-                                _stage_manager.getMassCount( ) ) ).transform.localPosition );
-						_player_manager.setPlayerPosition( ( int )PLAYER_ORDER.PLAYER_ONE, vector_tmp );
-						_player_manager.setPlayerCount( ( int )PLAYER_ORDER.PLAYER_TWO,
-                            _player_manager.getPlayerCount( ( int )PLAYER_ORDER.PLAYER_ONE, _stage_manager.getMassCount ( ) ) ); 
-						_player_manager.setPlayerCount( ( int )PLAYER_ORDER.PLAYER_ONE, count_tmp );
-=======
                 // パーティクルを検索
 				if( _particle_manager.getParticle() == null ) {
 					_particle_manager.setParticle( GameObject.Find( "Spiral" ) );
@@ -1922,39 +1518,12 @@ public class ApplicationManager : Manager< ApplicationManager > {
                         _player_manager.setPlayerCount( ( int )PLAYER_ORDER.PLAYER_TWO,
                             _player_manager.getPlayerCount( ( int )PLAYER_ORDER.PLAYER_ONE, _stage_manager.getMassCount ( ) ) ); 
 						_player_manager.setPlayerCount( ( int )PLAYER_ORDER.PLAYER_ONE, _count_tmp );
->>>>>>> beta_0203
 					}
 					int[ ] count = getResideCount( );
 					_player_manager.dicisionTopAndLowestPlayer( ref count );
 				}
                 _player_manager.setEventType( id, EVENT_TYPE.EVENT_CHANGE );
                 break;
-<<<<<<< HEAD
-            case EVENT_TYPE.EVENT_WORP:
-                // ワープする場所を決定
-                int worp_position = _file_manager.getNomalValue( _player_manager.getPlayerCount( id, _stage_manager.getMassCount( ) ) );
-				// パーティクルを検索
-                if ( _particle == null ) {
-					_particle = GameObject.Find( "Spiral" );
-				}
-				if ( _particle_time == 0 ) {
-                    // プレイヤーの位置を保持
-					_before_player_count = _player_manager.getPlayerCount( id, _stage_manager.getMassCount( ) );
-                    // パーティクルの開始
-					_particle.GetComponent< ParticleEmitter >( ).emit = true;
-                    _player_manager.setEventStart( true );
-				} else if( SPIRAL_TIME_ONE < _particle_time && _particle_time < SPIRAL_TIME_TWO ) {
-                    // パーティクルを停止
-					_particle.GetComponent< ParticleEmitter >( ).emit = false;
-
-				} else if( _particle_time < SPIRAL_TIME_FOUR && _particle_time > SPIRAL_TIME_TWO ) {
-					_player_manager.setPlayerCount( id, worp_position );
-					_player_manager.setPlayerPosition( id, _stage_manager.getTargetMass( worp_position ).transform.localPosition );
-					int[ ] count = getResideCount( );
-					_player_manager.dicisionTopAndLowestPlayer( ref count );
-				}
-                _player_manager.setEventType( id, EVENT_TYPE.EVENT_WORP );
-=======
 		    case EVENT_TYPE.EVENT_WORP:
                 _player_manager.setEventType( id, EVENT_TYPE.EVENT_WORP );
 				 // パーティクルを検索
@@ -1978,7 +1547,6 @@ public class ApplicationManager : Manager< ApplicationManager > {
 					int[ ] count = getResideCount( );
 					_player_manager.dicisionTopAndLowestPlayer( ref count );
 				}
->>>>>>> beta_0203
                 break;
 			case EVENT_TYPE.EVENT_DISCARD:
                 _event_type[ id ] = EVENT_TYPE.EVENT_DISCARD;
@@ -1994,10 +1562,6 @@ public class ApplicationManager : Manager< ApplicationManager > {
 				break;
 		}  
 	}
-<<<<<<< HEAD
-
-=======
->>>>>>> beta_0203
     /// <summary>
     /// マス効果のコルーチン
     /// </summary>
@@ -2032,23 +1596,6 @@ public class ApplicationManager : Manager< ApplicationManager > {
     /// FinishPhaseの更新
     /// </summary>
     private void updateFinishPhase( ) {
-<<<<<<< HEAD
-		if ( Input.GetKeyDown( KeyCode.A ) ) {
-			_scene = SCENE.SCENE_FINISH;
-			_scene_text.text = "SCENEFINISH";
-            _player_manager.destroyObj( );
-            _stage_manager.destroyObj( );
-			if ( _mode != PROGRAM_MODE.MODE_NO_CONNECT ) {
-				try {
-					_host_data.setSendScene( _scene );
-					_host_data.setSendChangeFieldScene( true );
-				} catch {
-					Debug.Log( "通信に失敗しまいました" );
-				}
-			}
-            _scene_init = false;
-		}
-=======
 		if ( !_phase_init ) {
 			_connect_wait_time = 0;
 			_phase_init = true;
@@ -2096,7 +1643,6 @@ public class ApplicationManager : Manager< ApplicationManager > {
 			_particle_manager.deleteParticle();
 		}
 		_particle_manager.enableParticle();
->>>>>>> beta_0203
 	}
 
 	public void OnGUI( ) {
@@ -2127,30 +1673,7 @@ public class ApplicationManager : Manager< ApplicationManager > {
 	public SCENE getScene( ) {
 		return _scene;
 	}
-<<<<<<< HEAD
-
-
-	/// <summary>
-	/// プレイヤーの現在位置（環境）
-	/// </summary>
-	/// <param name="environment"></param>
-	/// <param name="num"></param>
-	public void playerEnvironment( string environment, int num ) {
-		_environment[ num ].text = "プレイヤー" + ( num + 1 ) + ":" + environment;
-	}
-
-	/// <summary>
-	/// ゴールまでの残りマスを表示
-	/// </summary>
-	public void resideCount( ) {
-		for ( int i = 0; i < ( int )PLAYER_ORDER.MAX_PLAYER_NUM; i++ ) {
-			_reside_text[ i ].text = "プレイヤー" + i.ToString( ) + "：残り" + getResideCount( )[ i ].ToString( ) + "マス";
-		}
-	}
-    
-=======
    
->>>>>>> beta_0203
     /// <summary>
     /// ゴールまでどれくらい残っているか取得
     /// </summary>
@@ -2167,8 +1690,6 @@ public class ApplicationManager : Manager< ApplicationManager > {
 		_event_count[ id ] = count;
 	}
 
-<<<<<<< HEAD
-=======
 	private void createResultUI( ) { 
 		if ( _mode == PROGRAM_MODE.MODE_TWO_CONNECT ) {
 			_go_result_ui = ( GameObject )Resources.Load( "Prefabs/ResultUI" );
@@ -2207,5 +1728,4 @@ public class ApplicationManager : Manager< ApplicationManager > {
 			}
 		}
 	}
->>>>>>> beta_0203
 }

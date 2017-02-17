@@ -147,16 +147,10 @@ public class Player : MonoBehaviour {
      public void move( float time ) {
         
         // 方向を変える
-<<<<<<< HEAD
-		Quaternion dir = Quaternion.LookRotation( _end_position - _data.obj.transform.position );
-		_data.obj.transform.rotation = Quaternion.SlerpUnclamped( _data.obj.transform.rotation, dir, time );
-         
-=======
 		//Quaternion dir = Quaternion.LookRotation( _end_position - _data.obj.transform.position );
 		//_data.obj.transform.rotation = Quaternion.SlerpUnclamped( _data.obj.transform.rotation, dir, time );
 		_data.obj.transform.LookAt( _end_position ); 
 
->>>>>>> beta_0203
         _data.obj.transform.position = Vector3.SmoothDamp( _data.obj.transform.position, _end_position, ref _velocity , time );
 		//Vector3.Lerp ( _start_position[ i ], _end_position[ i ], rate );
 	}

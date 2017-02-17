@@ -131,8 +131,6 @@ namespace Common {
 		EVENT_DISCARD,        //9
     }
 
-<<<<<<< HEAD
-=======
     public enum PARTICLE_TYPE {
         PARTICLE_NONE,
         PARTICLE_OCEANCURRENT,
@@ -140,7 +138,6 @@ namespace Common {
         PARTICLE_FIREWORKS
     }
 
->>>>>>> beta_0203
 	public enum FIELD_ENVIRONMENT {
 		SHOAL_FIELD,
 		OPEN_SEA_FIELD,
@@ -168,10 +165,7 @@ namespace Common {
         public EVENT_TYPE[ ] event_type;
 		public bool send_result;
         public int[ ] mass_count;
-<<<<<<< HEAD
-=======
         public bool game_finish;
->>>>>>> beta_0203
 	};
 
 	/// <summary>
@@ -190,12 +184,9 @@ namespace Common {
 		public MASS_ADJUST mass_adjust;
         public bool ok_event;
         public bool connect_ready;
-<<<<<<< HEAD
-=======
         public bool go_title;
         public bool start_game;
         public bool finish_game;
->>>>>>> beta_0203
 	};
 
 	/// <summary>
@@ -282,8 +273,5 @@ namespace Common {
     public enum VOICE_LIST {
         NONE_VOICE,
     };
-<<<<<<< HEAD
-=======
 
->>>>>>> beta_0203
 }

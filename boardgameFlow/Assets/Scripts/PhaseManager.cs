@@ -10,29 +10,15 @@ public class PhaseManager : MonoBehaviour {
 	private bool _phase_changed = false;
 
     private Sprite _dice_phase_image;
-<<<<<<< HEAD
-    private GameObject _phase_image_obj;
-=======
     private Sprite _goal_image;
     private Sprite _start_image;
     private GameObject _phase_image_obj;
     private GameObject _back_ground;
->>>>>>> beta_0203
 	private float _phase_image_move_speed = 10.0f;
 	private float _phase_image_width      = 0.0f;
 	private float _phase_image_height     = 0.0f;
 	private bool _phase_image_move_finish = false;
 
-<<<<<<< HEAD
-	public Text _phase_text;
-
-	// Use this for initialization
-	void Start( ) {
-        _main_game_phase = MAIN_GAME_PHASE.GAME_PHASE_NO_PLAY;
-		_phase_text.text = "NoPlay";
-
-        _dice_phase_image = Resources.Load< Sprite >( "Graphics/UI/ui_phase_dice" );
-=======
 	// Use this for initialization
 	void Start( ) {
         _main_game_phase = MAIN_GAME_PHASE.GAME_PHASE_NO_PLAY;
@@ -42,7 +28,6 @@ public class PhaseManager : MonoBehaviour {
         _start_image = Resources.Load< Sprite >( "Graphics/UI/ui_gamestart" );
 
         _back_ground = GameObject.Find( "blackBackGround" );
->>>>>>> beta_0203
 	}
 	
 	// Update is called once per frame
@@ -58,10 +43,6 @@ public class PhaseManager : MonoBehaviour {
     public void changeMainGamePhase( MAIN_GAME_PHASE phase, string log_text ) {
         try {
             _main_game_phase = phase;
-<<<<<<< HEAD
-			_phase_text.text = log_text;
-=======
->>>>>>> beta_0203
 			_phase_changed = true;
         }
         catch {
@@ -85,12 +66,6 @@ public class PhaseManager : MonoBehaviour {
 
 		// フェイズによって画像を切り替え
 		switch ( phase ) {
-<<<<<<< HEAD
-		case MAIN_GAME_PHASE.GAME_PHASE_DICE:
-			_phase_image_obj.AddComponent< Image >( ).sprite = _dice_phase_image;
-			break;
-		}
-=======
         case MAIN_GAME_PHASE.GAME_PHASE_NO_PLAY:
             _phase_image_obj.AddComponent< Image >( ).sprite = _start_image;
             break;
@@ -101,7 +76,6 @@ public class PhaseManager : MonoBehaviour {
             _phase_image_obj.AddComponent< Image >( ).sprite = _goal_image;
             break;
         }
->>>>>>> beta_0203
 		// 画像のアクセプト比を維持し、サイズをリサイズ
 		_phase_image_obj.GetComponent< Image >( ).preserveAspect = true;
 		_phase_image_obj.GetComponent< Image >( ).SetNativeSize( );
@@ -111,11 +85,7 @@ public class PhaseManager : MonoBehaviour {
 		_phase_image_height = Screen.height / 3;
 		_phase_image_obj.GetComponent< RectTransform >( ).SetSizeWithCurrentAnchors( RectTransform.Axis.Horizontal, _phase_image_width );
 		_phase_image_obj.GetComponent< RectTransform >( ).SetSizeWithCurrentAnchors( RectTransform.Axis.Vertical, _phase_image_height );
-<<<<<<< HEAD
-		_phase_image_obj.GetComponent< RectTransform >( ).anchoredPosition = new Vector3( -( Screen.width / 2 + _phase_image_width / 2 ), 0, 0 );
-=======
 		_phase_image_obj.GetComponent< RectTransform >( ).anchoredPosition3D = new Vector3( -( Screen.width / 2 + _phase_image_width / 2 ), 0, 0 );
->>>>>>> beta_0203
     }
 
 	/// <summary>
@@ -124,11 +94,7 @@ public class PhaseManager : MonoBehaviour {
 	public void movePhaseImage( ) {
 		Vector2 pos = _phase_image_obj.GetComponent< RectTransform >( ).anchoredPosition;
 
-<<<<<<< HEAD
-		_phase_image_obj.GetComponent< RectTransform >( ).anchoredPosition = new Vector2( pos.x + _phase_image_move_speed, pos.y );
-=======
 		_phase_image_obj.GetComponent< RectTransform >( ).anchoredPosition3D = new Vector2( pos.x + _phase_image_move_speed, pos.y );
->>>>>>> beta_0203
 
 		if ( _phase_image_obj.GetComponent< RectTransform >( ).anchoredPosition.x > Screen.width ) {
 			_phase_image_move_finish = true;
@@ -138,14 +104,6 @@ public class PhaseManager : MonoBehaviour {
 	public void setPhaseImagePos( ) {
 		_phase_image_height = Screen.height / 6;
 		_phase_image_obj.GetComponent< RectTransform >( ).SetSizeWithCurrentAnchors( RectTransform.Axis.Vertical, _phase_image_height );
-<<<<<<< HEAD
-		_phase_image_obj.GetComponent< RectTransform >( ).anchoredPosition = new Vector3( 0, ( Screen.height / 2 ) - _phase_image_height / 2, 0 );
-	}
-
-	public void deletePhaseImage( ) {
-		Destroy( _phase_image_obj );
-		_phase_image_move_finish = false;
-=======
 		_phase_image_obj.GetComponent< RectTransform >( ).anchoredPosition3D = new Vector3( 0, ( Screen.height / 2 ) - _phase_image_height / 2, 0 );
 	}
     
@@ -160,7 +118,6 @@ public class PhaseManager : MonoBehaviour {
 		Destroy( _phase_image_obj );
 		_phase_image_move_finish = false;
         _back_ground.GetComponent< Image >( ).enabled = false;
->>>>>>> beta_0203
 	}
 
 	/// <summary>

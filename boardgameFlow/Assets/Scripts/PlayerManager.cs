@@ -14,11 +14,6 @@ public class PlayerManager : MonoBehaviour {
 	private Player[ ] _players = new Player[ ( int )PLAYER_ORDER.MAX_PLAYER_NUM ];
     // プレイヤーのモデルをロード
 	private GameObject[ ] _player_pref = new GameObject[ ( int )PLAYER_ORDER.MAX_PLAYER_NUM ];
-<<<<<<< HEAD
-	private GameObject _firstest_player;
-	private GameObject _latest_player;
-=======
->>>>>>> beta_0203
 	private GameObject _winner_player;
 	private GameObject _loser_player;
     
@@ -84,10 +79,6 @@ public class PlayerManager : MonoBehaviour {
 
             // プレイヤーの最大数を超えたらNoneに戻す
             if ( num >= ( int )PLAYER_ORDER.MAX_PLAYER_NUM ) {
-<<<<<<< HEAD
-                Debug.Log("aaaaaaaa");
-=======
->>>>>>> beta_0203
                 num = -1;
             }
 
@@ -108,11 +99,7 @@ public class PlayerManager : MonoBehaviour {
                 _players[ ( int )_player_order ].startMove( );
                 if ( !_move_flag ) {
                     if ( _current_flag ) {
-<<<<<<< HEAD
-                        _time = 0.5f;
-=======
                         _time = 0.8f;
->>>>>>> beta_0203
                     } else { 
                         _time = 0.3f;
                     }
@@ -218,11 +205,7 @@ public class PlayerManager : MonoBehaviour {
 			float winner = Mathf.Max( attack[ ( int )PLAYER_ORDER.PLAYER_ONE ], attack[ ( int )PLAYER_ORDER.PLAYER_TWO ] );
 
             Debug.Log( "P1:" + attack[ ( int )PLAYER_ORDER.PLAYER_ONE ] );
-<<<<<<< HEAD
-            Debug.Log( "P1:" + attack[ ( int )PLAYER_ORDER.PLAYER_TWO ] );
-=======
             Debug.Log( "P2:" + attack[ ( int )PLAYER_ORDER.PLAYER_TWO ] );
->>>>>>> beta_0203
             Debug.Log( "winner:" + winner );
 
 			if ( winner == attack[ ( int )PLAYER_ORDER.PLAYER_ONE ] ) {
@@ -401,15 +384,12 @@ public class PlayerManager : MonoBehaviour {
         _players[ ( int )_player_order ].setEventFinish( flag );
     }
 
-<<<<<<< HEAD
-=======
     public void setEventAllFinish( bool flag ) {
         for ( int i = 0; i < _players.Length; i++ ) {
             _players[ i ].setEventFinish( flag );
         }
     }
 
->>>>>>> beta_0203
     public void setEventStart( bool flag ) {
         _players[ ( int )_player_order ].setEventStart( flag );
 	}
@@ -520,14 +500,6 @@ public class PlayerManager : MonoBehaviour {
                     _limit_value = 0;
 				    return getPlayerCount( ( int )_player_order, length );
 			    }
-<<<<<<< HEAD
-		    } else {
-                if( _current_flag ){
-                    return getPlayerCount( ( int )_player_order, length ) - _limit_value;
-                } else {
-			        return getPlayerCount( ( int )_player_order, length ) - 1;
-                }
-=======
 			} else {
 				if ( getPlayerCount( ( int )_player_order, length ) > 0 ) {
 					if ( _current_flag ) {
@@ -539,7 +511,6 @@ public class PlayerManager : MonoBehaviour {
 					_limit_value = 0;
 					return 0;
 				}
->>>>>>> beta_0203
 		    }
         }
 
@@ -574,10 +545,6 @@ public class PlayerManager : MonoBehaviour {
     }
     public void addDrawCard( int num ) {
         _players[ ( int )_player_order ].addDrawCard( num );
-<<<<<<< HEAD
-        Debug.Log( "中継cardID:" + num );
-=======
->>>>>>> beta_0203
     }
 
     public List< int > getDrawCard( ) {
@@ -595,11 +562,7 @@ public class PlayerManager : MonoBehaviour {
     }
 
     public bool isChangeCount( PLAYER_ORDER player_num ) {
-<<<<<<< HEAD
-        if ( _players[ ( int )_player_order ].isChangeCount( ) ) {
-=======
         if ( _players[ ( int )player_num ].isChangeCount( ) ) {
->>>>>>> beta_0203
             return true;
         }
         return false;
@@ -647,11 +610,7 @@ public class PlayerManager : MonoBehaviour {
     }
 
     public void setPlayerPosition( int id, Vector3 position ) {
-<<<<<<< HEAD
-        _players[ ( int )_player_order ].getData( ).obj.transform.localPosition = _players[ ( int )_player_order ].adjustPos( ref position );
-=======
         _players[ id ].getData( ).obj.transform.localPosition = _players[ id ].adjustPos( ref position );
->>>>>>> beta_0203
     }
 
     public Vector3 isPlayerPosition( ) {

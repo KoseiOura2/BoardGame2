@@ -28,12 +28,9 @@ public class ClientData : NetworkBehaviour {
         _player_data.mass_adjust      = MASS_ADJUST.NO_ADJUST;
         _player_data.ok_event         = false;
         _player_data.connect_ready    = false;
-<<<<<<< HEAD
-=======
         _player_data.go_title         = false;
         _player_data.start_game       = false;
         _player_data.finish_game      = false;
->>>>>>> beta_0203
     }
 
 	// Update is called once per frame
@@ -172,8 +169,6 @@ public class ClientData : NetworkBehaviour {
 		_player_data.battle_ready  = ready;
     }
     
-<<<<<<< HEAD
-=======
 	[ Command ]
 	public void CmdSetSendRefreshCard( ) { 
 		for ( int i = 0; i < _player_data.used_card_list.Length; i++ ) {
@@ -194,7 +189,6 @@ public class ClientData : NetworkBehaviour {
 		}
     }
 
->>>>>>> beta_0203
     /// <summary>
     /// マス調整の結果を送る
     /// </summary>
@@ -221,8 +215,6 @@ public class ClientData : NetworkBehaviour {
     public void setOkEvent( bool ok ) { 
         _player_data.ok_event = ok;
     }
-<<<<<<< HEAD
-=======
     
 	[ Command ]
     public void CmdSetSendGoTitle( bool flag ) { 
@@ -253,7 +245,6 @@ public class ClientData : NetworkBehaviour {
     public void setFinishGame( bool flag ) { 
         _player_data.finish_game = flag;
     }
->>>>>>> beta_0203
 
 	public NETWORK_PLAYER_DATA getRecvData( ) {
 		return _player_data;
