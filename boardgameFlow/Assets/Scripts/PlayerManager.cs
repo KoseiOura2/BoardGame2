@@ -8,12 +8,12 @@ public class PlayerManager : MonoBehaviour {
     
     public float FINISH_MOVE_TIME_MAGNIFICANT = 3.5f;          // 移動を終了させる時間倍率
 
+    private GraphicManager _graphic_manager;
+
     // どのプレイヤーが行動中か
     [ SerializeField ]
     private PLAYER_ORDER _player_order = PLAYER_ORDER.NO_PLAYER;
 	private Player[ ] _players = new Player[ ( int )PLAYER_ORDER.MAX_PLAYER_NUM ];
-    // プレイヤーのモデルをロード
-	private GameObject[ ] _player_pref = new GameObject[ ( int )PLAYER_ORDER.MAX_PLAYER_NUM ];
 	private GameObject _winner_player;
 	private GameObject _loser_player;
     
@@ -35,14 +35,15 @@ public class PlayerManager : MonoBehaviour {
     /// 初期化
     /// </summary>
     /// <param name="first_pos"></param>
-    public void init( ref Vector3 first_pos ) {
+    public void init( ref Vector3 first_pos, ref GraphicManager graphic_manager ) {
+        _graphic_manager = graphic_manager;
         for ( int i = 0; i < ( int )PLAYER_ORDER.MAX_PLAYER_NUM; i++ ) {
-            // プレイヤープレハブのロード
-            _player_pref[ i ] = ( GameObject )Resources.Load( "Prefabs/Player/Player" + i );
             _players[ i ] = new Player( );
             // 出力したデータを元にプレイヤーを初期化
             Transform trans = this.gameObject.transform;
-            _players[ i ].init( i, ref _player_pref[ i ], ref first_pos, ref trans );
+            GameObject obj = _graphic_manager.getPlayerObj( i );
+            _players[ i ].init( i, ref obj, ref first_pos );
+            _graphic_manager.movePlayerObj( i, _players[ i ].getData( ).obj.transform.position );
         }
     }
 
@@ -90,7 +91,7 @@ public class PlayerManager : MonoBehaviour {
     }
 
     // MovePhaseの更新
-    public void movePhaseUpdate( ref int[ ] count, GameObject target_pos ) {
+    public void movePhaseUpdate( ref int[ ] count, Vector3 target_pos ) {
         // プレイヤーの順位を設定
         dicisionTopAndLowestPlayer( ref count );
 
@@ -111,6 +112,8 @@ public class PlayerManager : MonoBehaviour {
                     forceDistination( );
                     // ターゲットに向かって移動
                     _players[ ( int )_player_order ].move( _time );
+                    _graphic_manager.movePlayerObj( ( int )_player_order,
+                                                    _players[ ( int )_player_order ].getData( ).obj.transform.position );
                 }
             } else if ( _limit_value == 0 ) {
                 _players[ ( int )_player_order ].finishMove( );
@@ -610,7 +613,7 @@ public class PlayerManager : MonoBehaviour {
     }
 
     public void setPlayerPosition( int id, Vector3 position ) {
-        _players[ id ].getData( ).obj.transform.localPosition = _players[ id ].adjustPos( ref position );
+        _players[ id ].getData( ).obj.transform.localPosition = _players[ id ].adjustPos( position );
     }
 
     public Vector3 isPlayerPosition( ) {
@@ -619,12 +622,6 @@ public class PlayerManager : MonoBehaviour {
 
     public void setCurrentFlag( bool flag ){
         _current_flag = flag;
-    }
-
-    public void destroyObj( ) {
-        for ( int i = 0; i < _players.Length; i++ ) {
-            Destroy( _players[ i ].getData( ).obj );
-        }
     }
 
     public void setDefalutStatus( ) {

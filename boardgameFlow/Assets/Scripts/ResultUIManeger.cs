@@ -70,9 +70,6 @@ public class ResultUIManeger : MonoBehaviour {
         }*/
 		//受け取ったカードIDに対応するカードを表示
 		for( var i = 0; i < use_card_id.Count; i++ ) {
-			Debug.Log( use_card_id.Count + "use_idの大きさ" );
-			Debug.Log( _card_object.Length + "プレイヤーの数" );
-			Debug.Log( _card_object[ player_id ].Length + "プレイヤーのオブジェクト数" );
 			//1P
 			if ( _card_object.Length > 0 ) {
 				_card_object[ player_id ][ i ].GetComponent< Image >( ).enabled = true;
