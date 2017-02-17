@@ -37,6 +37,8 @@ public class ApplicationManager : Manager< ApplicationManager > {
 	private HostData _host_data;
 	[ SerializeField ]
 	private ClientData _client_data;
+	[ SerializeField ]
+	private SoundManager _sound_manager;
 
 	[ SerializeField ]
 	private PLAYER_ORDER _player_num = PLAYER_ORDER.NO_PLAYER;
@@ -221,6 +223,10 @@ public class ApplicationManager : Manager< ApplicationManager > {
             if ( _back_ground_obj == null ) {
                 _back_ground_obj = GameObject.Find( "BackGround" );
             }
+			if ( _sound_manager == null ) {
+				_sound_manager = GameObject.Find( "SoundManager" ).GetComponent< SoundManager >( );
+			}
+
 		}
 		catch {
 			Debug.Log( "参照に失敗しました。" );
@@ -373,6 +379,7 @@ public class ApplicationManager : Manager< ApplicationManager > {
             _back_ground_obj.GetComponent< Image >( ).enabled = false;
             if ( _click_text_obj == null ) {
                 createClickObj( );
+				_sound_manager.playBGM( BGM_LIST.TILTE_BGM );
             }
 
             _scene_init = true;
@@ -440,6 +447,7 @@ public class ApplicationManager : Manager< ApplicationManager > {
             destroyLightOffObj( );
             _map_manager.destroyObj( );
             createFinishObj( );
+			_sound_manager.playBGM( BGM_LIST.GAME_END2_BGM );
             if ( _mode == PROGRAM_MODE.MODE_CONNECT ) {
                 if ( _client_data.getRecvData( ).finish_game ) {
                     _client_data.CmdSetSendFinishGame( false );
@@ -520,6 +528,8 @@ public class ApplicationManager : Manager< ApplicationManager > {
 			bindMapCountImage( );
 			_map_manager.changeGoalImageNum( _goal_count_image[ 0 ], _goal_count_image[ 1 ] );
 
+			//BGMの再生
+			_sound_manager.playBGM ( BGM_LIST.FIELD_BGM );
             _scene_init = true;
         }
 
@@ -680,6 +690,8 @@ public class ApplicationManager : Manager< ApplicationManager > {
         }
 
         if ( _player_manager.isDiceRoll( ) ) {
+			//選択SE
+			_sound_manager.playSE( SE_LIST.CHOICE1_SE );
 
             // ダイスオブジェ削除
             Destroy( _dice_button_obj );
@@ -803,6 +815,7 @@ public class ApplicationManager : Manager< ApplicationManager > {
         if ( _player_manager.getDrawCardAction( ) == ClientPlayerManager.DRAW_CARD_ACTION.MOVE_FOR_GET_ACTION ) {
             if ( _player_manager.isArrivedAllDrawCard( ) ) {
                 createFlushObj( );
+				_sound_manager.playSE ( SE_LIST.DRAW_SE );
             }
         }
 
@@ -880,6 +893,7 @@ public class ApplicationManager : Manager< ApplicationManager > {
         // カードが送られて来たら
         if ( _player_manager.getDrawCardAction( ) == ClientPlayerManager.DRAW_CARD_ACTION.MOVE_FOR_GET_ACTION ) {
             if ( _player_manager.isArrivedAllDrawCard( ) ) {
+				_sound_manager.playSE ( SE_LIST.DRAW_SE );
                 createFlushObj( );
             }
         }
@@ -1065,6 +1079,7 @@ public class ApplicationManager : Manager< ApplicationManager > {
 		if ( _battle_manager.isComplete( ) ) {
             createWaitImage( "WaitOpponent" );
             destroyCompleteButton( );
+			_sound_manager.playSE( SE_LIST.CHOICE1_SE );
 			if ( _mode == PROGRAM_MODE.MODE_CONNECT ) {
 				// 選択結果を送る
 				int player_status = _player_manager.getPlayerData( ).power;
@@ -1150,6 +1165,10 @@ public class ApplicationManager : Manager< ApplicationManager > {
 
 
 			if ( !_result_init && battle_result != 0 ) {
+				//BGMを一旦停止
+				_sound_manager.stopBGM( );
+				//リザルトBGMを再生
+				_sound_manager.playSE( SE_LIST.RESULT_SE );
                 destroyWaitImage( );
 				createLightOffObj( false );
 				_battle_manager.createResultImage( ( BATTLE_RESULT )battle_result );
@@ -1158,6 +1177,7 @@ public class ApplicationManager : Manager< ApplicationManager > {
 
 			// 左クリックでResultを消す
 			if ( Input.GetMouseButtonDown( 0 ) ) {
+				_sound_manager.playBGM ( BGM_LIST.FIELD_BGM );
 				_battle_manager.clearResult( );
 				_battle_manager.deleteResultImage( );
 				destroyLightOffObj( );
@@ -1221,6 +1241,10 @@ public class ApplicationManager : Manager< ApplicationManager > {
             int num = 0;
 
 			if ( !_result_init ) {
+				//BGMを一旦停止
+				_sound_manager.stopBGM( );
+				//リザルトBGMを再生
+				_sound_manager.playSE( SE_LIST.RESULT_SE );
                 destroyWaitImage( );
 				createLightOffObj( false );
 				_battle_manager.createResultImage( _debug_result );
@@ -1229,6 +1253,7 @@ public class ApplicationManager : Manager< ApplicationManager > {
 
 			// 左クリックでResultを消す
 			if ( Input.GetMouseButtonDown( 0 ) ) {
+				_sound_manager.playBGM ( BGM_LIST.FIELD_BGM );
 				_battle_manager.clearResult( );
 				_battle_manager.deleteResultImage( );
 				destroyLightOffObj( );
@@ -1276,6 +1301,7 @@ public class ApplicationManager : Manager< ApplicationManager > {
             if ( flag ) {
                 if ( _debug_result != BATTLE_RESULT.LOSE ) {
                     _map_manager.dicisionMoveTarget( num );
+					_sound_manager.playSE( SE_LIST.MASS_SE );
                 }
 			    _phase_manager.setPhase( MAIN_GAME_PHASE.GAME_PHASE_EVENT );
                 _map_manager.allMassReject( );

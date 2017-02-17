@@ -245,7 +245,6 @@ namespace Common {
 		NONE_BGM,
 		FIELD_BGM,
 		TILTE_BGM,
-		GAME_END1_BGM,
 		GAME_END2_BGM,
 	};
 
@@ -261,6 +260,7 @@ namespace Common {
 		MASS_SE,
 		PHASE_SE,
 		TRESURE_SE,
+		RESULT_SE,
 	};
 
 	public enum VOICE_LIST {

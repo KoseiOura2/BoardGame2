@@ -79,7 +79,6 @@ public class SoundManager : Manager< SoundManager > {
         //BGMファイル設定
         _bgm[ ( int )BGM_LIST.FIELD_BGM ] = ( AudioClip )Resources.Load( "Audio/BGM/field" );
         _bgm[ ( int )BGM_LIST.TILTE_BGM ] = ( AudioClip )Resources.Load( "Audio/BGM/title" );
-        _bgm[ ( int )BGM_LIST.GAME_END1_BGM ] = ( AudioClip )Resources.Load( "Audio/BGM/gameend1" );
         _bgm[ ( int )BGM_LIST.GAME_END2_BGM ] = ( AudioClip )Resources.Load( "Audio/BGM/gameend2" );
 
         // === SEファイル設定 ===
@@ -99,6 +98,7 @@ public class SoundManager : Manager< SoundManager > {
         _se[ ( int )SE_LIST.MASS_SE ] = ( AudioClip )Resources.Load( "Audio/SE/mass" );
         _se[ ( int )SE_LIST.PHASE_SE ] = ( AudioClip )Resources.Load( "Audio/SE/phase" );
         _se[ ( int )SE_LIST.TRESURE_SE ] = ( AudioClip )Resources.Load( "Audio/SE/tresure" );
+		_se[ ( int )SE_LIST.RESULT_SE ] = ( AudioClip )Resources.Load( "Audio/SE/result" );
 
         // === VOICEファイル設定 ===
     }
