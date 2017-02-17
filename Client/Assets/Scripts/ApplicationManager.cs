@@ -13,7 +13,7 @@ public class ApplicationManager : Manager< ApplicationManager > {
 
 	private const int MAX_DRAW_NUM = 4;
 	private const int MAX_SEND_CARD_NUM = 4;
-	private const float OK_START_GAME_TIME = 5.0f;
+	private const float OK_START_GAME_TIME = 1.0f;
 
 	[ SerializeField ]
 	private SCENE _scene = SCENE.SCENE_CONNECT;
