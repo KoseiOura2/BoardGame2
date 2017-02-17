@@ -29,6 +29,8 @@ public class ClientData : NetworkBehaviour {
         _player_data.ok_event         = false;
         _player_data.connect_ready    = false;
         _player_data.go_title         = false;
+        _player_data.start_game       = false;
+        _player_data.finish_game      = false;
     }
 
 	// Use this for initialization
@@ -172,6 +174,26 @@ public class ClientData : NetworkBehaviour {
 		_player_data.battle_ready  = ready;
     }
     
+    [ Command ]
+	public void CmdSetSendRefreshCard( ) { 
+		for ( int i = 0; i < _player_data.used_card_list.Length; i++ ) {
+			_player_data.used_card_list[ i ] = 0;
+		}
+		for ( int i = 0; i < _player_data.turned_card_list.Length; i++ ) {
+			_player_data.turned_card_list[ i ] = 0;
+		}
+    }
+    
+	[ Client ]
+	public void setRefreshCard( ) { 
+		for ( int i = 0; i < _player_data.used_card_list.Length; i++ ) {
+			_player_data.used_card_list[ i ] = 0;
+		}
+		for ( int i = 0; i < _player_data.turned_card_list.Length; i++ ) {
+			_player_data.turned_card_list[ i ] = 0;
+		}
+    }
+
     /// <summary>
     /// マス調整の結果を送る
     /// </summary>
@@ -209,6 +231,16 @@ public class ClientData : NetworkBehaviour {
         _player_data.go_title = flag;
     }
     
+	[ Command ]
+    public void CmdSetSendStartGame( bool flag ) { 
+        _player_data.start_game = flag;
+    }
+    
+	[ Client ]
+    public void setStartGame( bool flag ) { 
+        _player_data.start_game = flag;
+    }
+
 	[ Command ]
     public void CmdSetSendFinishGame( bool flag ) { 
         _player_data.finish_game = flag;

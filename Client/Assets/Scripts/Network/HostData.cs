@@ -91,17 +91,46 @@ public class HostData : NetworkBehaviour {
 
     // Use this for initialization
     public void init ( ) {
+        if ( _network_send_status.Count == 0 ) {
+            for ( int i = 0; i < ( int )PLAYER_ORDER.MAX_PLAYER_NUM; i++ ) {
+                _network_send_status.Add( false );
+                _network_player_power.Add( 0 );
+                _network_hand_num.Add( 0 );
+                _network_battle_result.Add( 0 );
+                _network_send_card.Add( false );
+                _network_mass_count.Add( 0 );
+                _network_event_type.Add( 0 );
+            }
+        }
 
         // 配列の確保
-        _field_data.card_list_one = new int[ DISTRIBUT_CARD_NUM ];
-        _field_data.card_list_two = new int[ DISTRIBUT_CARD_NUM ];
-        _field_data.send_status   = new bool[ _network_send_status.Count ];
-        _field_data.player_power  = new int[ _network_player_power.Count ];
-        _field_data.hand_num      = new int[ _network_hand_num.Count ];
-        _field_data.result_player = new BATTLE_RESULT[ _network_battle_result.Count ];
-		_field_data.send_card     = new bool[ _network_send_card.Count ];
-        _field_data.mass_count    = new int[ _network_mass_count.Count ];
-        _field_data.event_type    = new EVENT_TYPE[ _network_event_type.Count ];
+        if ( _field_data.card_list_one == null ) {
+            _field_data.card_list_one = new int[ DISTRIBUT_CARD_NUM ];
+        }
+        if ( _field_data.card_list_two == null ) {
+            _field_data.card_list_two = new int[ DISTRIBUT_CARD_NUM ];
+        }
+        if ( _field_data.send_status == null ) {
+            _field_data.send_status = new bool[ _network_send_status.Count ];
+        }
+        if ( _field_data.player_power == null ) {
+            _field_data.player_power = new int[ _network_player_power.Count ];
+        }
+        if ( _field_data.hand_num == null ) {
+            _field_data.hand_num = new int[ _network_hand_num.Count ];
+        }
+        if ( _field_data.result_player == null ) {
+            _field_data.result_player = new BATTLE_RESULT[ _network_battle_result.Count ];
+        }
+        if ( _field_data.send_card == null ) {
+		    _field_data.send_card = new bool[ _network_send_card.Count ];
+        }
+        if ( _field_data.mass_count == null ) {
+            _field_data.mass_count = new int[ _network_mass_count.Count ];
+        }
+        if ( _field_data.event_type == null ) {
+            _field_data.event_type = new EVENT_TYPE[ _network_event_type.Count ];
+        }
 
         for ( int i = 0; i < ( int )PLAYER_ORDER.MAX_PLAYER_NUM; i++ ) {
             _field_data.send_status[ i ]   = _network_send_status[ i ];
