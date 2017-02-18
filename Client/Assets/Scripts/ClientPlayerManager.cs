@@ -97,6 +97,7 @@ public class ClientPlayerManager : MonoBehaviour {
     private List< bool > _rotate_list  = new List< bool >( );
     private int _power = 0;
 	private int _dice_value = 0;
+    private int _card_num = 0;
     private int _expantion_num = -1;
     private float _card_width = 3.1f;
     private float _draw_card_pos_x_adjust = 0.5f;
@@ -355,7 +356,6 @@ public class ClientPlayerManager : MonoBehaviour {
                 // リフレッシュ
                 _draw_card_list.Clear( );
             }
-
             _arrived_list.Clear( );
 
             return true;
@@ -363,7 +363,31 @@ public class ClientPlayerManager : MonoBehaviour {
 
         return false;
     }
-    
+    public bool isArrivedDrawCard( ) {
+        // 全てのカードが到着したら
+        if ( _arrived_list.Count == _draw_card_list.Count ) {
+            if ( _draw_card_action == DRAW_CARD_ACTION.MOVE_FOR_GET_ACTION ) {
+                //現在のカード値がドロー数値より上なら次のアクションへ
+                if ( _card_num < _draw_card_list.Count ) {
+                    //現在のカード値のカードが回転していなければ回転を行う
+                    if( !_draw_card_list[ _card_num ].rotate ) {
+                        rotateStartDrawCard( _card_num );
+                    }
+                } else {
+                    //リフレッシュ
+                    _arrived_list.Clear( );
+                    //現在のカード値をリセット
+                    _card_num = 0;
+                    //次のアクションを設定
+                    _draw_card_action = DRAW_CARD_ACTION.ROTATE_ACTION;
+                    return true;
+                }
+            }
+        }
+
+        return false;
+    }
+
     public void rotateStartDrawCard( int id ) {
         bool rotate = true;
 
@@ -386,7 +410,8 @@ public class ClientPlayerManager : MonoBehaviour {
                                                             _draw_card_list[ id ].pos, _draw_card_list[ id ].angle, 
                                                             _draw_card_list[ id ].move, rotate );
                 _rotate_list.Add( true );
-
+                //次のカードへ
+                _card_num++;
                 return;
             }
 

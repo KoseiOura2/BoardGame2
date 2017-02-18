@@ -19,6 +19,7 @@ public class ParticleManager : MonoBehaviour {
 	private GameObject _particle;
     private GameObject _fireworks_1;
     private GameObject _fireworks_2;
+    private GameObject _lightning;
 	[ SerializeField ]
 	private float _particle_time = 0;
 
@@ -49,6 +50,7 @@ public class ParticleManager : MonoBehaviour {
     public void loadParticle( ) {
         _fireworks_1 = Resources.Load< GameObject >( "Prefabs/Effect_02" );
         _fireworks_2 = Resources.Load< GameObject >( "Prefabs/Effect_07" );
+        _lightning   = Resources.Load< GameObject >( "Prefabs/Lightning_Effect" );
     }
 
     public void setParticle( GameObject particle ) {

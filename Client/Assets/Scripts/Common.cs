@@ -139,6 +139,48 @@ namespace Common {
 		NO_FIELD,
 	};
 
+    public enum BGM_TYPE {
+		BGM_NONE,
+		BGM_FIELD,
+		BGM_TILTE,
+		BGM_GAME_END2,
+	};
+
+	public enum SE_TYPE {
+		SE_NONE,
+		SE_BUFF,
+		SE_BUTTLE,
+		SE_CHOICE1,
+		SE_CHOICE2,
+		SE_DRAW,
+		SE_FISH1,
+		SE_FISH2,
+		SE_MASS,
+		SE_PHASE,
+		SE_TRESURE,
+		SE_RESULT,
+	};
+
+	public enum VOICE_TYPE {
+		VOICE_NONE,
+	};
+
+	public enum PARTICLE_TYPE {
+		PARTICLE_NONE,
+		PARTICLE_OCEANCURRENT,
+		PARTICLE_SPIRAL,
+		PARTICLE_FIREWORKS,
+		PARTICLE_LIGHTNING,
+	};
+
+    public enum RARITY_TYPE {
+        RARITY_NONE,
+        RARITY_NORMAL,
+        RARITY_RARE,
+        RARITY_SUPER_RARE,
+        RARITY_DOUBLE_SUPER_RARE,
+    };
+
     /// <summary>
     /// 通信で送受信するフィールド側のデータ
     /// </summary>
@@ -240,39 +282,5 @@ namespace Common {
             this.rarity = rarity;
         }
     }
-
-	public enum BGM_LIST {
-		NONE_BGM,
-		FIELD_BGM,
-		TILTE_BGM,
-		GAME_END2_BGM,
-	};
-
-	public enum SE_LIST {
-		NONE_SE,
-		BUFF_SE,
-		BUTTLE_SE,
-		CHOICE1_SE,
-		CHOICE2_SE,
-		DRAW_SE,
-		FISH1_SE,
-		FISH2_SE,
-		MASS_SE,
-		PHASE_SE,
-		TRESURE_SE,
-		RESULT_SE,
-	};
-
-	public enum VOICE_LIST {
-		NONE_VOICE,
-	};
-
-	public enum PARTICLE_TYPE {
-		PARTICLE_NONE,
-		PARTICLE_OCEANCURRENT,
-		PARTICLE_SPIRAL,
-		PARTICLE_FIREWORKS,
-		PARTICLE_LIGHTNING
-	}
 
 }
