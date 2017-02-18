@@ -95,6 +95,8 @@ public class ParticleManager : MonoBehaviour {
                 }
                 _particle_init_time++;
                 break;
+			case PARTICLE_TYPE.PARTICLE_LIGHTNING:
+				break;
         }
     }
 
