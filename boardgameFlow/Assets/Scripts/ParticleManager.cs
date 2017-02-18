@@ -90,7 +90,6 @@ public class ParticleManager : MonoBehaviour {
                     int rand = Random.Range(0, 2);
                     GameObject road_particle = ( rand == 1 ) ? _fireworks_1 : _fireworks_2;
                     _particle_obj.Add((GameObject)Instantiate(road_particle, new Vector3( Random.Range( 90, 110 ), Random.Range( 100, 105 ), 165f ),Quaternion.identity));
-                    _particle_obj[_particle_init_count].transform.parent = GameObject.Find( "Canvas" ).transform;
                     _particle_init_count++;
                 }
                 _particle_init_time++;

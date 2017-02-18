@@ -1661,7 +1661,6 @@ public class ApplicationManager : Manager< ApplicationManager > {
 					_player_manager.resetPlayerGoal( );
 				}
 			}
-			_particle_manager.deleteParticle( );
 		}
 		_particle_manager.enableParticle( );
 	}

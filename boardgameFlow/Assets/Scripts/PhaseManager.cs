@@ -128,10 +128,11 @@ public class PhaseManager : MonoBehaviour {
 		}
 
 		_phase_image_height = Screen.height / 6;
+		_phase_image_width	= Screen.height / 3;
 		_phase_image_obj.GetComponent< RectTransform >( ).SetSizeWithCurrentAnchors( RectTransform.Axis.Vertical, _phase_image_height );
-		_phase_image_obj.GetComponent< RectTransform >( ).anchoredPosition3D = new Vector3( 250, ( Screen.height / 2 ) - _phase_image_height * 2, 0 );
+		_phase_image_obj.GetComponent< RectTransform >( ).anchoredPosition3D = new Vector3( _phase_image_width, ( Screen.height / 2 ) - _phase_image_height * 2, 0 );
 		_win_player_obj.GetComponent< RectTransform >( ).SetSizeWithCurrentAnchors( RectTransform.Axis.Vertical, _phase_image_height );
-		_win_player_obj.GetComponent< RectTransform >( ).anchoredPosition3D = new Vector3( -250, ( Screen.height / 2 ) - _phase_image_height * 2, 0 );
+		_win_player_obj.GetComponent< RectTransform >( ).anchoredPosition3D = new Vector3( -_phase_image_width, ( Screen.height / 2 ) - _phase_image_height * 2, 0 );
 
 		_back_ground.GetComponent< Image >( ).enabled = true;
     }
