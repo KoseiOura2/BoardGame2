@@ -5,153 +5,165 @@ using System.Collections.Generic;
 using Common;
 
 public class ParticleManager : MonoBehaviour {
-
+    
     // パーティクル関係
-    private const float OCEAN_CURRENT_STOP_TIME    = 60.0f;
-    private const float OCEAN_CURRENT_DESTROY_TIME = 90.0f;
-    private const float SPIRAL_TIME_ONE            = 15.0f;
-    private const float SPIRAL_TIME_TWO            = 60.0f;
-    private const float SPIRAL_TIME_THREE          = 62.0f;
-    private const float SPIRAL_TIME_FOUR           = 200.0f;
-    private const float GOAL_PARTICLE_WAIT_TIME    = 30.0f;
+    private const float OCEAN_CURRENT_STOP_TIME    = 1.0f;
+    private const float OCEAN_CURRENT_DESTROY_TIME = 1.5f;
+    private const float SPIRAL_TIME_ONE            = 0.25f;
+    private const float SPIRAL_TIME_TWO            = 1.0f;
+    private const float SPIRAL_TIME_THREE          = 1.2f;
+    private const float SPIRAL_TIME_FOUR           = 3.0f;
+    private const float GOAL_PARTICLE_WAIT_TIME    = 0.5f;
 
-    [ SerializeField ]
-	private GameObject _particle;
-    private GameObject _fireworks_1;
-    private GameObject _fireworks_2;
-    private GameObject _lightning;
-	[ SerializeField ]
-	private float _particle_time = 0;
+    private float[ ][ ] _particle_time_list = new float[ ( int )PARTICLE_TYPE.MAX_PARTICLE_NUM ][ ];
 
-    private int _particle_phase = 0;
+    /// <summary>
+    /// パーティクルシステムを操作するクラス  
+    /// </summary>
+    public class ParticleOperate {
+        private GameObject _particle;
+        private PARTICLE_TYPE _particle_type;
+        private int _particle_phase  = 0;
+        private List< float > _change_phase_time_list = new List< float >( );
+	    private float _particle_time = 0.0f;
+        private bool _particle_end   = false;
 
-    private int _goal_time = 0;
-    private int _particle_init_time = 0;
-    private int _particle_init_count = 0;
-    private List<GameObject> _particle_obj = new List<GameObject> { };
+        public ParticleOperate( PARTICLE_TYPE type, ref float[ ] time_list, ref GameObject pref ) {
+            // タイプを設定
+            _particle_type = type;
 
-    private PARTICLE_TYPE _particle_type;
-    private bool _particle_end = false;
+            // フェイズ切り替え時間を登録
+            for ( int i = 0; i < time_list.Length; i++ ) {
+                _change_phase_time_list.Add( time_list[ i ] );
+            }
 
-	// Use this for initialization
-	void Start () {
-	
-	}
+            // パーティクルを生成
+            _particle = ( GameObject )Instantiate( pref );
+            _particle.transform.position = pref.transform.position;
+        }
 
+        /// <summary>
+        /// パーティクルシステムの更新
+        /// </summary>
+        public void particleUpdate( ) {
+            // パーティクルの更新
+            _particle_time += Time.deltaTime;
+            
+            switch( _particle_type ) {
+                case PARTICLE_TYPE.PARTICLE_OCEANCURRENT:
+				    if( _particle_time > _change_phase_time_list[ 0 ] ) {
+                        //　パーティクルの停止
+					    _particle.GetComponent< ParticleEmitter >( ).emit = false;
+				    }
+                    break;
+            }
+
+            // パーティクル終了処理
+            if ( _particle_time > _change_phase_time_list[ _change_phase_time_list.Count - 1 ] ) {
+                // パーティクルの削除
+				_particle_time = 0.0f;
+                Destroy( _particle );
+				_particle = null;
+				_particle_phase = 0;
+                _particle_end = true;
+                
+			}
+
+        }
+
+        /// <summary>
+        /// パーティクル再生時間によってフェイズを切り替える
+        /// </summary>
+        public void particlePhaseUpdate( ) {
+            if ( _particle_phase + 1 < _change_phase_time_list.Count ) { 
+                // 更新時間が0秒の時
+		        if ( _particle_time == 0.0f ) {
+			        _particle_phase = 0;
+		        }
+                // 指定の区間に入ったらフェイズを更新
+                else if ( _change_phase_time_list[ _particle_phase ] < _particle_time &&
+                            _change_phase_time_list[ _particle_phase + 1 ] > _particle_time ) {
+			        _particle_phase += 1;
+		        }
+            }
+	    }
+        
+        public bool isParticleEnd( ) {
+            return _particle_end;
+        }
+
+    };
+
+    private GameObject[ ] _particle_prefs = new GameObject[ ( int )PARTICLE_TYPE.MAX_PARTICLE_NUM ];
+    private List< int > _delete_particle_num = new List< int >( );
+    private List< ParticleOperate > _particle_operates = new List< ParticleOperate >( );
+    
     public void init( ) {
         loadParticle( );
+        timeArrayInsure( );
     }
 	
-	// Update is called once per frame
-	void Update () {
-	
-	}
-
-    public void loadParticle( ) {
-        _fireworks_1 = Resources.Load< GameObject >( "Prefabs/Effect_02" );
-        _fireworks_2 = Resources.Load< GameObject >( "Prefabs/Effect_07" );
-        _lightning   = Resources.Load< GameObject >( "Prefabs/Lightning_Effect" );
+    private void loadParticle( ) {
+        for ( int i = 1; i < ( int )PARTICLE_TYPE.MAX_PARTICLE_NUM; i++ ) {
+            _particle_prefs[ i ] = Resources.Load< GameObject >( "Prefabs/Particle" + i );
+        }
     }
 
-    public void setParticle( GameObject particle ) {
-        _particle = particle;
+    /// <summary>
+    /// 各パーティクルの時間を確保
+    /// </summary>
+    private void timeArrayInsure( ) {
+        // 海流
+        _particle_time_list[ ( int )PARTICLE_TYPE.PARTICLE_OCEANCURRENT ] = new float[ ]{
+            OCEAN_CURRENT_STOP_TIME,
+            OCEAN_CURRENT_DESTROY_TIME
+        };
+        // 渦潮
+        _particle_time_list[ ( int )PARTICLE_TYPE.PARTICLE_SPIRAL ] = new float[ ]{
+            SPIRAL_TIME_ONE,
+            SPIRAL_TIME_TWO,
+            SPIRAL_TIME_THREE,
+            SPIRAL_TIME_FOUR
+        };
+        // 渦潮
+        _particle_time_list[ ( int )PARTICLE_TYPE.PARTICLE_FIREWORKS ] = new float[ ]{
+            GOAL_PARTICLE_WAIT_TIME
+        };
+    }
+    
+    /// <summary>
+    /// パーティクルの生成
+    /// </summary>
+    /// <param name="type"></param>
+    public void createParticle( PARTICLE_TYPE type ) {
+        ParticleOperate particle = new ParticleOperate( type, 
+                                                        ref _particle_time_list[ ( int )type ],
+                                                        ref _particle_prefs[ ( int )type ] );
+
+        _particle_operates.Add( particle );
     }
 
-    public GameObject getParticle() {
-        return _particle;
-    }
-
+    /// <summary>
+    /// パーティクルの更新
+    /// </summary>
     public void particleUpdate( ) {
-        // パーティクルの更新
-        switch( _particle_type ) {
-            case PARTICLE_TYPE.PARTICLE_OCEANCURRENT:
-				_particle_time++;
-				if( _particle_time > OCEAN_CURRENT_STOP_TIME ) {
-                    //　パーティクルの停止
-					_particle.GetComponent< ParticleEmitter >( ).emit = false;
-				}
-				if( _particle_time > OCEAN_CURRENT_DESTROY_TIME ) {
-                    // パーティクルの削除
-					_particle_time = 0.0f;
-					_particle = null;
-					_particle_phase = 0;
-				}
-                break;
-            case PARTICLE_TYPE.PARTICLE_SPIRAL:
-				_particle_time++;
-                if ( _particle_phase == 3 ) {
-					_particle_end = true;
-					_particle_time = 0.0f;
-					_particle = null;
-                    _particle_phase = 0;
-                }
-                break;
-            case PARTICLE_TYPE.PARTICLE_FIREWORKS:
-                if(_particle_init_time > GOAL_PARTICLE_WAIT_TIME) {
-                    _particle_init_time = 0;
-                    int rand = Random.Range(0, 2);
-                    GameObject road_particle = ( rand == 1 ) ? _fireworks_1 : _fireworks_2;
-                    _particle_obj.Add((GameObject)Instantiate(road_particle, new Vector3( Random.Range( 90, 110 ), Random.Range( 100, 105 ), 165f ),Quaternion.identity));
-                    _particle_obj[_particle_init_count].transform.parent = GameObject.Find( "Canvas" ).transform;
-                    _particle_init_count++;
-                }
-                _particle_init_time++;
-                break;
-			case PARTICLE_TYPE.PARTICLE_LIGHTNING:
-				break;
+        // 各パーティクルの更新
+        for ( int i = 0; i < _particle_operates.Count; i++ ) {
+            _particle_operates[ i ].particlePhaseUpdate( );
+            _particle_operates[ i ].particleUpdate( );
+
+            if ( _particle_operates[ i ].isParticleEnd( ) ) {
+                _delete_particle_num.Add( i );
+            }
         }
-    }
 
-    public void setParticleType( PARTICLE_TYPE particle_type ) {
-        _particle_type = particle_type;
-    }
-
-	public void particlePhaseUpdate( ) {
-		if( _particle_time == 0 ) {
-			_particle_phase = 0;
-		} else if ( SPIRAL_TIME_ONE < _particle_time && _particle_time < SPIRAL_TIME_TWO ) {
-			_particle_phase = 1;
-		} else if (  SPIRAL_TIME_TWO < _particle_time && _particle_time< SPIRAL_TIME_THREE ) {
-			_particle_phase = 2;
-		} else if ( _particle_time > SPIRAL_TIME_FOUR ) {
-			_particle_phase = 3;
-		} else {
-            _particle_phase = 4;
+        // パーティクルの削除
+        if ( _delete_particle_num.Count > 0 ) {
+            for ( int i = 0; i < _delete_particle_num.Count; i++ ) {
+                _particle_operates.RemoveAt( _delete_particle_num[ i ] );
+            }
+            _delete_particle_num.Clear( );
         }
-	}
-
-    public int isParticlePhase( ) {
-        return _particle_phase;
-    }
-
-    public bool isParticleEnd( ) {
-        return _particle_end;
-    }
-
-    public void resetParticleEnd( ) {
-        _particle_end  = false;
-    }
-
-    public void enableParticle( ) {
-        for(int i = 0; i < _particle_obj.Count; i++) {
-            if ( !_particle_obj[ i ].GetComponentInChildren<ParticleSystem>().IsAlive() )
-                    _particle_obj[ i ].SetActive( false );
-        }
-    }
-
-    public void deleteParticle( ) {
-        for(int i = 0; i < _particle_obj.Count; i++) {
-            Destroy(_particle_obj[ i ]);
-        }
-		_particle_obj.Clear( );
-    }
-
-    public void refreshParticle( ){
-        _particle = null;
-        _particle_end = false;
-        _particle_time = 0;
-        _particle_phase = 0;
-        _particle_type = PARTICLE_TYPE.PARTICLE_NONE;
     }
 }
 

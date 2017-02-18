@@ -5,18 +5,18 @@ using System;
 
 // 音量クラス
 [ Serializable ]
-public class SoundVolume{
+public class SoundVolume {
 	public float bgm = 1.0f;
 	public float voice = 1.0f;
 	public float se = 1.0f;
 	public bool mute = false;
-	 
+	
 	public void init( ) {
 		bgm = 1.0f;
 		voice = 1.0f;
 		se = 1.0f;
 		mute = false;
-	}
+    }
 }
 
 public class SoundManager : Manager< SoundManager > {
@@ -77,6 +77,14 @@ public class SoundManager : Manager< SoundManager > {
         _bgm = new AudioClip[ bgm_file.Length ];
         
         //BGMファイル設定
+        for(int i = 1; i < bgm_file.Length; i++ ) {
+            //こんな感じにする予定 BGMはBGM_01などにファイル名を変更します
+            if( i <= 9 ) {
+                //_bgm[ i ] = ( AudioClip )Resources.Load( "Audio/BGM/BGM_0" + i );
+            } else {
+                //_bgm[ i ] = ( AudioClip )Resources.Load( "Audio/BGM/BGM_" + i );
+            }
+        }
         _bgm[ ( int )BGM_TYPE.BGM_FIELD ] = ( AudioClip )Resources.Load( "Audio/BGM/field" );
         _bgm[ ( int )BGM_TYPE.BGM_TILTE ] = ( AudioClip )Resources.Load( "Audio/BGM/title" );
         _bgm[ ( int )BGM_TYPE.BGM_GAME_END2 ] = ( AudioClip )Resources.Load( "Audio/BGM/gameend2" );

@@ -171,6 +171,7 @@ namespace Common {
 		PARTICLE_SPIRAL,
 		PARTICLE_FIREWORKS,
 		PARTICLE_LIGHTNING,
+        MAX_PARTICLE_NUM,
 	};
 
     public enum RARITY_TYPE {

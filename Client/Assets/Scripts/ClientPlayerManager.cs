@@ -410,6 +410,19 @@ public class ClientPlayerManager : MonoBehaviour {
                                                             _draw_card_list[ id ].pos, _draw_card_list[ id ].angle, 
                                                             _draw_card_list[ id ].move, rotate );
                 _rotate_list.Add( true );
+                //レアリティに応じてパーティクルを設定
+                switch(_draw_card_list[ id ].card_data.rarity) {
+                    case (int)RARITY_TYPE.RARITY_RARE:
+                        Debug.Log("レア");
+                        
+                        break;
+                    case (int)RARITY_TYPE.RARITY_SUPER_RARE:
+                        Debug.Log("スーパーレア");
+                        break;
+                    case (int)RARITY_TYPE.RARITY_DOUBLE_SUPER_RARE:
+                        Debug.Log("ダブルスーパーレア");
+                        break;
+                }
                 //次のカードへ
                 _card_num++;
                 return;
