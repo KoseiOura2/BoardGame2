@@ -629,4 +629,24 @@ public class PlayerManager : MonoBehaviour {
             _players[ i ].setDefalutStatus( );
         }
     }
+
+	public void setPlayerGoal( int id , bool flag ) {
+		_players[ id ].setPlayerGoal( flag );
+	}
+
+	public void resetPlayerGoal( ) {
+		for( int i = 0; i < _players.Length; i++ ) {
+			_players[ i ].setPlayerGoal( false ) ;
+		}
+	}
+
+	public int isPlayerGoal( ) {
+		if ( _players [ 0 ].getData( ).goalFlag ) {
+			return 0;
+		} else if ( _players[ 1 ].getData( ).goalFlag ) {
+			return 1;
+		} else {
+			return -1;
+		}
+	}
 }

@@ -12,7 +12,10 @@ public class PhaseManager : MonoBehaviour {
     private Sprite _dice_phase_image;
     private Sprite _goal_image;
     private Sprite _start_image;
+	private Sprite _player1_image;
+	private Sprite _player2_image;
     private GameObject _phase_image_obj;
+	private GameObject _win_player_obj;
     private GameObject _back_ground;
 	private float _phase_image_move_speed = 10.0f;
 	private float _phase_image_width      = 0.0f;
@@ -26,6 +29,8 @@ public class PhaseManager : MonoBehaviour {
         _dice_phase_image = Resources.Load< Sprite >( "Graphics/UI/ui_phase_dice" );
         _goal_image = Resources.Load< Sprite >( "Graphics/UI/ui_goal" );
         _start_image = Resources.Load< Sprite >( "Graphics/UI/ui_gamestart" );
+		_player1_image = Resources.Load< Sprite >( "Graphics/UI/ui_winner_1P" );
+		_player2_image = Resources.Load< Sprite >( "Graphics/UI/ui_winner_2P" );
 
         _back_ground = GameObject.Find( "blackBackGround" );
 	}
@@ -107,11 +112,28 @@ public class PhaseManager : MonoBehaviour {
 		_phase_image_obj.GetComponent< RectTransform >( ).anchoredPosition3D = new Vector3( 0, ( Screen.height / 2 ) - _phase_image_height / 2, 0 );
 	}
     
-    public void setGoalImagePos( ) {
+	public void setGoalImagePos( int win_player ) {
+		// オブジェクトの生成
+		if( _win_player_obj == null ) {
+			_win_player_obj = new GameObject ( "PlayerImage" );
+			_win_player_obj.transform.parent = GameObject.Find ( "Canvas" ).transform;
+
+			// 大きさを単位化
+			_win_player_obj.AddComponent< RectTransform >( ).localScale = new Vector3( 3, 1, 1 );
+			if( win_player == 0 ) {
+				_win_player_obj.AddComponent< Image >( ).sprite = _player1_image;
+			} else if( win_player == 1 ) {
+				_win_player_obj.AddComponent< Image >( ).sprite = _player2_image;
+			} 
+		}
+
 		_phase_image_height = Screen.height / 6;
 		_phase_image_obj.GetComponent< RectTransform >( ).SetSizeWithCurrentAnchors( RectTransform.Axis.Vertical, _phase_image_height );
-		_phase_image_obj.GetComponent< RectTransform >( ).anchoredPosition3D = new Vector3( 0, ( Screen.height / 2 ) - _phase_image_height * 2, 0 );
-        _back_ground.GetComponent<Image>().enabled = true;
+		_phase_image_obj.GetComponent< RectTransform >( ).anchoredPosition3D = new Vector3( 250, ( Screen.height / 2 ) - _phase_image_height * 2, 0 );
+		_win_player_obj.GetComponent< RectTransform >( ).SetSizeWithCurrentAnchors( RectTransform.Axis.Vertical, _phase_image_height );
+		_win_player_obj.GetComponent< RectTransform >( ).anchoredPosition3D = new Vector3( -250, ( Screen.height / 2 ) - _phase_image_height * 2, 0 );
+
+		_back_ground.GetComponent< Image >( ).enabled = true;
     }
     
 	public void deletePhaseImage( ) {

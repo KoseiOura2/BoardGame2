@@ -226,6 +226,7 @@ namespace Common {
         public EVENT_TYPE event_type;
         public bool on_move;
         public GAME_STAGE stage;
+		public bool goalFlag;
     }
 
     /// <summary>

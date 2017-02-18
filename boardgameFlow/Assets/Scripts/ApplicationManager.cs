@@ -79,6 +79,8 @@ public class ApplicationManager : Manager< ApplicationManager > {
     // デバッグ用
     [ SerializeField ]
 	private int _debug_dice_value = 0;
+	[ SerializeField ]
+	private int _debug_goal_player = 0;
     [ SerializeField ]
 	private int[ ] _debug_use_card = new int[ 6 ];
     [ SerializeField ]
@@ -618,9 +620,10 @@ public class ApplicationManager : Manager< ApplicationManager > {
         if ( _phase_manager.isFinishMovePhaseImage( ) == false ) {
 			_phase_manager.movePhaseImage( );
 		} else {
-            _phase_manager.changeMainGamePhase( MAIN_GAME_PHASE.GAME_PHASE_DICE, "DicePhase" );
+			_player_manager.setPlayerGoal( _debug_goal_player , true );
+			_phase_manager.changeMainGamePhase( MAIN_GAME_PHASE.GAME_PHASE_FINISH, "DicePhase" );
             _phase_manager.deletePhaseImage( );
-            _phase_manager.createPhaseText( MAIN_GAME_PHASE.GAME_PHASE_DICE );
+			_phase_manager.createPhaseText( MAIN_GAME_PHASE.GAME_PHASE_FINISH );
         }
 	}
     
@@ -1458,6 +1461,7 @@ public class ApplicationManager : Manager< ApplicationManager > {
                 if ( _player_manager.getPlayerResult( id ) == BATTLE_RESULT.WIN ) {
                     Debug.Log ( "プレイヤー" + ( id + 1 ) + ":Goal!!" );
                     _goal_flag = true;
+					_player_manager.setPlayerGoal( id , true );
                     _player_manager.setEventFinish( true );
                     _player_manager.setEventType( id, EVENT_TYPE.EVENT_GOAL );
                 } else if ( _player_manager.getPlayerResult( id ) == BATTLE_RESULT.LOSE ||
@@ -1618,8 +1622,8 @@ public class ApplicationManager : Manager< ApplicationManager > {
 		}
 
 		if ( _goal_time < GOAL_WAIT_TIME ) {
-            // パーティするを作動させる
-			_phase_manager.setGoalImagePos( );
+            // パーティクルを作動させる
+			_phase_manager.setGoalImagePos( _player_manager.isPlayerGoal( ) );
 			_particle_manager.setParticleType( PARTICLE_TYPE.PARTICLE_FIREWORKS );
 			_particle_manager.particleUpdate( );
 			_goal_time++;
@@ -1654,6 +1658,7 @@ public class ApplicationManager : Manager< ApplicationManager > {
 					_goal_time         = 0;
 					_phase_manager.deletePhaseImage( );
 					_particle_manager.deleteParticle( );
+					_player_manager.resetPlayerGoal( );
 				}
 			}
 			_particle_manager.deleteParticle( );

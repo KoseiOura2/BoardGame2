@@ -233,6 +233,10 @@ public class Player : MonoBehaviour {
         _data.obj.transform.position = _end_position;
     }
 
+	public void setPlayerGoal( bool flag ){
+		_data.goalFlag = flag;
+	}
+
     public void deleteTargetMass( ) {
         _target_mass = Vector3.zero;
     }
@@ -268,4 +272,6 @@ public class Player : MonoBehaviour {
         }
         return false;
     }
+
+
 }
