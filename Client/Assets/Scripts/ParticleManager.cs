@@ -58,7 +58,7 @@ public class ParticleManager : MonoBehaviour {
 				    }
                     break;
             }
-
+				
             // パーティクル終了処理
             if ( _particle_time > _change_phase_time_list[ _change_phase_time_list.Count - 1 ] ) {
                 // パーティクルの削除
@@ -93,7 +93,17 @@ public class ParticleManager : MonoBehaviour {
             return _particle_end;
         }
 
-    };
+		//パーティクルタイプを取得
+		public PARTICLE_TYPE getParticleType( ) {
+			return _particle_type;
+		}
+
+		//パーティクルオブジェクトを取得
+		public GameObject getParticleObject( ) {
+			return _particle;
+		}
+
+	};
 
 	[ SerializeField ]
     private GameObject[ ] _particle_prefs = new GameObject[ ( int )PARTICLE_TYPE.MAX_PARTICLE_NUM ];
@@ -107,7 +117,7 @@ public class ParticleManager : MonoBehaviour {
 	
     private void loadParticle( ) {
         for ( int i = 1; i < ( int )PARTICLE_TYPE.MAX_PARTICLE_NUM; i++ ) {
-            _particle_prefs[ i ] = Resources.Load< GameObject >( "Prefabs/Particle" + i );
+			_particle_prefs[ i ] = Resources.Load< GameObject >( "Prefabs/Particle/Effect_0" + i );
         }
     }
 
@@ -131,6 +141,10 @@ public class ParticleManager : MonoBehaviour {
         _particle_time_list[ ( int )PARTICLE_TYPE.PARTICLE_FIREWORKS ] = new float[ ]{
             GOAL_PARTICLE_WAIT_TIME
         };
+		//点滅
+		_particle_time_list[ ( int )PARTICLE_TYPE.PARTICLE_LIGHTNING ] = new float[ ]{
+			LIGHTNING_TIME
+		};
     }
     
     /// <summary>
@@ -167,5 +181,19 @@ public class ParticleManager : MonoBehaviour {
             _delete_particle_num.Clear( );
         }
     }
+
+	/// <summary>
+	/// 指定したパーティクルの取得
+	/// </summary>
+	public GameObject[ ] getParticle( PARTICLE_TYPE type ){
+		GameObject[ ] obj = new GameObject[ _particle_operates.Count ];
+
+		for( int i = 0; i < _particle_operates.Count; i++ ) {
+			if ( _particle_operates [ i ].getParticleType ( ) == type ) {
+				obj[ i ] = _particle_operates [ i ].getParticleObject( );
+			}
+		}
+		return obj;
+	}
 }
 
