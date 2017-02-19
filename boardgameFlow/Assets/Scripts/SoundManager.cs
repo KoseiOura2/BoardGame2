@@ -5,18 +5,18 @@ using System;
 
 // 音量クラス
 [ Serializable ]
-public class SoundVolume{
+public class SoundVolume {
 	public float bgm = 1.0f;
 	public float voice = 1.0f;
 	public float se = 1.0f;
 	public bool mute = false;
-	 
+	
 	public void init( ) {
 		bgm = 1.0f;
 		voice = 1.0f;
 		se = 1.0f;
 		mute = false;
-	}
+    }
 }
 
 public class SoundManager : Manager< SoundManager > {
@@ -77,10 +77,13 @@ public class SoundManager : Manager< SoundManager > {
         _bgm = new AudioClip[ bgm_file.Length ];
         
         //BGMファイル設定
-        _bgm[ ( int )BGM_TYPE.BGM_FIELD ] = ( AudioClip )Resources.Load( "Audio/BGM/field" );
-        _bgm[ ( int )BGM_TYPE.BGM_TILTE ] = ( AudioClip )Resources.Load( "Audio/BGM/title" );
-        _bgm[ ( int )BGM_TYPE.BGM_GAME_END2 ] = ( AudioClip )Resources.Load( "Audio/BGM/gameend2" );
-
+        for(int i = 1; i < bgm_file.Length; i++ ) {
+            if( i <= 9 ) {
+                _bgm[ i ] = ( AudioClip )Resources.Load( "Audio/BGM/BGM_0" + i );
+            } else {
+                _bgm[ i ] = ( AudioClip )Resources.Load( "Audio/BGM/BGM_" + i );
+            }
+        }
         // === SEファイル設定 ===
         Array se_file = Enum.GetValues( typeof( SE_TYPE ) );
 
@@ -88,18 +91,13 @@ public class SoundManager : Manager< SoundManager > {
         _se = new AudioClip[ se_file.Length ];
 
         //SEファイル設定
-        _se[ ( int )SE_TYPE.SE_BUFF ] = ( AudioClip )Resources.Load( "Audio/SE/buff" );
-        _se[ ( int )SE_TYPE.SE_BUTTLE ] = ( AudioClip )Resources.Load( "Audio/SE/buttle" );
-        _se[ ( int )SE_TYPE.SE_CHOICE1 ] = ( AudioClip )Resources.Load( "Audio/SE/choice1" );
-        _se[ ( int )SE_TYPE.SE_CHOICE2 ] = ( AudioClip )Resources.Load( "Audio/SE/choice2" );
-        _se[ ( int )SE_TYPE.SE_DRAW ] = ( AudioClip )Resources.Load( "Audio/SE/draw" );
-        _se[ ( int )SE_TYPE.SE_FISH1 ] = ( AudioClip )Resources.Load( "Audio/SE/fish" );
-        _se[ ( int )SE_TYPE.SE_FISH2 ] = ( AudioClip )Resources.Load( "Audio/SE/fish2" );
-        _se[ ( int )SE_TYPE.SE_MASS ] = ( AudioClip )Resources.Load( "Audio/SE/mass" );
-        _se[ ( int )SE_TYPE.SE_PHASE ] = ( AudioClip )Resources.Load( "Audio/SE/phase" );
-        _se[ ( int )SE_TYPE.SE_TRESURE ] = ( AudioClip )Resources.Load( "Audio/SE/tresure" );
-		_se[ ( int )SE_TYPE.SE_RESULT ] = ( AudioClip )Resources.Load( "Audio/SE/result" );
-
+		for(int i = 1; i < se_file.Length; i++ ) {
+			if( i <= 9 ) {
+				_se[ i ] = ( AudioClip )Resources.Load( "Audio/SE/SE_0" + i );
+			} else {										      
+				_se[ i ] = ( AudioClip )Resources.Load( "Audio/SE/SE_" + i );
+			}
+		}
         // === VOICEファイル設定 ===
     }
 
