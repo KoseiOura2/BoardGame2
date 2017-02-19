@@ -14,6 +14,7 @@ public class ParticleManager : MonoBehaviour {
     private const float SPIRAL_TIME_THREE          = 1.2f;
     private const float SPIRAL_TIME_FOUR           = 3.0f;
     private const float GOAL_PARTICLE_WAIT_TIME    = 0.5f;
+	private const float LIGHTNING_TIME 			   = 1.0f;
 
     private float[ ][ ] _particle_time_list = new float[ ( int )PARTICLE_TYPE.MAX_PARTICLE_NUM ][ ];
 
@@ -94,6 +95,7 @@ public class ParticleManager : MonoBehaviour {
 
     };
 
+	[ SerializeField ]
     private GameObject[ ] _particle_prefs = new GameObject[ ( int )PARTICLE_TYPE.MAX_PARTICLE_NUM ];
     private List< int > _delete_particle_num = new List< int >( );
     private List< ParticleOperate > _particle_operates = new List< ParticleOperate >( );

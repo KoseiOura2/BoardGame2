@@ -18,7 +18,6 @@ public class ClientPlayerManager : MonoBehaviour {
         ACTION_NONE,
         MOVE_FOR_GET_ACTION,
         ROTATE_ACTION,
-		SHINING_ACTION,
         MOVE_FOR_HAND_ACTION,
     }
 
@@ -67,6 +66,8 @@ public class ClientPlayerManager : MonoBehaviour {
 
 	[ SerializeField ]
 	private CardManager _card_manager;
+	[ SerializeField ]
+	private ParticleManager _particle_manager;
 	[ SerializeField ]
 	private PLAYER_CARD_DATA _player_card = new PLAYER_CARD_DATA( );
 	private PLAYER_DATA _player_data;
@@ -191,6 +192,10 @@ public class ClientPlayerManager : MonoBehaviour {
 		}
 		if ( _card_manager == null ) {
 			_card_manager = GameObject.Find( "CardManager" ).GetComponent< CardManager >( );
+		}
+
+		if ( _particle_manager == null ) {
+			_particle_manager = GameObject.Find( "ParticleManager" ).GetComponent< ParticleManager >( );
 		}
 
 		_player_data.power = INIT_PLAYER_POWER;
@@ -410,18 +415,10 @@ public class ClientPlayerManager : MonoBehaviour {
                                                             _draw_card_list[ id ].pos, _draw_card_list[ id ].angle, 
                                                             _draw_card_list[ id ].move, rotate );
                 _rotate_list.Add( true );
-                //レアリティに応じてパーティクルを設定
-                switch(_draw_card_list[ id ].card_data.rarity) {
-                    case (int)RARITY_TYPE.RARITY_RARE:
-                        Debug.Log("レア");
-                        
-                        break;
-                    case (int)RARITY_TYPE.RARITY_SUPER_RARE:
-                        Debug.Log("スーパーレア");
-                        break;
-                    case (int)RARITY_TYPE.RARITY_DOUBLE_SUPER_RARE:
-                        Debug.Log("ダブルスーパーレア");
-                        break;
+                //回転したカードのレアリティがレア以上ならパーティクルを生成
+				if( _draw_card_list[ id ].card_data.rarity > ( int )RARITY_TYPE.RARITY_NORMAL ){
+					//対象のカードの座標にパーティクルを生成
+					//_particle_manager.createParticle( PARTICLE_TYPE.PARTICLE_LIGHTNING );
                 }
                 //次のカードへ
                 _card_num++;
@@ -451,6 +448,12 @@ public class ClientPlayerManager : MonoBehaviour {
 
         return false;
     }
+
+	public void partcleUpdateDrawCard( ) {
+		//パーティクルの更新を行う
+		_particle_manager.particleUpdate( );
+	}
+
     public void addThrowCard( int id ) {
         CARD_DATA card_data = _player_card.hand_list[ id ];
 

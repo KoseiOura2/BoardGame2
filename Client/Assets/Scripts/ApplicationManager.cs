@@ -226,7 +226,6 @@ public class ApplicationManager : Manager< ApplicationManager > {
 			if ( _sound_manager == null ) {
 				_sound_manager = GameObject.Find( "SoundManager" ).GetComponent< SoundManager >( );
 			}
-
 		}
 		catch {
 			Debug.Log( "参照に失敗しました。" );
@@ -892,6 +891,7 @@ public class ApplicationManager : Manager< ApplicationManager > {
 
         // カードが送られて来たら
         if ( _player_manager.getDrawCardAction( ) == ClientPlayerManager.DRAW_CARD_ACTION.MOVE_FOR_GET_ACTION ) {
+			//全てのカードの回転が終わっているか
             if ( _player_manager.isArrivedDrawCard( ) ) {
                 //ドローのSEを再生
                 _sound_manager.playSE( SE_TYPE.SE_DRAW );
@@ -940,8 +940,10 @@ public class ApplicationManager : Manager< ApplicationManager > {
             if ( _player_manager.getDrawCardAction( ) == ClientPlayerManager.DRAW_CARD_ACTION.ROTATE_ACTION ||
                 _player_manager.getDrawCardAction( ) == ClientPlayerManager.DRAW_CARD_ACTION.MOVE_FOR_GET_ACTION ) {
                 _player_manager.rotateDrawCard( i );
-            } 
+            }
         }
+		//パーティクルの更新
+		_player_manager.partcleUpdateDrawCard( );
     }
 
     /// <summary>
