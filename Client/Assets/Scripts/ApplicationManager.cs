@@ -812,7 +812,7 @@ public class ApplicationManager : Manager< ApplicationManager > {
 
         // カードが送られて来たら
         if ( _player_manager.getDrawCardAction( ) == ClientPlayerManager.DRAW_CARD_ACTION.MOVE_FOR_GET_ACTION ) {
-            if ( _player_manager.isArrivedAllDrawCard( ) ) {
+			if ( _player_manager.isArrivedDrawCard( ) ) {
                 createFlushObj( );
 				_sound_manager.playSE ( SE_TYPE.SE_DRAW );
             }
@@ -827,7 +827,7 @@ public class ApplicationManager : Manager< ApplicationManager > {
         }
 
         if ( _player_manager.getDrawCardAction( ) == ClientPlayerManager.DRAW_CARD_ACTION.MOVE_FOR_HAND_ACTION ) {
-            if ( _player_manager.isArrivedAllDrawCard( ) ) {
+			if ( _player_manager.isArrivedDrawCard( ) ) {
                 finishDrawUpdate( );
                 
                 if ( _player_manager.getPlayerCardNum( ) > _player_manager.getMaxPlayerCardNum( ) ) {
@@ -910,7 +910,7 @@ public class ApplicationManager : Manager< ApplicationManager > {
 
 
         if ( _player_manager.getDrawCardAction( ) == ClientPlayerManager.DRAW_CARD_ACTION.MOVE_FOR_HAND_ACTION ) {
-            if ( _player_manager.isArrivedAllDrawCard( ) ) {
+			if ( _player_manager.isArrivedDrawCard( ) ) {
                 finishDrawUpdate( );
                     
                 if ( _player_manager.getPlayerCardNum( ) > _player_manager.getMaxPlayerCardNum( ) ) {

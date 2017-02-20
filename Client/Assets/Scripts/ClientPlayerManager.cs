@@ -344,55 +344,39 @@ public class ClientPlayerManager : MonoBehaviour {
         }
     }
 
-    public bool isArrivedAllDrawCard( ) {
-        // 全てのカードが到着したら
-        if ( _arrived_list.Count == _draw_card_list.Count ) {
-            if ( _draw_card_action == DRAW_CARD_ACTION.MOVE_FOR_GET_ACTION ) {
-                _draw_card_action = DRAW_CARD_ACTION.ROTATE_ACTION;
-                // 回転スタート
-                for ( int i = 0; i < _draw_card_list.Count; i++ ) {
-                    rotateStartDrawCard( i );
-                }
-            } else if ( _draw_card_action == DRAW_CARD_ACTION.MOVE_FOR_HAND_ACTION ) {
-                _draw_card_action = DRAW_CARD_ACTION.ACTION_NONE;
-                
-                for ( int i = 0; i < _draw_card_list.Count; i++ ) {
-                    // ハンドに追加
-                    addPlayerCard( _draw_card_list[ i ].card_data );
-                    // オブジェクトの削除
-                    Destroy( _draw_card_list[ i ].obj );
-                }
-                
-                // リフレッシュ
-                _draw_card_list.Clear( );
-            }
-            _arrived_list.Clear( );
-
-            return true;
-        }
-
-        return false;
-    }
     public bool isArrivedDrawCard( ) {
         // 全てのカードが到着したら
         if ( _arrived_list.Count == _draw_card_list.Count ) {
-            if ( _draw_card_action == DRAW_CARD_ACTION.MOVE_FOR_GET_ACTION ) {
-                //現在のカード値がドロー数値より上なら次のアクションへ
-                if ( _card_num < _draw_card_list.Count ) {
-                    //現在のカード値のカードが回転していなければ回転を行う
-                    if( !_draw_card_list[ _card_num ].rotate ) {
-                        rotateStartDrawCard( _card_num );
-                    }
-                } else {
-                    //リフレッシュ
-                    _arrived_list.Clear( );
-                    //現在のカード値をリセット
-                    _card_num = 0;
-                    //次のアクションを設定
-                    _draw_card_action = DRAW_CARD_ACTION.ROTATE_ACTION;
-                    return true;
-                }
-            }
+			if ( _draw_card_action == DRAW_CARD_ACTION.MOVE_FOR_GET_ACTION ) {
+				//現在のカード値がドロー数値より上なら次のアクションへ
+				if ( _card_num < _draw_card_list.Count ) {
+					//現在のカード値のカードが回転していなければ回転を行う
+					if ( !_draw_card_list [ _card_num ].rotate ) {
+						rotateStartDrawCard ( _card_num );
+					}
+				} else {
+					//リフレッシュ
+					_arrived_list.Clear ( );
+					//現在のカード値をリセット
+					_card_num = 0;
+					//次のアクションを設定
+					_draw_card_action = DRAW_CARD_ACTION.ROTATE_ACTION;
+					return true;
+				}
+			} else if ( _draw_card_action == DRAW_CARD_ACTION.MOVE_FOR_HAND_ACTION ) {
+				_draw_card_action = DRAW_CARD_ACTION.ACTION_NONE;
+
+				for( int i = 0; i < _draw_card_list.Count; i++ ) {
+					// ハンドに追加
+					addPlayerCard ( _draw_card_list [ i ].card_data );
+					// オブジェクトの削除
+					Destroy ( _draw_card_list [ i ].obj );
+				}
+
+				// リフレッシュ
+				_draw_card_list.Clear ( );
+				return true;
+			}
         }
 
         return false;
@@ -405,6 +389,7 @@ public class ClientPlayerManager : MonoBehaviour {
                                                     _draw_card_list[ id ].pos, _draw_card_list[ id ].angle, 
                                                     _draw_card_list[ id ].move, rotate );
     }
+
     public void rotateDrawCard( int id ) {
         if ( _draw_card_list[ id ].rotate ) {
             float angle = _draw_card_list[ id ].angle;
@@ -420,7 +405,7 @@ public class ClientPlayerManager : MonoBehaviour {
                                                             _draw_card_list[ id ].move, rotate );
                 _rotate_list.Add( true );
                 //回転したカードのレアリティがレア以上ならパーティクルを生成
-				if( _draw_card_list[ id ].card_data.rarity > ( int )RARITY_TYPE.RARITY_NORMAL ){
+				if( _draw_card_list[ id ].card_data.rarity > ( int )RARITY_TYPE.RARITY_RARE ){
 					//対象のカードの座標にパーティクルを生成
 					_particle_manager.createParticle( PARTICLE_TYPE.PARTICLE_LIGHTNING );
 					//現在光るエフェクトを行っているパーティクルを取得
