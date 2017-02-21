@@ -71,6 +71,7 @@
      <Compile Include="Assets\Scripts\ResultUIManeger.cs" />
      <Compile Include="Assets\Scripts\SoundManager.cs" />
      <Compile Include="Assets\Scripts\StageManager.cs" />
+     <Compile Include="Assets\Scripts\old\oldPlayerManager.cs" />
  <Reference Include="UnityEngine.UI">
  <HintPath>C:/Program Files/Unity/Editor/Data/UnityExtensions/Unity/GUISystem/UnityEngine.UI.dll</HintPath>
  </Reference>
