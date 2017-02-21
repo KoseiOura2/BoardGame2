@@ -14,7 +14,7 @@ public class ParticleManager : MonoBehaviour {
     private const float SPIRAL_TIME_THREE          = 1.2f;
     private const float SPIRAL_TIME_FOUR           = 3.0f;
     private const float GOAL_PARTICLE_WAIT_TIME    = 0.5f;
-	private const float LIGHTNING_TIME 			   = 1.0f;
+	private const float LIGHTNING_TIME 			   = 3.0f;
 
     private float[ ][ ] _particle_time_list = new float[ ( int )PARTICLE_TYPE.MAX_PARTICLE_NUM ][ ];
 
@@ -185,15 +185,26 @@ public class ParticleManager : MonoBehaviour {
 	/// <summary>
 	/// 指定したパーティクルの取得
 	/// </summary>
-	public GameObject[ ] getParticle( PARTICLE_TYPE type ){
+	public GameObject[ ] getParticleType( PARTICLE_TYPE type ) {
 		GameObject[ ] obj = new GameObject[ _particle_operates.Count ];
 
 		for( int i = 0; i < _particle_operates.Count; i++ ) {
-			if ( _particle_operates [ i ].getParticleType ( ) == type ) {
-				obj[ i ] = _particle_operates [ i ].getParticleObject( );
+			if ( _particle_operates[ i ].getParticleType ( ) == type ) {
+				obj[ i ] = _particle_operates[ i ].getParticleObject( );
 			}
 		}
 		return obj;
+	}
+
+	/// <summary>
+	/// 指定したパーティクルの削除
+	/// </summary>
+	public void particleTypeDelete( PARTICLE_TYPE type ) {
+		for( int i = _particle_operates.Count - 1; i >= 0; i-- ) {
+			if ( _particle_operates[ i ].getParticleType ( ) == type ) {
+				_particle_operates.RemoveAt( i );
+			}
+		}
 	}
 }
 

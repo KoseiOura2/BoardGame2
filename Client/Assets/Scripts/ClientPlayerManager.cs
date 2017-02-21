@@ -409,10 +409,9 @@ public class ClientPlayerManager : MonoBehaviour {
 					//対象のカードの座標にパーティクルを生成
 					_particle_manager.createParticle( PARTICLE_TYPE.PARTICLE_LIGHTNING );
 					//現在光るエフェクトを行っているパーティクルを取得
-					GameObject[ ] particleObj = _particle_manager.getParticle( PARTICLE_TYPE.PARTICLE_LIGHTNING );
+					GameObject[ ] particleObj = _particle_manager.getParticleType( PARTICLE_TYPE.PARTICLE_LIGHTNING );
 					//パーティクルを対象カードの子オブジェクトに移動
 					particleObj[ particleObj.Length - 1 ].GetComponent<Transform>().SetParent( _draw_card_list[ id ].obj.transform, false );
-
                 }
                 //次のカードへ
                 _card_num++;
@@ -436,6 +435,9 @@ public class ClientPlayerManager : MonoBehaviour {
 			//設定時間分待機
 			if ( _draw_card_time > DRAW_CARD_ROTATION_WAIT_TIME ) {
 				_draw_card_action = DRAW_CARD_ACTION.MOVE_FOR_HAND_ACTION;
+
+				//カードにかかってるパーティクルを削除
+				_particle_manager.particleTypeDelete ( PARTICLE_TYPE.PARTICLE_LIGHTNING );
 				// 移動スタート
 				for( int i = 0; i < _draw_card_list.Count; i++ ) {
 					moveStartDrawCard ( i );
