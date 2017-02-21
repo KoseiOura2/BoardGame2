@@ -1092,6 +1092,11 @@ public class ApplicationManager : Manager< ApplicationManager > {
         _battle_manager.battleTimeCount( );
 
 		if ( _battle_manager.isComplete( ) ) {
+            //拡大画像を削除
+            if ( _player_manager.isExpantion( ) ) {
+                destroyLightOffObj( );
+                _player_manager.destroyExpantionCard( );
+            }
             createWaitImage( "WaitOpponent" );
             destroyCompleteButton( );
 			_sound_manager.playSE( SE_TYPE.SE_CHOICE1 );
