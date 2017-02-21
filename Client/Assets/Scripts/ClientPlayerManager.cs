@@ -375,6 +375,7 @@ public class ClientPlayerManager : MonoBehaviour {
 
 				// リフレッシュ
 				_draw_card_list.Clear ( );
+                _arrived_list.Clear ( );
 				return true;
 			}
         }
