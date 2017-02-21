@@ -960,7 +960,7 @@ public class ApplicationManager : Manager< ApplicationManager > {
             }
         }
 		//パーティクルの更新
-		_player_manager.partcleUpdateDrawCard( );
+		_particle_manager.particleUpdate( );
 
         //回転カード数が前回の回転カード数と違う場合にドローSEを出す
         if ( _rotate_card_num != _player_manager.getRotateCardNum( ) ) {

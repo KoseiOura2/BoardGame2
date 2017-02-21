@@ -186,13 +186,21 @@ public class ParticleManager : MonoBehaviour {
 	/// 指定したパーティクルの取得
 	/// </summary>
 	public GameObject[ ] getParticleType( PARTICLE_TYPE type ) {
-		GameObject[ ] obj = new GameObject[ _particle_operates.Count ];
+        int count = 0;
+        List< int > obj_num = new List< int >( );
 
+        // 同じタイプのオブジェクト番号を登録
 		for( int i = 0; i < _particle_operates.Count; i++ ) {
 			if ( _particle_operates[ i ].getParticleType ( ) == type ) {
-				obj[ i ] = _particle_operates[ i ].getParticleObject( );
+                obj_num.Add( i );
+                count++;
 			}
 		}
+        
+		GameObject[ ] obj = new GameObject[ count ];
+        for( int i = 0; i < count; i++ ) {
+			obj[ i ] = _particle_operates[ obj_num[ i ] ].getParticleObject( );
+		} 
 		return obj;
 	}
 
@@ -200,9 +208,14 @@ public class ParticleManager : MonoBehaviour {
 	/// 指定したパーティクルの削除
 	/// </summary>
 	public void particleTypeDelete( PARTICLE_TYPE type ) {
-		for( int i = _particle_operates.Count - 1; i >= 0; i-- ) {
-			if ( _particle_operates[ i ].getParticleType ( ) == type ) {
-				_particle_operates.RemoveAt( i );
+        int count = 0;
+        int length = _particle_operates.Count;
+
+		for( int i = 0; i < length; i++ ) {
+			if ( _particle_operates[ i - count ].getParticleType( ) == type ) {
+                Destroy( _particle_operates[ i - count ].getParticleObject( ) );
+				_particle_operates.RemoveAt( i - count );
+                count++;
 			}
 		}
 	}

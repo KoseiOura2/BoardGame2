@@ -405,12 +405,10 @@ public class ClientPlayerManager : MonoBehaviour {
                 _rotate_list.Add( true );
                 //回転したカードのレアリティがレア以上ならパーティクルを生成
 				if ( _draw_card_list[ id ].card_data.rarity > ( int )RARITY_TYPE.RARITY_RARE ) {
-					//対象のカードの座標にパーティクルを生成
+					//パーティクルを生成
 					_particle_manager.createParticle( PARTICLE_TYPE.PARTICLE_LIGHTNING );
-					//現在光るエフェクトを行っているパーティクルを取得
-					GameObject[ ] particleObj = _particle_manager.getParticleType( PARTICLE_TYPE.PARTICLE_LIGHTNING );
-                    //パーティクルを対象カードの子オブジェクトに移動
-					particleObj[ particleObj.Length - 1 ].GetComponent< Transform >( ).SetParent( _draw_card_list[ id ].obj.transform, false );
+                    //パーティクルを移動
+                    moveParticle( id );
                 }
                 //次のカードへ
                 _card_num++;
@@ -423,6 +421,20 @@ public class ClientPlayerManager : MonoBehaviour {
             _draw_card_list[ id ] = new DRAW_CARD_DATA( _draw_card_list[ id ].card_data, _draw_card_list[ id ].obj,
                                                         _draw_card_list[ id ].pos, angle, 
                                                         _draw_card_list[ id ].move, _draw_card_list[ id ].rotate );
+        }
+    }
+
+    private void moveParticle( int id ) {
+        Vector3 setpos;
+
+        //回転済みカードのレアリティはレア以上か
+        if( _draw_card_list[ id ].card_data.rarity > ( int )RARITY_TYPE.RARITY_RARE ) {
+            //現在光るエフェクトを行っているパーティクルを取得
+		    GameObject[ ] particleObj = _particle_manager.getParticleType( PARTICLE_TYPE.PARTICLE_LIGHTNING );
+            setpos = particleObj[ particleObj.Length - 1 ].GetComponent< Transform >( ).position;
+            //回転済みカードの座標を加える
+            setpos += _draw_card_list[ id ].pos;
+            particleObj[ particleObj.Length - 1  ].GetComponent< Transform >( ).position = setpos;
         }
     }
     
@@ -450,10 +462,6 @@ public class ClientPlayerManager : MonoBehaviour {
 
         return false;
     }
-	public void partcleUpdateDrawCard( ) {
-		//パーティクルの更新を行う
-		_particle_manager.particleUpdate( );
-	}
 
     public void addThrowCard( int id ) {
         CARD_DATA card_data = _player_card.hand_list[ id ];
