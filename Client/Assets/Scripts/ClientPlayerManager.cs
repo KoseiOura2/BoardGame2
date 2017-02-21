@@ -11,8 +11,9 @@ public class ClientPlayerManager : MonoBehaviour {
 	private const float MIN_DICE_VALUE   = 1.0f;
 	private const int INIT_PLAYER_POWER  = 10;
     private const int MAX_PLAYER_CARD_NUM = 6;
-	private const int MAX_SEND_CARD_NUM = 4;
+	private const int MAX_SEND_CARD_NUM = 6;
     private const float EXPANTION_MAGNIFICATION = 2.0f;
+	private const float DRAW_CARD_ROTATION_WAIT_TIME = 1.0f;
 
     public enum DRAW_CARD_ACTION {
         ACTION_NONE,
@@ -67,6 +68,8 @@ public class ClientPlayerManager : MonoBehaviour {
 	[ SerializeField ]
 	private CardManager _card_manager;
 	[ SerializeField ]
+	private ParticleManager _particle_manager;
+	[ SerializeField ]
 	private PLAYER_CARD_DATA _player_card = new PLAYER_CARD_DATA( );
 	private PLAYER_DATA _player_data;
     private List< DRAW_CARD_DATA > _draw_card_list = new List< DRAW_CARD_DATA >( );
@@ -96,10 +99,12 @@ public class ClientPlayerManager : MonoBehaviour {
     private List< bool > _rotate_list  = new List< bool >( );
     private int _power = 0;
 	private int _dice_value = 0;
+    private int _card_num = 0;
     private int _expantion_num = -1;
     private float _card_width = 3.1f;
     private float _draw_card_pos_x_adjust = 0.5f;
     private float _draw_card_move_speed = 0.5f;
+	private float _draw_card_time = 0.0f;
     [ SerializeField ]
     private bool _draw_card  = false;
     private bool _throw_card = false;
@@ -124,6 +129,14 @@ public class ClientPlayerManager : MonoBehaviour {
 		_player_card.hand_obj_list   = new List< GameObject >( );
 		_player_card.select_position = new List< Vector3 >( );
 		_player_card.select_list     = new List< CARD_DATA >( );
+    }
+
+    /// <summary>
+    /// 初期化
+    /// </summary>
+    public void init( ref CardManager card_manager, ref ParticleManager particle_manager ) {
+        _card_manager = card_manager;
+        _particle_manager = particle_manager;
     }
 
 	// Use this for initialization
@@ -187,13 +200,10 @@ public class ClientPlayerManager : MonoBehaviour {
 		if ( _card_obj == null ) {
 			_card_obj = ( GameObject )Resources.Load( "Prefabs/Card" );
 		}
-		if ( _card_manager == null ) {
-			_card_manager = GameObject.Find( "CardManager" ).GetComponent< CardManager >( );
-		}
 
 		_player_data.power = INIT_PLAYER_POWER;
 	}
-	
+
 	/// <summary>
     /// エディタ上でのみデバッグ機能が実行される
     /// </summary>
@@ -332,37 +342,45 @@ public class ClientPlayerManager : MonoBehaviour {
         }
     }
 
-    public bool isArrivedAllDrawCard( ) {
+    public bool isArrivedDrawCard( ) {
         // 全てのカードが到着したら
         if ( _arrived_list.Count == _draw_card_list.Count ) {
-            if ( _draw_card_action == DRAW_CARD_ACTION.MOVE_FOR_GET_ACTION ) {
-                _draw_card_action = DRAW_CARD_ACTION.ROTATE_ACTION;
-                // 回転スタート
-                for ( int i = 0; i < _draw_card_list.Count; i++ ) {
-                    rotateStartDrawCard( i );
-                }
-            } else if ( _draw_card_action == DRAW_CARD_ACTION.MOVE_FOR_HAND_ACTION ) {
-                _draw_card_action = DRAW_CARD_ACTION.ACTION_NONE;
-                
-                for ( int i = 0; i < _draw_card_list.Count; i++ ) {
-                    // ハンドに追加
-                    addPlayerCard( _draw_card_list[ i ].card_data );
-                    // オブジェクトの削除
-                    Destroy( _draw_card_list[ i ].obj );
-                }
-                
-                // リフレッシュ
-                _draw_card_list.Clear( );
-            }
+			if ( _draw_card_action == DRAW_CARD_ACTION.MOVE_FOR_GET_ACTION ) {
+				//現在のカード値がドロー数値より上なら次のアクションへ
+				if ( _card_num < _draw_card_list.Count ) {
+					//現在のカード値のカードが回転していなければ回転を行う
+					if ( !_draw_card_list [ _card_num ].rotate ) {
+						rotateStartDrawCard ( _card_num );
+					}
+				} else {
+					//リフレッシュ
+					_arrived_list.Clear ( );
+					//現在のカード値をリセット
+					_card_num = 0;
+					//次のアクションを設定
+					_draw_card_action = DRAW_CARD_ACTION.ROTATE_ACTION;
+					return true;
+				}
+			} else if ( _draw_card_action == DRAW_CARD_ACTION.MOVE_FOR_HAND_ACTION ) {
+				_draw_card_action = DRAW_CARD_ACTION.ACTION_NONE;
 
-            _arrived_list.Clear( );
+				for( int i = 0; i < _draw_card_list.Count; i++ ) {
+					// ハンドに追加
+					addPlayerCard ( _draw_card_list [ i ].card_data );
+					// オブジェクトの削除
+					Destroy ( _draw_card_list [ i ].obj );
+				}
 
-            return true;
+				// リフレッシュ
+				_draw_card_list.Clear ( );
+                _arrived_list.Clear ( );
+				return true;
+			}
         }
 
         return false;
     }
-    
+
     public void rotateStartDrawCard( int id ) {
         bool rotate = true;
 
@@ -385,7 +403,15 @@ public class ClientPlayerManager : MonoBehaviour {
                                                             _draw_card_list[ id ].pos, _draw_card_list[ id ].angle, 
                                                             _draw_card_list[ id ].move, rotate );
                 _rotate_list.Add( true );
-
+                //回転したカードのレアリティがレア以上ならパーティクルを生成
+				if ( _draw_card_list[ id ].card_data.rarity > ( int )RARITY_TYPE.RARITY_RARE ) {
+					//パーティクルを生成
+					_particle_manager.createParticle( PARTICLE_TYPE.PARTICLE_LIGHTNING );
+                    //パーティクルを移動
+                    moveParticle( id );
+                }
+                //次のカードへ
+                _card_num++;
                 return;
             }
 
@@ -397,21 +423,46 @@ public class ClientPlayerManager : MonoBehaviour {
                                                         _draw_card_list[ id ].move, _draw_card_list[ id ].rotate );
         }
     }
+
+    private void moveParticle( int id ) {
+        Vector3 setpos;
+
+        //回転済みカードのレアリティはレア以上か
+        if( _draw_card_list[ id ].card_data.rarity > ( int )RARITY_TYPE.RARITY_RARE ) {
+            //現在光るエフェクトを行っているパーティクルを取得
+		    GameObject[ ] particleObj = _particle_manager.getParticleType( PARTICLE_TYPE.PARTICLE_LIGHTNING );
+            setpos = particleObj[ particleObj.Length - 1 ].GetComponent< Transform >( ).position;
+            //回転済みカードの座標を加える
+            setpos += _draw_card_list[ id ].pos;
+            particleObj[ particleObj.Length - 1  ].GetComponent< Transform >( ).position = setpos;
+        }
+    }
     
     public bool isFinishRotateAllDrawCard( ) {
         // 全てのカードが回転したら
         if ( _rotate_list.Count == _draw_card_list.Count ) {
-            _draw_card_action = DRAW_CARD_ACTION.MOVE_FOR_HAND_ACTION;
-            // 移動スタート
-            for ( int i = 0; i < _draw_card_list.Count; i++ ) {
-                moveStartDrawCard( i );
-            }
-            _rotate_list.Clear( );
-            return true;
+			//時間の更新
+			_draw_card_time += Time.deltaTime;
+			//設定時間分待機
+			if ( _draw_card_time > DRAW_CARD_ROTATION_WAIT_TIME ) {
+				_draw_card_action = DRAW_CARD_ACTION.MOVE_FOR_HAND_ACTION;
+
+				//カードにかかってるパーティクルを削除
+				_particle_manager.particleTypeDelete ( PARTICLE_TYPE.PARTICLE_LIGHTNING );
+				// 移動スタート
+				for( int i = 0; i < _draw_card_list.Count; i++ ) {
+					moveStartDrawCard ( i );
+				}
+				//時間をリセット
+				_draw_card_time = 0.0f;
+				_rotate_list.Clear ( );
+				return true;
+			}
         }
 
         return false;
     }
+
     public void addThrowCard( int id ) {
         CARD_DATA card_data = _player_card.hand_list[ id ];
 
@@ -484,6 +535,11 @@ public class ClientPlayerManager : MonoBehaviour {
     public int getThrowCardNum( ) {
         return _throw_card_list.Count;
     }
+
+    public int getRotateCardNum( ) {
+        return _rotate_list.Count;
+    }
+
     /// <summary>
 	/// 手札にカードを追加する処理
     /// </summary>

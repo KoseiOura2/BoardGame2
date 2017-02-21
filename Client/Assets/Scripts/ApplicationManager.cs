@@ -37,6 +37,10 @@ public class ApplicationManager : Manager< ApplicationManager > {
 	private HostData _host_data;
 	[ SerializeField ]
 	private ClientData _client_data;
+	[ SerializeField ]
+	private SoundManager _sound_manager;
+    [ SerializeField ]
+    private ParticleManager _particle_manager;
 
 	[ SerializeField ]
 	private PLAYER_ORDER _player_num = PLAYER_ORDER.NO_PLAYER;
@@ -98,6 +102,7 @@ public class ApplicationManager : Manager< ApplicationManager > {
     private bool _create_mass_text  = false;
     private int _opponent_power     = 0;
     private int _opponent_card_num  = 0;
+    private int _rotate_card_num    = 0;
     private int _change_scene_count = 0;
     private int _change_phase_count = 0;
     private float _title_wait_time  = 0.0f;
@@ -178,6 +183,20 @@ public class ApplicationManager : Manager< ApplicationManager > {
         }
 
         try {
+            _player_manager.init( ref _card_manager, ref _particle_manager );
+        }
+        catch {
+            Debug.Log( "Failure Init ClientPlayerManager..." );
+        }
+
+        try {
+            _particle_manager.init( );
+        }
+        catch {
+            Debug.Log( "Failure Init ParticleManager..." );
+        }
+
+        try {
             _light_off_pref = Resources.Load< GameObject >( "Prefabs/Background/LightOff" );
         }
         catch {
@@ -190,6 +209,7 @@ public class ApplicationManager : Manager< ApplicationManager > {
         catch {
             Debug.Log( "Failure Load FlushObj..." );
         }
+
 	}
 
     private void referManager( ) {
@@ -220,6 +240,12 @@ public class ApplicationManager : Manager< ApplicationManager > {
             }
             if ( _back_ground_obj == null ) {
                 _back_ground_obj = GameObject.Find( "BackGround" );
+            }
+			if ( _sound_manager == null ) {
+				_sound_manager = GameObject.Find( "SoundManager" ).GetComponent< SoundManager >( );
+			}
+            if ( _particle_manager == null ) {
+                _particle_manager = GameObject.Find( "ParticleManager" ).GetComponent< ParticleManager >( );
             }
 		}
 		catch {
@@ -283,9 +309,11 @@ public class ApplicationManager : Manager< ApplicationManager > {
 			updateTitleScene( );
 			break;
 		case SCENE.SCENE_GAME:
-            if ( _host_data.getRecvData( ).game_finish ) {
-                _phase_init = true;
-            }
+			if ( _mode != PROGRAM_MODE.MODE_NO_CONNECT ) {
+				if ( _host_data.getRecvData ( ).game_finish ) {
+					_phase_init = true;
+				}
+			}
             if ( !_go_title_processing ) {
 			    updateGameScene( );
             }
@@ -371,6 +399,7 @@ public class ApplicationManager : Manager< ApplicationManager > {
             _back_ground_obj.GetComponent< Image >( ).enabled = false;
             if ( _click_text_obj == null ) {
                 createClickObj( );
+				_sound_manager.playBGM( BGM_TYPE.BGM_TILTE );
             }
 
             _scene_init = true;
@@ -438,6 +467,7 @@ public class ApplicationManager : Manager< ApplicationManager > {
             destroyLightOffObj( );
             _map_manager.destroyObj( );
             createFinishObj( );
+			_sound_manager.playBGM( BGM_TYPE.BGM_GAME_END2 );
             if ( _mode == PROGRAM_MODE.MODE_CONNECT ) {
                 if ( _client_data.getRecvData( ).finish_game ) {
                     _client_data.CmdSetSendFinishGame( false );
@@ -518,6 +548,8 @@ public class ApplicationManager : Manager< ApplicationManager > {
 			bindMapCountImage( );
 			_map_manager.changeGoalImageNum( _goal_count_image[ 0 ], _goal_count_image[ 1 ] );
 
+			//BGMの再生
+			_sound_manager.playBGM ( BGM_TYPE.BGM_FIELD );
             _scene_init = true;
         }
 
@@ -678,6 +710,8 @@ public class ApplicationManager : Manager< ApplicationManager > {
         }
 
         if ( _player_manager.isDiceRoll( ) ) {
+			//選択SE
+			_sound_manager.playSE( SE_TYPE.SE_CHOICE1 );
 
             // ダイスオブジェ削除
             Destroy( _dice_button_obj );
@@ -799,7 +833,7 @@ public class ApplicationManager : Manager< ApplicationManager > {
 
         // カードが送られて来たら
         if ( _player_manager.getDrawCardAction( ) == ClientPlayerManager.DRAW_CARD_ACTION.MOVE_FOR_GET_ACTION ) {
-            if ( _player_manager.isArrivedAllDrawCard( ) ) {
+			if ( _player_manager.isArrivedDrawCard( ) ) {
                 createFlushObj( );
             }
         }
@@ -813,7 +847,7 @@ public class ApplicationManager : Manager< ApplicationManager > {
         }
 
         if ( _player_manager.getDrawCardAction( ) == ClientPlayerManager.DRAW_CARD_ACTION.MOVE_FOR_HAND_ACTION ) {
-            if ( _player_manager.isArrivedAllDrawCard( ) ) {
+			if ( _player_manager.isArrivedDrawCard( ) ) {
                 finishDrawUpdate( );
                 
                 if ( _player_manager.getPlayerCardNum( ) > _player_manager.getMaxPlayerCardNum( ) ) {
@@ -877,21 +911,24 @@ public class ApplicationManager : Manager< ApplicationManager > {
 
         // カードが送られて来たら
         if ( _player_manager.getDrawCardAction( ) == ClientPlayerManager.DRAW_CARD_ACTION.MOVE_FOR_GET_ACTION ) {
-            if ( _player_manager.isArrivedAllDrawCard( ) ) {
+			//全てのカードの回転が終わっているか
+            if ( _player_manager.isArrivedDrawCard( ) ) {
                 createFlushObj( );
             }
         }
 
         // カードの回転が終わったら
         if ( _player_manager.getDrawCardAction( ) == ClientPlayerManager.DRAW_CARD_ACTION.ROTATE_ACTION ) {
+            //  全ての回転が終わった
             if ( _player_manager.isFinishRotateAllDrawCard( ) ) {
                 finishRotateCard( );
                 destroyFlushObj( );
             }
         }
 
+
         if ( _player_manager.getDrawCardAction( ) == ClientPlayerManager.DRAW_CARD_ACTION.MOVE_FOR_HAND_ACTION ) {
-            if ( _player_manager.isArrivedAllDrawCard( ) ) {
+			if ( _player_manager.isArrivedDrawCard( ) ) {
                 finishDrawUpdate( );
                     
                 if ( _player_manager.getPlayerCardNum( ) > _player_manager.getMaxPlayerCardNum( ) ) {
@@ -904,7 +941,6 @@ public class ApplicationManager : Manager< ApplicationManager > {
 
                 _phase_init = false;
                 _phase_manager.setPhase( phase );
-                    
             }
         }
     }
@@ -917,9 +953,22 @@ public class ApplicationManager : Manager< ApplicationManager > {
             if ( _player_manager.getDrawCardAction( ) == ClientPlayerManager.DRAW_CARD_ACTION.MOVE_FOR_GET_ACTION ||
                  _player_manager.getDrawCardAction( ) == ClientPlayerManager.DRAW_CARD_ACTION.MOVE_FOR_HAND_ACTION ) {
                 _player_manager.moveDrawCard( i );
-            } else if ( _player_manager.getDrawCardAction( ) == ClientPlayerManager.DRAW_CARD_ACTION.ROTATE_ACTION ) {
+            }
+            if ( _player_manager.getDrawCardAction( ) == ClientPlayerManager.DRAW_CARD_ACTION.ROTATE_ACTION ||
+                _player_manager.getDrawCardAction( ) == ClientPlayerManager.DRAW_CARD_ACTION.MOVE_FOR_GET_ACTION ) {
                 _player_manager.rotateDrawCard( i );
-            } 
+            }
+        }
+		//パーティクルの更新
+		_particle_manager.particleUpdate( );
+
+        //回転カード数が前回の回転カード数と違う場合にドローSEを出す
+        if ( _rotate_card_num != _player_manager.getRotateCardNum( ) ) {
+            //回転カード数を設定
+            _rotate_card_num = _player_manager.getRotateCardNum( );
+
+            //ドローのSEを再生
+            _sound_manager.playSE( SE_TYPE.SE_DRAW );
         }
     }
 
@@ -933,6 +982,8 @@ public class ApplicationManager : Manager< ApplicationManager > {
         _player_manager.initDiceValue( );
         // カードを生成
         _player_manager.initAllPlayerCard( );
+        //回転カード数のリセット
+        _rotate_card_num = 0;
         if ( _mode == PROGRAM_MODE.MODE_CONNECT ) {
             _client_data.CmdSetSendStatus( _player_manager.getPlayerData( ).power, _player_manager.getHandNum( ) );
             _client_data.setStatus( _player_manager.getPlayerData( ).power, _player_manager.getHandNum( ) );
@@ -1061,8 +1112,14 @@ public class ApplicationManager : Manager< ApplicationManager > {
         _battle_manager.battleTimeCount( );
 
 		if ( _battle_manager.isComplete( ) ) {
+            //拡大画像を削除
+            if ( _player_manager.isExpantion( ) ) {
+                destroyLightOffObj( );
+                _player_manager.destroyExpantionCard( );
+            }
             createWaitImage( "WaitOpponent" );
             destroyCompleteButton( );
+			_sound_manager.playSE( SE_TYPE.SE_CHOICE1 );
 			if ( _mode == PROGRAM_MODE.MODE_CONNECT ) {
 				// 選択結果を送る
 				int player_status = _player_manager.getPlayerData( ).power;
@@ -1083,7 +1140,10 @@ public class ApplicationManager : Manager< ApplicationManager > {
                 _player_manager.refreshSelectCard( );
 			    _phase_manager.setPhase( MAIN_GAME_PHASE.GAME_PHASE_RESULT );
                 _phase_init = false;
-            } 
+            }
+            //一度画面上に配置しているカードオブジェクトを削除
+            _player_manager.allDeletePlayerCard( );
+
         }
 
 		if ( _mode == PROGRAM_MODE.MODE_CONNECT ) {
@@ -1148,6 +1208,10 @@ public class ApplicationManager : Manager< ApplicationManager > {
 
 
 			if ( !_result_init && battle_result != 0 ) {
+				//BGMを一旦停止
+				_sound_manager.stopBGM( );
+				//リザルトBGMを再生
+				_sound_manager.playSE( SE_TYPE.SE_RESULT );
                 destroyWaitImage( );
 				createLightOffObj( false );
 				_battle_manager.createResultImage( ( BATTLE_RESULT )battle_result );
@@ -1156,9 +1220,12 @@ public class ApplicationManager : Manager< ApplicationManager > {
 
 			// 左クリックでResultを消す
 			if ( Input.GetMouseButtonDown( 0 ) ) {
+				_sound_manager.playBGM ( BGM_TYPE.BGM_FIELD );
 				_battle_manager.clearResult( );
 				_battle_manager.deleteResultImage( );
 				destroyLightOffObj( );
+                // カードを生成
+                _player_manager.initAllPlayerCard( );
 
 				// 前後一マス以内のマスを明るくする
 				for ( int i = 0; i < _map_manager.getMassCount( ); i++ ) {
@@ -1219,6 +1286,10 @@ public class ApplicationManager : Manager< ApplicationManager > {
             int num = 0;
 
 			if ( !_result_init ) {
+				//BGMを一旦停止
+				_sound_manager.stopBGM( );
+				//リザルトBGMを再生
+				_sound_manager.playSE( SE_TYPE.SE_RESULT );
                 destroyWaitImage( );
 				createLightOffObj( false );
 				_battle_manager.createResultImage( _debug_result );
@@ -1227,6 +1298,9 @@ public class ApplicationManager : Manager< ApplicationManager > {
 
 			// 左クリックでResultを消す
 			if ( Input.GetMouseButtonDown( 0 ) ) {
+				_sound_manager.playBGM ( BGM_TYPE.BGM_FIELD );
+                // カードを生成
+                _player_manager.initAllPlayerCard( );
 				_battle_manager.clearResult( );
 				_battle_manager.deleteResultImage( );
 				destroyLightOffObj( );
@@ -1274,6 +1348,7 @@ public class ApplicationManager : Manager< ApplicationManager > {
             if ( flag ) {
                 if ( _debug_result != BATTLE_RESULT.LOSE ) {
                     _map_manager.dicisionMoveTarget( num );
+					_sound_manager.playSE( SE_TYPE.SE_MASS );
                 }
 			    _phase_manager.setPhase( MAIN_GAME_PHASE.GAME_PHASE_EVENT );
                 _map_manager.allMassReject( );

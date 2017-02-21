@@ -139,6 +139,49 @@ namespace Common {
 		NO_FIELD,
 	};
 
+    public enum BGM_TYPE {
+		BGM_NONE,
+		BGM_FIELD,
+		BGM_TILTE,
+		BGM_GAME_END2,
+	};
+
+	public enum SE_TYPE {
+		SE_NONE,
+		SE_BUFF,
+		SE_BUTTLE,
+		SE_CHOICE1,
+		SE_CHOICE2,
+		SE_DRAW,
+		SE_FISH1,
+		SE_FISH2,
+		SE_MASS,
+		SE_PHASE,
+		SE_TRESURE,
+		SE_RESULT,
+	};
+
+	public enum VOICE_TYPE {
+		VOICE_NONE,
+	};
+
+	public enum PARTICLE_TYPE {
+		PARTICLE_NONE,
+		PARTICLE_OCEANCURRENT,
+		PARTICLE_SPIRAL,
+		PARTICLE_FIREWORKS,
+		PARTICLE_LIGHTNING,
+        MAX_PARTICLE_NUM,
+	};
+
+    public enum RARITY_TYPE {
+        RARITY_NONE,
+        RARITY_NORMAL,
+        RARITY_RARE,
+        RARITY_SUPER_RARE,
+        RARITY_DOUBLE_SUPER_RARE,
+    };
+
     /// <summary>
     /// 通信で送受信するフィールド側のデータ
     /// </summary>
@@ -240,4 +283,5 @@ namespace Common {
             this.rarity = rarity;
         }
     }
+
 }
