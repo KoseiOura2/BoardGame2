@@ -100,6 +100,7 @@ public class ApplicationManager : Manager< ApplicationManager > {
     private bool _create_mass_text  = false;
     private int _opponent_power     = 0;
     private int _opponent_card_num  = 0;
+    private int _rotate_card_num    = 0;
     private int _change_scene_count = 0;
     private int _change_phase_count = 0;
     private float _title_wait_time  = 0.0f;
@@ -814,7 +815,6 @@ public class ApplicationManager : Manager< ApplicationManager > {
         if ( _player_manager.getDrawCardAction( ) == ClientPlayerManager.DRAW_CARD_ACTION.MOVE_FOR_GET_ACTION ) {
 			if ( _player_manager.isArrivedDrawCard( ) ) {
                 createFlushObj( );
-				_sound_manager.playSE ( SE_TYPE.SE_DRAW );
             }
         }
 
@@ -893,8 +893,6 @@ public class ApplicationManager : Manager< ApplicationManager > {
         if ( _player_manager.getDrawCardAction( ) == ClientPlayerManager.DRAW_CARD_ACTION.MOVE_FOR_GET_ACTION ) {
 			//全てのカードの回転が終わっているか
             if ( _player_manager.isArrivedDrawCard( ) ) {
-                //ドローのSEを再生
-                _sound_manager.playSE( SE_TYPE.SE_DRAW );
                 createFlushObj( );
             }
         }
@@ -923,7 +921,6 @@ public class ApplicationManager : Manager< ApplicationManager > {
 
                 _phase_init = false;
                 _phase_manager.setPhase( phase );
-                    
             }
         }
     }
@@ -944,6 +941,15 @@ public class ApplicationManager : Manager< ApplicationManager > {
         }
 		//パーティクルの更新
 		_player_manager.partcleUpdateDrawCard( );
+
+        //回転カード数が前回の回転カード数と違う場合にドローSEを出す
+        if ( _rotate_card_num != _player_manager.getRotateCardNum( ) ) {
+            //回転カード数を設定
+            _rotate_card_num = _player_manager.getRotateCardNum( );
+
+            //ドローのSEを再生
+            _sound_manager.playSE( SE_TYPE.SE_DRAW );
+        }
     }
 
     /// <summary>
@@ -956,6 +962,8 @@ public class ApplicationManager : Manager< ApplicationManager > {
         _player_manager.initDiceValue( );
         // カードを生成
         _player_manager.initAllPlayerCard( );
+        //回転カード数のリセット
+        _rotate_card_num = 0;
         if ( _mode == PROGRAM_MODE.MODE_CONNECT ) {
             _client_data.CmdSetSendStatus( _player_manager.getPlayerData( ).power, _player_manager.getHandNum( ) );
             _client_data.setStatus( _player_manager.getPlayerData( ).power, _player_manager.getHandNum( ) );

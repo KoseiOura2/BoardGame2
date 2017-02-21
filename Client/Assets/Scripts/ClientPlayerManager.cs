@@ -406,13 +406,13 @@ public class ClientPlayerManager : MonoBehaviour {
                                                             _draw_card_list[ id ].move, rotate );
                 _rotate_list.Add( true );
                 //回転したカードのレアリティがレア以上ならパーティクルを生成
-				if( _draw_card_list[ id ].card_data.rarity > ( int )RARITY_TYPE.RARITY_RARE ){
+				if ( _draw_card_list[ id ].card_data.rarity > ( int )RARITY_TYPE.RARITY_RARE ) {
 					//対象のカードの座標にパーティクルを生成
 					_particle_manager.createParticle( PARTICLE_TYPE.PARTICLE_LIGHTNING );
 					//現在光るエフェクトを行っているパーティクルを取得
 					GameObject[ ] particleObj = _particle_manager.getParticleType( PARTICLE_TYPE.PARTICLE_LIGHTNING );
 					//パーティクルを対象カードの子オブジェクトに移動
-					particleObj[ particleObj.Length - 1 ].GetComponent<Transform>().SetParent( _draw_card_list[ id ].obj.transform, false );
+					particleObj[ particleObj.Length - 1 ].GetComponent< Transform >( ).SetParent( _draw_card_list[ id ].obj.transform, false );
                 }
                 //次のカードへ
                 _card_num++;
@@ -529,6 +529,11 @@ public class ClientPlayerManager : MonoBehaviour {
     public int getThrowCardNum( ) {
         return _throw_card_list.Count;
     }
+
+    public int getRotateCardNum( ) {
+        return _rotate_list.Count;
+    }
+
     /// <summary>
 	/// 手札にカードを追加する処理
     /// </summary>
