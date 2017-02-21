@@ -11,7 +11,7 @@ public class ClientPlayerManager : MonoBehaviour {
 	private const float MIN_DICE_VALUE   = 1.0f;
 	private const int INIT_PLAYER_POWER  = 10;
     private const int MAX_PLAYER_CARD_NUM = 6;
-	private const int MAX_SEND_CARD_NUM = 4;
+	private const int MAX_SEND_CARD_NUM = 6;
     private const float EXPANTION_MAGNIFICATION = 2.0f;
 	private const float DRAW_CARD_ROTATION_WAIT_TIME = 1.0f;
 
@@ -131,6 +131,14 @@ public class ClientPlayerManager : MonoBehaviour {
 		_player_card.select_list     = new List< CARD_DATA >( );
     }
 
+    /// <summary>
+    /// 初期化
+    /// </summary>
+    public void init( ref CardManager card_manager, ref ParticleManager particle_manager ) {
+        _card_manager = card_manager;
+        _particle_manager = particle_manager;
+    }
+
 	// Use this for initialization
 	void Start( ) {
 		if ( _profile_card_area == null ) {
@@ -192,20 +200,10 @@ public class ClientPlayerManager : MonoBehaviour {
 		if ( _card_obj == null ) {
 			_card_obj = ( GameObject )Resources.Load( "Prefabs/Card" );
 		}
-		if ( _card_manager == null ) {
-			_card_manager = GameObject.Find( "CardManager" ).GetComponent< CardManager >( );
-		}
-
-		if ( _particle_manager == null ) {
-			_particle_manager = GameObject.Find( "ParticleManager" ).GetComponent< ParticleManager >( );
-		}
-
-		//パーティクルマネージャーの初期化
-		_particle_manager.init( );
 
 		_player_data.power = INIT_PLAYER_POWER;
 	}
-	
+
 	/// <summary>
     /// エディタ上でのみデバッグ機能が実行される
     /// </summary>
@@ -411,7 +409,7 @@ public class ClientPlayerManager : MonoBehaviour {
 					_particle_manager.createParticle( PARTICLE_TYPE.PARTICLE_LIGHTNING );
 					//現在光るエフェクトを行っているパーティクルを取得
 					GameObject[ ] particleObj = _particle_manager.getParticleType( PARTICLE_TYPE.PARTICLE_LIGHTNING );
-					//パーティクルを対象カードの子オブジェクトに移動
+                    //パーティクルを対象カードの子オブジェクトに移動
 					particleObj[ particleObj.Length - 1 ].GetComponent< Transform >( ).SetParent( _draw_card_list[ id ].obj.transform, false );
                 }
                 //次のカードへ

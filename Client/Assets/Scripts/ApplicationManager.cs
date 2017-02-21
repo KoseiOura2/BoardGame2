@@ -39,6 +39,8 @@ public class ApplicationManager : Manager< ApplicationManager > {
 	private ClientData _client_data;
 	[ SerializeField ]
 	private SoundManager _sound_manager;
+    [ SerializeField ]
+    private ParticleManager _particle_manager;
 
 	[ SerializeField ]
 	private PLAYER_ORDER _player_num = PLAYER_ORDER.NO_PLAYER;
@@ -181,6 +183,20 @@ public class ApplicationManager : Manager< ApplicationManager > {
         }
 
         try {
+            _player_manager.init( ref _card_manager, ref _particle_manager );
+        }
+        catch {
+            Debug.Log( "Failure Init ClientPlayerManager..." );
+        }
+
+        try {
+            _particle_manager.init( );
+        }
+        catch {
+            Debug.Log( "Failure Init ParticleManager..." );
+        }
+
+        try {
             _light_off_pref = Resources.Load< GameObject >( "Prefabs/Background/LightOff" );
         }
         catch {
@@ -193,6 +209,7 @@ public class ApplicationManager : Manager< ApplicationManager > {
         catch {
             Debug.Log( "Failure Load FlushObj..." );
         }
+
 	}
 
     private void referManager( ) {
@@ -227,6 +244,9 @@ public class ApplicationManager : Manager< ApplicationManager > {
 			if ( _sound_manager == null ) {
 				_sound_manager = GameObject.Find( "SoundManager" ).GetComponent< SoundManager >( );
 			}
+            if ( _particle_manager == null ) {
+                _particle_manager = GameObject.Find( "ParticleManager" ).GetComponent< ParticleManager >( );
+            }
 		}
 		catch {
 			Debug.Log( "参照に失敗しました。" );
