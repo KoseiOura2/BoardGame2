@@ -1120,7 +1120,10 @@ public class ApplicationManager : Manager< ApplicationManager > {
                 _player_manager.refreshSelectCard( );
 			    _phase_manager.setPhase( MAIN_GAME_PHASE.GAME_PHASE_RESULT );
                 _phase_init = false;
-            } 
+            }
+            //一度画面上に配置しているカードオブジェクトを削除
+            _player_manager.allDeletePlayerCard( );
+
         }
 
 		if ( _mode == PROGRAM_MODE.MODE_CONNECT ) {
@@ -1201,6 +1204,8 @@ public class ApplicationManager : Manager< ApplicationManager > {
 				_battle_manager.clearResult( );
 				_battle_manager.deleteResultImage( );
 				destroyLightOffObj( );
+                // カードを生成
+                _player_manager.initAllPlayerCard( );
 
 				// 前後一マス以内のマスを明るくする
 				for ( int i = 0; i < _map_manager.getMassCount( ); i++ ) {
@@ -1274,6 +1279,8 @@ public class ApplicationManager : Manager< ApplicationManager > {
 			// 左クリックでResultを消す
 			if ( Input.GetMouseButtonDown( 0 ) ) {
 				_sound_manager.playBGM ( BGM_TYPE.BGM_FIELD );
+                // カードを生成
+                _player_manager.initAllPlayerCard( );
 				_battle_manager.clearResult( );
 				_battle_manager.deleteResultImage( );
 				destroyLightOffObj( );
