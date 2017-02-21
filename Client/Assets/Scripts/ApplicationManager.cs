@@ -1208,10 +1208,6 @@ public class ApplicationManager : Manager< ApplicationManager > {
 
 
 			if ( !_result_init && battle_result != 0 ) {
-				//BGMを一旦停止
-				_sound_manager.stopBGM( );
-				//リザルトBGMを再生
-				_sound_manager.playSE( SE_TYPE.SE_RESULT );
                 destroyWaitImage( );
 				createLightOffObj( false );
 				_battle_manager.createResultImage( ( BATTLE_RESULT )battle_result );
@@ -1220,7 +1216,6 @@ public class ApplicationManager : Manager< ApplicationManager > {
 
 			// 左クリックでResultを消す
 			if ( Input.GetMouseButtonDown( 0 ) ) {
-				_sound_manager.playBGM ( BGM_TYPE.BGM_FIELD );
 				_battle_manager.clearResult( );
 				_battle_manager.deleteResultImage( );
 				destroyLightOffObj( );
@@ -1286,10 +1281,6 @@ public class ApplicationManager : Manager< ApplicationManager > {
             int num = 0;
 
 			if ( !_result_init ) {
-				//BGMを一旦停止
-				_sound_manager.stopBGM( );
-				//リザルトBGMを再生
-				_sound_manager.playSE( SE_TYPE.SE_RESULT );
                 destroyWaitImage( );
 				createLightOffObj( false );
 				_battle_manager.createResultImage( _debug_result );
@@ -1298,7 +1289,6 @@ public class ApplicationManager : Manager< ApplicationManager > {
 
 			// 左クリックでResultを消す
 			if ( Input.GetMouseButtonDown( 0 ) ) {
-				_sound_manager.playBGM ( BGM_TYPE.BGM_FIELD );
                 // カードを生成
                 _player_manager.initAllPlayerCard( );
 				_battle_manager.clearResult( );
