@@ -4,7 +4,7 @@ using System.Collections;
 using System.Collections.Generic;
 using Common;
 
-public class GraphicManager : MonoBehaviour {
+public class GraphicManager : Manager< GraphicManager > {
 
     private const float DISTRIBUTE_TIME = 1.0f;
 
@@ -45,6 +45,10 @@ public class GraphicManager : MonoBehaviour {
 	void Start( ) {
 	
 	}
+    // Awake関数の代わり
+	protected override void initialize( ) {
+		
+	}
 
     public void init( ) {
         loadAlwaysGraph( );
@@ -65,11 +69,33 @@ public class GraphicManager : MonoBehaviour {
         }
     }
 
+    /// <summary>
+    /// プレハブロード用関数
+    /// </summary>
+    /// <param name="data_path"></param>
+    /// <returns></returns>
+    public GameObject loadPrefab( string data_path ) {
+        GameObject pref = Resources.Load< GameObject >( "Prefabs/" + data_path );
+
+        return pref;
+    }
+    
+    /// <summary>
+    /// スプライトロード用関数
+    /// </summary>
+    /// <param name="data_path"></param>
+    /// <returns></returns>
+    public Sprite loadSprite( string data_path ) {
+        Sprite sprite = Resources.Load< Sprite >( "Graphics/" + data_path );
+
+        return sprite;
+    }
+
     private void loadAlwaysGraph( ) {
-        _title_back_pref = Resources.Load< GameObject >( "Prefabs/BackGroundObj/TitleBack" );
+        _title_back_pref = loadPrefab( "BackGroundObj/TitleBack" );
 
         for ( int i = 0; i < _big_num_image.Length; i++ ) {
-            _big_num_image[ i ] = Resources.Load< Sprite >( "Graphics/UI/number/number_buff_" + i );
+            _big_num_image[ i ] = loadSprite( "UI/number/number_buff_" + i );
         }
     }
 
@@ -143,12 +169,14 @@ public class GraphicManager : MonoBehaviour {
     public void createMassObj( int num, MASS_TYPE type, EVENT_TYPE event_type, Vector3 pos ) {
 		// タイプによるリソース分け
 		switch ( type ) {
+            case MASS_TYPE.MASS_NORMAL:
+                _mass_prefab = ( GameObject )Resources.Load( "Prefabs/Mass/mass_normal" );
+                break;
 			case MASS_TYPE.MASS_START:
 			case MASS_TYPE.MASS_GOAL:
 				_mass_prefab = ( GameObject )Resources.Load( "Prefabs/Mass/mass_yellow" );
                 break;
 			case MASS_TYPE.MASS_NONE:
-            case MASS_TYPE.MASS_NORMAL:
                 _mass_prefab = ( GameObject )Resources.Load( "Prefabs/Mass/mass_blue" );
                 break;
 			case MASS_TYPE.MASS_DENGER:

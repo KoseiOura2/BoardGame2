@@ -83,17 +83,22 @@ public class ApplicationManager : Manager< ApplicationManager > {
 	private int[ ] _debug_use_card = new int[ 6 ];
     [ SerializeField ]
 	private bool _debug_mode = false;
+    [ SerializeField ]
+    private bool _immediately_goal = false;
 
 	// Awake関数の代わり
 	protected override void initialize( ) {
-        if ( isError( ) ) {
+        if ( isFileManagerError( ) ) {
             return;
         }
-
+        
+        if ( isGraphicManagerError( ) ) {
+            return;
+        }
 		referManager( );
 	}
 
-    bool isError( ) {
+    private bool isFileManagerError( ) {
         bool error = false;
 
         if ( !_file_manager ) {
@@ -108,50 +113,105 @@ public class ApplicationManager : Manager< ApplicationManager > {
         return error;
     }
 
+    private bool isGraphicManagerError( ) {
+        bool error = false;
+
+        if ( !_graphic_manager ) {
+            try {
+                error = true;
+                _graphic_manager = GraphicManager.getInstance( );
+            } catch {
+                Debug.LogError( "グラフィックマネージャーのインスタンスが取得できませんでした。" );
+            }
+        }
+
+        return error;
+    }
+
 	// Use this for initialization
 	void Start( ) {
 		referManager( );
 
         _graphic_manager.init( );
 		_card_manager.init( );
-        _particle_manager.init( );
+        _particle_manager.init( ref _graphic_manager );
 	}
 
     /// <summary>
     /// 各マネージャーの参照
     /// </summary>
-	void referManager( ) {
-		try {
-			if ( _network_manager == null ) {
-				_network_manager = GameObject.Find( "NetworkManager" ).GetComponent< NetworkMNG >( );
-			}
-			if ( _phase_manager == null ) {
-				_phase_manager = GameObject.Find( "PhaseManager" ).GetComponent< PhaseManager >( );
-			}
-			if ( _card_manager == null ) {
-				_card_manager = GameObject.Find( "CardManager" ).GetComponent< CardManager >( );
-			}
-			if ( _player_manager == null ) {
-				_player_manager = GameObject.Find( "PlayerManager" ).GetComponent< PlayerManager >( );
-			}
-			if ( _stage_manager == null ) {
-				_stage_manager = GameObject.Find( "StageManager" ).GetComponent< StageManager >( );
-			}
-            if ( _particle_manager == null ) {
-				_particle_manager = GameObject.Find( "ParticleManager" ).GetComponent< ParticleManager >( );
-			}
-			if ( _camera_manager == null ) {
-				_camera_manager = Camera.main.GetComponent< CameraManager >( );
-			}
-			if ( _graphic_manager == null ) {
-				_graphic_manager = GameObject.Find( "GraphicManager" ).GetComponent< GraphicManager >( );
-			}
-			_network_gui_controll = GameObject.Find( "NetworkManager" ).GetComponent< NetworkGUIControll >( );
+	private void referManager( ) {
+		if ( _network_manager == null ) {
+            try {
+			    _network_manager = referManager( "NetworkManager" ).GetComponent< NetworkMNG >( );
+            } catch {
+                Debug.Log( "NetworkManagerの参照に失敗しました。" );
+            }
 		}
-		catch {
-			Debug.Log( "参照に失敗しました。" );
+		if ( _phase_manager == null ) {
+            try {
+			    _phase_manager = referManager( "PhaseManager" ).GetComponent< PhaseManager >( );
+            } catch {
+                Debug.Log( "PhaseManagerの参照に失敗しました。" );
+            }
+		}
+		if ( _card_manager == null ) {
+            try {
+			    _card_manager = referManager( "CardManager" ).GetComponent< CardManager >( );
+            } catch {
+                Debug.Log( "CardManagerの参照に失敗しました。" );
+            }
+		}
+		if ( _player_manager == null ) {
+            try {
+			    _player_manager = referManager( "PlayerManager" ).GetComponent< PlayerManager >( );
+            } catch {
+                Debug.Log( "PlayerManagerの参照に失敗しました。" );
+            }
+		}
+		if ( _stage_manager == null ) {
+            try {
+			    _stage_manager = referManager( "StageManager" ).GetComponent< StageManager >( );
+            } catch {
+                Debug.Log( "StageManagerの参照に失敗しました。" );
+            }
+		}
+        if ( _particle_manager == null ) {
+            try {
+			    _particle_manager = referManager( "ParticleManager" ).GetComponent< ParticleManager >( );
+            } catch {
+                Debug.Log( "ParticleManagerの参照に失敗しました。" );
+            }
+		}
+		if ( _camera_manager == null ) {
+            try {
+                _camera_manager = Camera.main.GetComponent< CameraManager >( );
+            } catch {
+                Debug.Log( "CameraManagerの参照に失敗しました。" );
+            }
+		}
+		if ( _network_gui_controll == null ) {
+            try {
+			    _network_gui_controll = referManager( "NetworkManager" ).GetComponent< NetworkGUIControll >( );
+            } catch {
+                Debug.Log( "NetworkGUIControllの参照に失敗しました。" );
+            }
 		}
 	}
+
+    private GameObject referManager( string manager_name ) {
+        GameObject manager = null;
+        GameObject pref    = null;
+
+        manager = GameObject.Find( manager_name );
+        // マネージャーがヒエラルキー内に存在しない場合
+        if ( manager == null ) {
+            pref = _graphic_manager.loadPrefab( "Manager/" + manager_name );
+            manager = ( GameObject )Instantiate( pref );
+        }
+
+        return manager;
+    }
 	
 	// Update is called once per frame
 	void FixedUpdate( ) {
@@ -298,7 +358,7 @@ public class ApplicationManager : Manager< ApplicationManager > {
                 _graphic_manager.createPlayerObj( player_manager_obj.transform );
 
 			    //マスの生成
-			    _stage_manager.init( ref _graphic_manager );
+			    _stage_manager.init( ref _graphic_manager, ref _particle_manager );
 			    for( int i = 0; i < _file_manager.getMassCount( ); i++ ) {
 				    int num = _stage_manager.getMassCount( );
 				    _stage_manager.massCreate( num, _file_manager.getFileData( ).mass[ num ].mass_type,
@@ -365,7 +425,7 @@ public class ApplicationManager : Manager< ApplicationManager > {
         GameObject player_manager_obj = _player_manager.transform.gameObject;
         _graphic_manager.createPlayerObj( player_manager_obj.transform );
 		//マスの生成
-		_stage_manager.init( ref _graphic_manager );
+		_stage_manager.init( ref _graphic_manager, ref _particle_manager );
 		for( int i = 0; i < _file_manager.getMassCount( ); i++ ) {
 			int num = _stage_manager.getMassCount( );
 			_stage_manager.massCreate( num, _file_manager.getFileData( ).mass[ num ].mass_type,
@@ -528,7 +588,11 @@ public class ApplicationManager : Manager< ApplicationManager > {
 			break;
 		}
 
+        // ライトの更新
 		_stage_manager.updateLightColor( _stage_manager.getEnvironment( ), num );
+
+        // 泡パーティクルの更新
+        _stage_manager.updateBubble( );
 
         if ( _send_status ) {
             if ( _mode == PROGRAM_MODE.MODE_ONE_CONNECT ) {
@@ -619,9 +683,15 @@ public class ApplicationManager : Manager< ApplicationManager > {
         if ( _phase_manager.isFinishMovePhaseImage( ) == false ) {
 			_phase_manager.movePhaseImage( );
 		} else {
-            _phase_manager.changeMainGamePhase( MAIN_GAME_PHASE.GAME_PHASE_FINISH, "DicePhase" );
-            _phase_manager.deletePhaseImage( );
-            _phase_manager.createPhaseText( MAIN_GAME_PHASE.GAME_PHASE_FINISH );
+            if ( !_immediately_goal ) {
+                _phase_manager.changeMainGamePhase( MAIN_GAME_PHASE.GAME_PHASE_DICE, "DicePhase" );
+                _phase_manager.deletePhaseImage( );
+                _phase_manager.createPhaseText( MAIN_GAME_PHASE.GAME_PHASE_DICE );
+            } else {
+                _phase_manager.changeMainGamePhase( MAIN_GAME_PHASE.GAME_PHASE_FINISH, "FinishPhase" );
+                _phase_manager.deletePhaseImage( );
+                _phase_manager.createPhaseText( MAIN_GAME_PHASE.GAME_PHASE_FINISH );
+            }
         }
 	}
     
@@ -1214,7 +1284,7 @@ public class ApplicationManager : Manager< ApplicationManager > {
 
 		// マス移動終了時にイベントフラグをfalseにしてもう一度イベントが発生するようにする
         if ( _player_manager.getPlayerOrder( ) != PLAYER_ORDER.NO_PLAYER ) {
-            if ( _player_manager.getEventType( ) == EVENT_TYPE.EVENT_MOVE        ||
+            if ( _player_manager.getEventType( ) == EVENT_TYPE.EVENT_MOVE     ||
                  _player_manager.getEventType( ) == EVENT_TYPE.EVENT_TRAP_ONE ||
                  _player_manager.getEventType( ) == EVENT_TYPE.EVENT_TRAP_TWO ) {
 			    if ( _player_manager.isMoveFinish( ) ) {
@@ -1234,6 +1304,7 @@ public class ApplicationManager : Manager< ApplicationManager > {
 
         // パーティクルの更新
         _particle_manager.particleUpdate( );
+        _particle_manager.finishParticle( );
         
         // 動作しているパーティクルの確保
         _particle_list = _particle_manager.getParticleNumsForType( PARTICLE_TYPE.PARTICLE_SPIRAL );
@@ -1242,15 +1313,18 @@ public class ApplicationManager : Manager< ApplicationManager > {
             _spiral_array[ i ] = _particle_list[ i ];
         }
 
-        if( _particle_manager.isFinshParticle( _spiral_array ) ) {
-            if( _player_manager.getEventType( ) == EVENT_TYPE.EVENT_CHANGE ) {
-                _player_manager.setEventAllFinish( true );
-            } else {
-                _player_manager.setEventFinish( true );
+        if ( _player_manager.getPlayerOrder( ) != PLAYER_ORDER.NO_PLAYER ) {
+            if( _particle_manager.isFinshParticle( _spiral_array ) ) {
+                if( _player_manager.getEventType( ) == EVENT_TYPE.EVENT_CHANGE ) {
+                    _player_manager.setEventAllFinish( true );
+                } else {
+                    _player_manager.setEventFinish( true );
+                }
+                _particle_list.Clear( );
+			    _player_manager.setEventType( ( int )_player_manager.getPlayerOrder( ), EVENT_TYPE.EVENT_NONE );
             }
-            _particle_list.Clear( );
-			_player_manager.setEventType( ( int )_player_manager.getPlayerOrder( ), EVENT_TYPE.EVENT_NONE );
         }
+
         // プレイヤーの順番を更新
         _player_manager.updatePlayerOrder( );
 
@@ -1638,13 +1712,14 @@ public class ApplicationManager : Manager< ApplicationManager > {
             int rand = Random.Range( 0, 2 );
             PARTICLE_TYPE type = ( rand == 1 ) ? PARTICLE_TYPE.PARTICLE_FIREWORKS1 : PARTICLE_TYPE.PARTICLE_FIREWORKS2;
             create_num = _particle_manager.getParticlesForType( type ).Length;
-            if( _particle_manager.isFireUpdate( ) ){
+            if( _particle_manager.isCretateFireTiming( ) ){
 			    if( create_num < _particle_manager.getLimitCreateNum( type ) ) {
 			        _particle_manager.createParticle( type );
 			    }
             }
 			//_particle_manager.setParticleType( PARTICLE_TYPE.PARTICLE_FIREWORKS );
 			_particle_manager.particleUpdate( );
+            _particle_manager.finishParticle( );
 			_goal_time++;
 		} else if ( _goal_time >= GOAL_WAIT_TIME || Input.GetKey( KeyCode.A ) ) {
 			if ( _mode == PROGRAM_MODE.MODE_NO_CONNECT ) {

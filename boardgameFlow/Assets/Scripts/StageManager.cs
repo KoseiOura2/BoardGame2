@@ -18,8 +18,12 @@ public class StageManager : MonoBehaviour {
 	private const float MESOPELAGIC_DEPTH =  200.0f;
 	private const float DEEP_SEA_DEPTH    = 1000.0f;
 	private const float GOAL_DEPTH        = 1200.0f;
+    
+    private const int MAX_CREATE_BUBBLE_NUM = 3;
+    private const float CREATE_BUBBLE_TIME  = 5.0f;
 
     private GraphicManager _graphic_manager;
+    private ParticleManager _particle_manager;
 
 	[ SerializeField ]
 	private Light _main_light;
@@ -31,10 +35,14 @@ public class StageManager : MonoBehaviour {
 
     private int _create_mass_count = 0;
 	private int[ ] _sea_environment_id = new int[ ( int )FIELD_ENVIRONMENT.FIELD_ENVIRONMENT_NUM ]{ 0, 0, 0 };
+	[ SerializeField ]
+    private float _create_bubble_time = 0.0f;
 
-	public void init( ref GraphicManager graphic_manager ) {
+	public void init( ref GraphicManager graphic_manager, ref ParticleManager particle_manager ) {
         // グラフィックマネージャーの参照
         _graphic_manager = graphic_manager;
+        // パーティクルマネージャーの参照
+        _particle_manager = particle_manager;
         
         // カラーの読み込み
 		_sea_color = new Color[ ]{ SHOAL_COLOR, MESOPELAGIC_COLOR, DEEP_SEA_COLOR, GOAL_COLOR };
@@ -65,6 +73,11 @@ public class StageManager : MonoBehaviour {
         _mass_pos_list.Add( pos );
     }
 
+    /// <summary>
+    /// ライトカラーの更新
+    /// </summary>
+    /// <param name="environment"></param>
+    /// <param name="mass_id"></param>
 	public void updateLightColor( FIELD_ENVIRONMENT environment, int mass_id ) {
 		int mass_num = 0;
 		int player_pos = 0;
@@ -93,6 +106,45 @@ public class StageManager : MonoBehaviour {
 									   _sea_color[ ( int )environment + 1 ].b - b * player_pos );
 
 	}
+
+    /// <summary>
+    /// 泡パーティクルの更新
+    /// </summary>
+    public void updateBubble( ) {
+        // timeの更新
+        _create_bubble_time += Time.deltaTime;
+        _particle_manager.particleUpdate( );
+
+        // 動作しているパーティクルの確保
+        List< int > bubble_list = _particle_manager.getParticleNumsForType( PARTICLE_TYPE.PARTICLE_BUBBLE );
+        int[ ] bubble_array = new int[ bubble_list.Count ];
+        for ( int i = 0; i < bubble_list.Count; i++ ) {
+            bubble_array[ i ] = bubble_list[ i ];
+        }
+
+        if ( _particle_manager.isFinshParticle( bubble_array ) ) {
+            _particle_manager.finishParticle( );
+        }
+
+        if ( _create_bubble_time >= CREATE_BUBBLE_TIME ) {
+            // 現在生成されているパーティクル数を取得
+            int created_num = _particle_manager.getParticlesForType( PARTICLE_TYPE.PARTICLE_BUBBLE ).Length;
+		    if( created_num < _particle_manager.getLimitCreateNum( PARTICLE_TYPE.PARTICLE_BUBBLE ) ) {
+                // 生成する数を計算
+                int create_num = Random.Range( 1, MAX_CREATE_BUBBLE_NUM );
+                if ( create_num + created_num > MAX_CREATE_BUBBLE_NUM ) {
+                    create_num = MAX_CREATE_BUBBLE_NUM - created_num;
+                }
+                for ( int i = 0; i < create_num; i++ ) {
+                    // パーティクルを生成
+                    _particle_manager.createParticle( PARTICLE_TYPE.PARTICLE_BUBBLE );
+                }
+            }
+
+            // timeの初期化
+            _create_bubble_time = 0.0f;
+        }
+    }
 
 	public void setEnvironmentID( int id, FIELD_ENVIRONMENT environment ) {
 		_sea_environment_id[ ( int )environment ] = id;

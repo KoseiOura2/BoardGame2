@@ -6,7 +6,7 @@ using Common;
 
 public class ParticleManager : MonoBehaviour {
     
-    // パーティクル関係
+    // パーティクルの時間関係
     private const float OCEAN_CURRENT_STOP_TIME    = 1.0f;
     private const float OCEAN_CURRENT_DESTROY_TIME = 1.5f;
     private const float SPIRAL_TIME_ONE            = 0.25f;
@@ -14,8 +14,20 @@ public class ParticleManager : MonoBehaviour {
     private const float SPIRAL_TIME_THREE          = 1.2f;
     private const float SPIRAL_TIME_FOUR           = 3.0f;
     private const float GOAL_PARTICLE_WAIT_TIME    = 3.0f;
-	private const float BUBBLE_TIME   			   = 3.0f;
     private const float GOAL_PARTICLE_UPDATE_TIME  = 0.5f;
+	private const float BUBBLE_TIME   			   = 5.0f;
+    // パーティクルの生成座標関係
+    private const float GOAL_PARTICLE_CREATE_POS_X_MIN =  90.0f;
+    private const float GOAL_PARTICLE_CREATE_POS_X_MAX = 110.0f;
+    private const float GOAL_PARTICLE_CREATE_POS_Y_MIN = 100.0f;
+    private const float GOAL_PARTICLE_CREATE_POS_Y_MAX = 105.0f;
+    private const float GOAL_PARTICLE_CREATE_POS_Z     = 165.0f;
+
+    private const float BUBBLE_PARTICLE_CREATE_POS_X_MIN = -20.0f;
+    private const float BUBBLE_PARTICLE_CREATE_POS_X_MAX = 100.0f;
+    private const float BUBBLE_PARTICLE_CREATE_POS_Y_MIN =   0.1f;
+    private const float BUBBLE_PARTICLE_CREATE_POS_Y_MAX =   1.5f;
+    private const float BUBBLE_PARTICLE_CREATE_POS_Z     =  10.0f;
 
     private float[ ][ ] _particle_time_list = new float[ ( int )PARTICLE_TYPE.MAX_PARTICLE_NUM ][ ];
 
@@ -42,15 +54,26 @@ public class ParticleManager : MonoBehaviour {
 
             // パーティクルを生成
             _particle = ( GameObject )Instantiate( pref );
-            if( _particle_type != PARTICLE_TYPE.PARTICLE_FIREWORKS1 && _particle_type != PARTICLE_TYPE.PARTICLE_FIREWORKS2 ){
-                _particle.transform.position = pref.transform.position;
+            Vector3 create_pos;
+            // タイプによって生成位置を変える
+            if ( _particle_type == PARTICLE_TYPE.PARTICLE_FIREWORKS1 || _particle_type == PARTICLE_TYPE.PARTICLE_FIREWORKS2 ) {
+                create_pos = new Vector3( Random.Range( GOAL_PARTICLE_CREATE_POS_X_MIN, GOAL_PARTICLE_CREATE_POS_X_MAX ),
+                                          Random.Range( GOAL_PARTICLE_CREATE_POS_Y_MIN, GOAL_PARTICLE_CREATE_POS_Y_MAX ),
+                                          GOAL_PARTICLE_CREATE_POS_Z );
                 // パーティクルの作動
                 _particle.GetComponent< ParticleEmitter >( ).emit = true;
+            } else if ( _particle_type == PARTICLE_TYPE.PARTICLE_BUBBLE ){
+                create_pos = new Vector3( Random.Range( BUBBLE_PARTICLE_CREATE_POS_X_MIN, BUBBLE_PARTICLE_CREATE_POS_X_MAX ),
+                                          Random.Range( BUBBLE_PARTICLE_CREATE_POS_Y_MIN, BUBBLE_PARTICLE_CREATE_POS_Y_MAX ),
+                                          Random.Range( -BUBBLE_PARTICLE_CREATE_POS_Z, BUBBLE_PARTICLE_CREATE_POS_Z ) );
             } else {
-                _particle.transform.position = new Vector3( Random.Range( 90, 110 ), Random.Range( 100, 105 ), 165f );
+                create_pos = pref.transform.position;
+                // パーティクルの作動
+                _particle.GetComponent< ParticleEmitter >( ).emit = true;
             }
 
-            
+            // ポジションの設定
+            setParticlePos( create_pos );
         }
 
         /// <summary>
@@ -139,25 +162,34 @@ public class ParticleManager : MonoBehaviour {
         }
 
 	};
+    
+    // プレイヤーの移動を開始する渦潮パーティクルのフェイズ
+    public int PLAYER_MOVE_START_PHASE_ON_SPIRAL = 2;
 
+    private GraphicManager _graphic_manager;
+    // パーティクルのプレハブ
 	[ SerializeField ]
     private GameObject[ ] _particle_prefs = new GameObject[ ( int )PARTICLE_TYPE.MAX_PARTICLE_NUM ];
+    // パーティクルクラスのリスト
     private List< ParticleOperate > _particle_operates = new List< ParticleOperate >( );
+    // 削除予定のパーティクルの数
     private List< int > _delete_particle_num = new List< int >( );
+    // 種別によるパーティクルの生成限界数
     private int[ ] _limit_create_nums = new int[ ( int )PARTICLE_TYPE.MAX_PARTICLE_NUM ] { 0, 1, 1, 7, 7, 3 };
-
-    public int PLAYER_MOVE_START_PHASE_ON_SPIRAL = 2;
-    
     private float _fire_update_count  = 0;
     
-    public void init( ) {
+    public void init( ref GraphicManager graphic_manager ) {
+        _graphic_manager = graphic_manager;
         loadParticle( );
         timeArrayInsure( );
     }
 	
+    /// <summary>
+    /// プレハブのロード
+    /// </summary>
     private void loadParticle( ) {
         for ( int i = 1; i < ( int )PARTICLE_TYPE.MAX_PARTICLE_NUM; i++ ) {
-			_particle_prefs[ i ] = Resources.Load< GameObject >( "Prefabs/Particle/Effect_" + i );
+			_particle_prefs[ i ] = _graphic_manager.loadPrefab( "Particle/Effect_" + i );
         }
     }
 
@@ -213,10 +245,19 @@ public class ParticleManager : MonoBehaviour {
             _particle_operates[ i ].particleUpdate( );
         }
 
+    }
+
+    /// <summary>
+    /// パーティクルオペレイターの削除
+    /// </summary>
+    public void finishParticle( ) {
+        int count = 0;
+
         // パーティクルの削除
         if ( _delete_particle_num.Count > 0 ) {
             for ( int i = 0; i < _delete_particle_num.Count; i++ ) {
-                _particle_operates.RemoveAt( _delete_particle_num[ i ] );
+                _particle_operates.RemoveAt( _delete_particle_num[ i - count ] );
+                count++;
             }
             _delete_particle_num.Clear( );
         }
@@ -310,7 +351,9 @@ public class ParticleManager : MonoBehaviour {
         for( int i = 0; i < _particle_operates.Count; i++ ) {
             if ( _particle_operates[ i ].isParticleEnd( ) ) {
                 count++;
-                _delete_particle_num.Add( i );
+                if ( !_delete_particle_num.Contains( i ) ) {
+                    _delete_particle_num.Add( i );
+                }
             }
         }
 
@@ -328,10 +371,11 @@ public class ParticleManager : MonoBehaviour {
     /// <param name="num"></param>
     /// <returns></returns>
     public bool isParticleOperates( int num ) {
-        if( _particle_operates[ num ] == null )
+        if( _particle_operates[ num ] == null ) {
             return false;
-        else 
+        } else { 
             return true;
+        }
     }
 
 	/// <summary>
