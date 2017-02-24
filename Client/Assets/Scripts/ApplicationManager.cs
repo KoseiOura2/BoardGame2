@@ -1108,8 +1108,10 @@ public class ApplicationManager : Manager< ApplicationManager > {
 		}
 
         // 時間更新
-		_battle_manager.changeBattleTimeImageNum( _battle_time_image[ 0 ], _battle_time_image[ 1 ] );
-        _battle_manager.battleTimeCount( );
+		if ( _client_data.getRecvData( ).battle_ready ) {
+			_battle_manager.changeBattleTimeImageNum( _battle_time_image[ 0 ], _battle_time_image[ 1 ] );
+			_battle_manager.battleTimeCount( );
+		}
 
 		if ( _battle_manager.isComplete( ) ) {
             //拡大画像を削除
@@ -1131,7 +1133,7 @@ public class ApplicationManager : Manager< ApplicationManager > {
                 _player_manager.refreshSelectCard( );
 				// カードを更新
 				_player_manager.initAllPlayerCard( );
-			} else if ( _mode == PROGRAM_MODE.MODE_NO_CONNECT ) {
+			} else {
 				int[ ] card_list = _player_manager.dicisionSelectCard( );
                 if ( card_list.Length > MAX_SEND_CARD_NUM ) {
                     _player_manager.refreshSelectCard( );
