@@ -170,14 +170,14 @@ public class GraphicManager : Manager< GraphicManager > {
 		// タイプによるリソース分け
 		switch ( type ) {
             case MASS_TYPE.MASS_NORMAL:
-                _mass_prefab = ( GameObject )Resources.Load( "Prefabs/Mass/mass_normal" );
+				_mass_prefab = ( GameObject )Resources.Load( "Prefabs/Mass/mass_blue" );
                 break;
 			case MASS_TYPE.MASS_START:
 			case MASS_TYPE.MASS_GOAL:
 				_mass_prefab = ( GameObject )Resources.Load( "Prefabs/Mass/mass_yellow" );
                 break;
 			case MASS_TYPE.MASS_NONE:
-                _mass_prefab = ( GameObject )Resources.Load( "Prefabs/Mass/mass_blue" );
+				_mass_prefab = ( GameObject )Resources.Load( "Prefabs/Mass/mass_normal" );
                 break;
 			case MASS_TYPE.MASS_DENGER:
 				_mass_prefab = ( GameObject )Resources.Load( "Prefabs/Mass/mass_red" );
@@ -201,7 +201,7 @@ public class GraphicManager : Manager< GraphicManager > {
             case EVENT_TYPE.EVENT_TRAP_TWO:
                 Vector3 mass_local_pos = obj.transform.localPosition;
                 GameObject chest = ( GameObject )Instantiate( _chest_prefab );
-                chest.transform.position = new Vector3( mass_local_pos.x, mass_local_pos.y, mass_local_pos.z + 2 );
+                chest.transform.position = new Vector3( mass_local_pos.x, mass_local_pos.y - 0.5f, mass_local_pos.z + 2 );
                 chest.name = "TreasureChest:" + num;
                 _chest_obj_list.Add( chest );
                 break; 
@@ -312,6 +312,8 @@ public class GraphicManager : Manager< GraphicManager > {
                 // ポジションの設定
                 Vector3 draw_card_pos = _draw_card_ui_pref.GetComponent< RectTransform >( ).localPosition;
                 _draw_card_ui_objs[ i ][ j ].GetComponent< RectTransform >( ).localPosition = draw_card_pos;
+
+				_draw_card_ui_objs[ i ][ j ].GetComponent< DeckImage >( ).adjustSize( );
             }
         }
 
@@ -327,6 +329,8 @@ public class GraphicManager : Manager< GraphicManager > {
         // ポジションの設定
         Vector3 deck_pos = _deck_ui_pref.GetComponent< RectTransform >( ).localPosition;
         _deck_ui_obj.GetComponent< RectTransform >( ).localPosition = deck_pos;
+
+		_deck_ui_obj.GetComponent< DeckImage >( ).adjustSize( );
     }
 
     public void destroyDrawPhaseUI( ) {

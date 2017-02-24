@@ -8,14 +8,14 @@ public class ParticleManager : MonoBehaviour {
     
     // パーティクルの時間関係
     private const float OCEAN_CURRENT_STOP_TIME    = 1.0f;
-    private const float OCEAN_CURRENT_DESTROY_TIME = 1.5f;
+    private const float OCEAN_CURRENT_DESTROY_TIME = 3.0f;
     private const float SPIRAL_TIME_ONE            = 0.25f;
     private const float SPIRAL_TIME_TWO            = 1.0f;
     private const float SPIRAL_TIME_THREE          = 1.2f;
     private const float SPIRAL_TIME_FOUR           = 3.0f;
     private const float GOAL_PARTICLE_WAIT_TIME    = 3.0f;
     private const float GOAL_PARTICLE_UPDATE_TIME  = 0.5f;
-	private const float BUBBLE_TIME   			   = 5.0f;
+	private const float BUBBLE_TIME   			   = 10.0f;
     // パーティクルの生成座標関係
     private const float GOAL_PARTICLE_CREATE_POS_X_MIN =  90.0f;
     private const float GOAL_PARTICLE_CREATE_POS_X_MAX = 110.0f;

@@ -146,6 +146,15 @@ public class StageManager : MonoBehaviour {
         }
     }
 
+	/// <summary>
+	/// 背景オブジェのレンダラーをリフレッシュする
+	/// </summary>
+	public void refreshRendBackObj( ) {
+		foreach ( GameObject obj in GameObject.FindGameObjectsWithTag( "NoRendObj" ) ) {
+			obj.GetComponent< BackgroundObj >( ).rendRefresh( );
+		}
+	}
+
 	public void setEnvironmentID( int id, FIELD_ENVIRONMENT environment ) {
 		_sea_environment_id[ ( int )environment ] = id;
 	}
