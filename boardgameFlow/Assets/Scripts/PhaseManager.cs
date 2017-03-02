@@ -14,7 +14,7 @@ public class PhaseManager : MonoBehaviour {
     private Sprite _start_image;
     private GameObject _phase_image_obj;
     private GameObject _back_ground;
-	private float _phase_image_move_speed = 10.0f;
+	private float _phase_image_move_speed = 20.0f;
 	private float _phase_image_width      = 0.0f;
 	private float _phase_image_height     = 0.0f;
 	private bool _phase_image_move_finish = false;

@@ -10,11 +10,9 @@ public class Player : MonoBehaviour {
 
     private PLAYER_DATA _data;
 
-    // プレイヤーのモデルデータ
-	private GameObject _player_pref = null;
     // 進む先のターゲットを設定
     [ SerializeField ]
-    private GameObject _target_mass;
+    private Vector3 _target_mass;
     // マス移動時の開始位置
     private Vector3 _start_position;   
     // マス移動時の到達位値   
@@ -56,39 +54,25 @@ public class Player : MonoBehaviour {
     /// 初期化
     /// </summary>
     /// <param name="id" "プレイヤーのＩＤ"></param>
-    /// <param name="pref" "オブジェクトのプレハブ"></param>
-    /// <param name="first_pos" "初期配置位置"></param>
-    /// <param name="trans" "親オブジェクトのトランスフォーム"></param>
-    public void init( int id, ref GameObject pref, ref Vector3 first_pos, ref Transform trans ) {
+    public void init( int id, ref GameObject obj, ref Vector3 first_pos ) {
         // 初期化
         _data.id          = id;
         _data.event_type  = EVENT_TYPE.EVENT_NONE;
 		_data.on_move     = true;
+        _data.obj         = obj;
 
-		_player_pref = pref;
+        _data.obj.transform.position = adjustPos( first_pos );;
 
-        createObj( ref first_pos, ref trans );
-
-		// ステータス値の初期化
-		setDefalutStatus( );
-		plusValueInit( );
-
-    }
-
-    /// <summary>
-    /// ゲーム開始時プレイヤーを生成
-    /// </summary>
-    /// <param name="first_pos" "初期配置位置"></param>
-    public void createObj( ref Vector3 first_pos, ref Transform trans ) {
-        // オブジェクト生成
-		_data.obj = ( GameObject )Instantiate( _player_pref, adjustPos( ref first_pos ), _player_pref.transform.rotation );
-        _data.obj.transform.parent = trans;
-        _data.obj.name   = "Player" + _data.id;
         if( _data.id == 0 ){
             _data.rank = PLAYER_RANK.RANK_FIRST;
         } else if( _data.id == 1 ){
             _data.rank = PLAYER_RANK.RANK_SECOND;
         }
+
+		// ステータス値の初期化
+		setDefalutStatus( );
+		plusValueInit( );
+
     }
     
     /// <summary>
@@ -96,7 +80,7 @@ public class Player : MonoBehaviour {
     /// </summary>
     /// <param name="pos" "修正するポジション"></param>
     /// <returns></returns>
-    public Vector3 adjustPos( ref Vector3 pos ) {
+    public Vector3 adjustPos( Vector3 pos ) {
         Vector3 adjust_pos = pos;
         // プレイヤーＩＤによって座標を修正
         adjust_pos.x += ( _data.id % 2 == 0 ) ? -ADJUST_PLAYER_POS : ADJUST_PLAYER_POS;
@@ -125,20 +109,20 @@ public class Player : MonoBehaviour {
 	/// ターゲットの設定
 	/// </summary>
 	/// <param name="target_pos"></param>
-	public void setTargetPos( float time, ref GameObject target_pos ) {
+	public void setTargetPos( float time, ref Vector3 target_pos ) {
         if ( time <= 0 ) {
             _data.obj.transform.position = _end_position;
-            _target_mass = null;
+            _target_mass = Vector3.zero;
             return;
         }
 
         _start_time     = Time.timeSinceLevelLoad;
         _start_position = _data.obj.transform.position;
         _target_mass    = target_pos;
-        _end_position   = _target_mass.transform.localPosition;
+        _end_position   = _target_mass;
 
         // 座標の修正
-        _end_position = adjustPos( ref _end_position );
+        _end_position = adjustPos( _end_position );
     }
 
     /// <summary>
@@ -167,8 +151,6 @@ public class Player : MonoBehaviour {
 
         for ( int i = 0; i < count; i++ ) {
             card.Add( _draw_card[ i ] );
-            Debug.Log( "kari:" + card[ i ] );
-            Debug.Log( "honmei:" + _draw_card[ i ] );
         }
         _draw_card.Clear( );
 
@@ -252,7 +234,7 @@ public class Player : MonoBehaviour {
     }
 
     public void deleteTargetMass( ) {
-        _target_mass = null;
+        _target_mass = Vector3.zero;
     }
 
     public PLAYER_DATA getData( ) {

@@ -36,7 +36,7 @@ public class ResultUIManeger : MonoBehaviour {
 	private bool _result_rend = false;
 	private float _wait_time = 3.0f;
 	private float _wait_time2 = 3.0f;
-	private ApplicationManager _app_manager;
+	private bool _end_result = false;
 
 	// Use this for initialization
 	void Start( ) {
@@ -70,9 +70,6 @@ public class ResultUIManeger : MonoBehaviour {
         }*/
 		//受け取ったカードIDに対応するカードを表示
 		for( var i = 0; i < use_card_id.Count; i++ ) {
-			Debug.Log( use_card_id.Count + "use_idの大きさ" );
-			Debug.Log( _card_object.Length + "プレイヤーの数" );
-			Debug.Log( _card_object[ player_id ].Length + "プレイヤーのオブジェクト数" );
 			//1P
 			if ( _card_object.Length > 0 ) {
 				_card_object[ player_id ][ i ].GetComponent< Image >( ).enabled = true;
@@ -185,7 +182,7 @@ public class ResultUIManeger : MonoBehaviour {
 		//yield return new WaitForSeconds(_wait_time);          //カードアニメーションがないのでコメントアウト　同時に消す
 		//_result_rend = false;
 		//プレイヤーアイコンを消す　勝利ロゴを出す
-		Debug.Log (_player_data[ 0 ].result + "プレイヤー１リザルト" );
+		Debug.Log( _player_data[ 0 ].result + "プレイヤー１リザルト" );
 		if ( _player_data[ 0 ].result == BATTLE_RESULT.WIN ) {
 			_player_two.SetActive( false );
 			_vs_ui.SetActive( false );
@@ -200,13 +197,20 @@ public class ResultUIManeger : MonoBehaviour {
 			_vs_ui.SetActive( false );
 			_drow_ui.GetComponent< Image >( ).enabled = true;
 		}
-
-		if ( _app_manager == null ) {
-			_app_manager = GameObject.Find( "ApplicationManager" ).GetComponent< ApplicationManager >( );
-		}
 		yield return new WaitForSeconds( _wait_time );
-		//UIを変更したらフェイズ切り替え
-		_app_manager.setChangeMainGamePhase( );
+		// 
+		_end_result = true;
+	}
+
+	public bool isEndResult( ) {
+		if ( _end_result ) {
+			return true;
+		}
+			
+		return false;
+	}
+
+	public void destroyObj( ) {
 		//自身を削除
 		Destroy( gameObject );
 	}
