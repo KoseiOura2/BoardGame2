@@ -7,6 +7,11 @@ using System.Net;//これもいるかもしれない
 using Common;
 
 public class NetworkMNG : NetworkManager  {
+    
+    [ SerializeField ]
+    private HostData _host_data;
+    [ SerializeField ]
+    private List< ClientData > _client_data = new List< ClientData >( );
 
 	//ファイヤーウォールを無効化してテスト
 	//ファイヤーウォールの接続を許可すること.
@@ -20,8 +25,8 @@ public class NetworkMNG : NetworkManager  {
 	private List< GameObject > _client_obj = new List< GameObject >( );
 	private string _ip   = "localhost";
 	private string _port = "5037";
-	private bool _connected = false;
     private int _player_num = 0;
+	private bool _connected = false;
 
 	void Awake( ) {
 		try {
@@ -50,11 +55,7 @@ public class NetworkMNG : NetworkManager  {
     }
 
 	// Update is called once per frame
-	void Update( ) {
-        if ( _host_obj == null ) {
-            _host_obj = GameObject.FindWithTag( "HostObj" );
-        }
-
+	void FixedUpdate( ) {
         int num = 0;
 
         if ( _mode == PROGRAM_MODE.MODE_ONE_CONNECT ) {
@@ -70,27 +71,34 @@ public class NetworkMNG : NetworkManager  {
 				}
 			}
 		}
+
+        // hostobjの検索
+        if ( _host_obj == null ) {
+            _host_obj = GameObject.FindWithTag( "HostObj" );
+        }
+        
+        if ( _mode == PROGRAM_MODE.MODE_NO_CONNECT ) {
+            _connected = true;
+        }
+
+        // host_dataとclient_dataの検索
+        if ( !_connected ) {
+		    if ( _host_data == null && _host_obj != null ) {
+			    _host_data = _host_obj.GetComponent< HostData >( );
+		    }
+            for ( int i = 0; i < ( int )_mode; i++ ) {
+                if ( _client_obj.Count > i && _client_obj[ i ] != null &&
+                     _client_data.Count <= i ) {
+                    _client_data.Add( _client_obj[ i ].GetComponent< ClientData >( ) );
+                    if ( i == ( int )_mode - 1 ) {
+                        _connected = true;
+                    }
+                }
+            }
+        }
         
 	    // IPアドレスの取得
         GetComponent< NetworkManager >( ).networkAddress = _ip_address.ToString( );
-	}
-    /*
-	//サーバ立ち上げ時に呼ばれるメソッド
-	public void OnServerInitialized( ) {
-		try {
-			//ネットワーク内のすべてのPCでインスタンス化が行われるメソッド
-			_host_obj = ( GameObject )Network.Instantiate( _object_prefab, _object_prefab.transform.position, _object_prefab.transform.rotation, 1 );
-		}
-		catch {
-			Debug.Log( "サーバーの初期化に失敗しました" );
-		}
-	}
-    */
-
-    
-	//サーバ立ち上げ時に呼ばれるメソッド
-	public void OnServerInitialized( ) {
-        _connected = true;
 	}
     
     //サーバーに接続したときクライアント上で呼び出されます。
@@ -148,6 +156,121 @@ public class NetworkMNG : NetworkManager  {
 		// IPアドレスの表示
 		GUI.Label( new Rect( Screen.width / 2 - text.Length / 2, Screen.height / 2, width, height ), text, style );
 	}
+    
+    /// <summary>
+    /// シーン移行したかチェック
+    /// </summary>
+    public void checkChangeScene( ) {
+        if ( _host_data != null ) {
+            int count = 0;
+            for ( int i = 0; i < _client_data.Count; i++ ) {
+                if ( _client_data[ i ] != null ) {
+                    if ( _client_data[ i ].getRecvData( ).changed_scene ) {
+                        count++;
+                    }
+                }
+            }
+            
+            //  全てのクライアントの準備が完了したら
+            if ( count == _client_data.Count ) {
+                _host_data.setSendChangeFieldScene( false );
+            }
+ 		}
+    }
+
+    /// <summary>
+    /// フェイズ移行したかチェック
+    /// </summary>
+    public void checkChangePhase( ) {
+        if ( _host_data != null ) {
+            int count = 0;
+            for ( int i = 0; i < _client_data.Count; i++ ) {
+                if ( _client_data[ i ] != null ) {
+                    if ( _client_data[ i ].getRecvData( ).changed_phase ) {
+                        count++;
+                    }
+                }
+            }
+            
+            //  全てのクライアントの準備が完了したら
+            if ( count == _client_data.Count ) {
+                _host_data.setSendChangeFieldPhase( false );
+            }
+ 		}
+    }
+
+    /// <summary>
+    /// ホストデータを送る処理
+    /// </summary>
+    public void sendHostData( ) {
+        if ( _host_data != null ) {
+            int count = 0;
+            for ( int i = 0; i < _client_data.Count; i++ ) {
+                if ( _client_data[ i ] != null ) {
+                    if ( _client_data[ i ].getRecvData( ).connect_ready ) {
+                        count++;
+                    }
+                }
+            }
+            
+            //  全てのクライアントの準備が完了したら
+            if ( count == _client_data.Count ) {
+                _host_data.send( );
+            }
+ 		}
+    }
+
+    public void changeScene( SCENE scene ) {
+        _host_data.setSendScene( scene );
+        _host_data.setSendChangeFieldScene( true );
+    }
+
+    /// <summary>
+    /// ゲームを開始してよいか
+    /// </summary>
+    /// <returns></returns>
+    public bool okStartGame( ) {
+        int count = 0;
+        for ( int i = 0; i < _client_data.Count; i++ ) {
+            if ( _client_data[ i ] != null ) {
+                if ( _client_data[ i ].getRecvData( ).start_game ) {
+                    count++;
+                }
+            }
+        }
+
+        //  全てのクライアントの準備が完了したら
+        if ( count == _client_data.Count ) {
+            if ( _host_data.getRecvData( ).game_finish ) {
+                _host_data.setSendGameFinish( false );
+            }
+            return true;
+        }
+
+        return false;
+    }
+
+    /// <summary>
+    /// 全てのクライアントの準備が完了したかどうか
+    /// </summary>
+    /// <returns></returns>
+    public bool isReady( ) {
+        int count = 0;
+        for ( int i = 0; i < _client_data.Count; i++ ) {
+            if ( _client_data[ i ] != null ) {
+                if ( _client_data[ i ].getRecvData( ).ready ) {
+                    count++;
+                }
+            }
+        }
+
+        //  全てのクライアントの準備が完了したら
+        if ( count == _client_data.Count ) {
+            return true;
+        }
+
+        return false;
+    }
 
 	/// <summary>
 	/// 接続されたかどうか返す

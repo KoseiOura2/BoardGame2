@@ -54,6 +54,7 @@ public class SoundManager : Manager< SoundManager > {
 	}
 
     void loadAudioOption( ) {
+
         // BGM AudioSource
         _bgm_source = gameObject.AddComponent< AudioSource >( );
         // BGMはループを有効にする
@@ -67,9 +68,15 @@ public class SoundManager : Manager< SoundManager > {
         for( int i = 0 ; i < _voice_sources.Length ; i++ ) {
          _voice_sources[ i ] = gameObject.AddComponent< AudioSource >( );
         }
+
+        //音量初期設定
+        soundConfig( );
     }
 
     void loadAudioSource( ) {
+        //1桁の最大数
+        int max_single_number = 9;
+
         // === BGMファイル設定 ===
         Array bgm_file = Enum.GetValues( typeof( BGM_TYPE ) );
         
@@ -78,7 +85,7 @@ public class SoundManager : Manager< SoundManager > {
         
         //BGMファイル設定
         for(int i = 1; i < bgm_file.Length; i++ ) {
-            if( i <= 9 ) {
+            if( i <= max_single_number ) {
                 _bgm[ i ] = ( AudioClip )Resources.Load( "Audio/BGM/BGM_0" + i );
             } else {
                 _bgm[ i ] = ( AudioClip )Resources.Load( "Audio/BGM/BGM_" + i );
@@ -92,7 +99,7 @@ public class SoundManager : Manager< SoundManager > {
 
         //SEファイル設定
 		for(int i = 1; i < se_file.Length; i++ ) {
-			if( i <= 9 ) {
+			if( i <= max_single_number ) {
 				_se[ i ] = ( AudioClip )Resources.Load( "Audio/SE/SE_0" + i );
 			} else {										      
 				_se[ i ] = ( AudioClip )Resources.Load( "Audio/SE/SE_" + i );
@@ -121,10 +128,6 @@ public class SoundManager : Manager< SoundManager > {
         }
     }
 
-    void Update( ) {
-        soundConfig( );
-    }
-
     // ***** BGM再生 *****
 	/// <summary>
 	/// BGM再生( 実行したいＢＧＭリストの中の曲 )
@@ -132,12 +135,14 @@ public class SoundManager : Manager< SoundManager > {
     public void playBGM( BGM_TYPE play_bgm ) {
         int play_index = ( int )play_bgm;
 
-        if ( BGM_TYPE.BGM_NONE > play_bgm ) {
-         return;
+        //BGM_NONEを指定していたら再生をしない
+        if ( BGM_TYPE.BGM_NONE == play_bgm ) {
+            return;
         }
+
         // 同じBGMの場合は何もしない
         if( _bgm_source.clip == _bgm[ play_index ] ) {
-         return;
+            return;
         }
         _bgm_source.Stop( );
         _bgm_source.clip = _bgm[ play_index ];
@@ -159,7 +164,8 @@ public class SoundManager : Manager< SoundManager > {
      public void playSE( SE_TYPE play_se ) {
         int play_index = ( int )play_se;
 
-        if( SE_TYPE.SE_NONE > play_se ) {
+        //SE_NONEを指定していたら再生をしない
+        if( SE_TYPE.SE_NONE == play_se ) {
             return;
         }
 
@@ -191,9 +197,11 @@ public class SoundManager : Manager< SoundManager > {
      public void playVoice( VOICE_TYPE play_voice ) {
         int play_index = ( int )play_voice;
 
-        if( VOICE_TYPE.VOICE_NONE > play_voice ){
+        //VOICE_NONEを指定していたら再生をしない
+        if( VOICE_TYPE.VOICE_NONE == play_voice ){
             return;
         }
+
         // 再生中で無いAudioSouceで鳴らす
         foreach( AudioSource source in _voice_sources ) {
             if( false == source.isPlaying ){

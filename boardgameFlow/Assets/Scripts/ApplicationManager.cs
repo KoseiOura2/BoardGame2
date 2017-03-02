@@ -37,10 +37,6 @@ public class ApplicationManager : Manager< ApplicationManager > {
 	private ResultUIManeger _result_UI_maneger;
     [ SerializeField ]
     private NetworkGUIControll _network_gui_controll;
-    [ SerializeField ]
-    private HostData _host_data;
-    [ SerializeField ]
-    private ClientData[ ] _client_data = new ClientData[ ( int )PLAYER_ORDER.MAX_PLAYER_NUM ];
     
 	[ SerializeField ]
 	private PROGRAM_MODE _mode = PROGRAM_MODE.MODE_NO_CONNECT;
@@ -222,81 +218,24 @@ public class ApplicationManager : Manager< ApplicationManager > {
             _network_init = true;
         }
 
-        if ( _client_data[ 1 ] != null ) {
-            for ( int i = 0; i < _debug_use_card.Length; i++ ) {
-                _debug_use_card[ i ] = _client_data[ 1 ].getRecvData( ).used_card_list[ i ];
-            }
-        }
-        
-		if ( _mode == PROGRAM_MODE.MODE_ONE_CONNECT ) {
-			if ( _host_data == null && _network_manager.getHostObj( ) != null ) {
-				_host_data = _network_manager.getHostObj( ).GetComponent< HostData >( );
-			}
-			if ( _client_data[ 0 ] == null && _network_manager.getClientObj( 0 ) != null ) {
-				_client_data[ 0 ] = _network_manager.getClientObj( 0 ).GetComponent< ClientData >( );
-			}
-		} else if ( _mode == PROGRAM_MODE.MODE_TWO_CONNECT ) {
-			if ( _host_data == null && _network_manager.getHostObj( ) != null ) {
-				_host_data = _network_manager.getHostObj( ).GetComponent< HostData >( );
-			}
-			if ( _client_data[ 0 ] == null && _network_manager.getClientObj( 0 ) != null ) {
-				_client_data[ 0 ] = _network_manager.getClientObj( 0 ).GetComponent< ClientData >( );
-			}
-		    if ( _client_data[ 1 ] == null && _network_manager.getClientObj( 1 ) != null ) {
-			    _client_data[ 1 ] = _network_manager.getClientObj( 1 ).GetComponent< ClientData >( );
-		    }
-        }
-
 		switch( _scene ) {
-		case SCENE.SCENE_CONNECT:
-			updateConnectScene( );
-			break;
-		case SCENE.SCENE_TITLE:
-			updateTitleScene( );
-			break;
-		case SCENE.SCENE_GAME:
-			updateGameScene( );
-			break;
-		case SCENE.SCENE_FINISH:
-			updateFinishScene( );
-			break;
+		    case SCENE.SCENE_CONNECT:
+			    updateConnectScene( );
+			    break;
+		    case SCENE.SCENE_TITLE:
+			    updateTitleScene( );
+			    break;
+		    case SCENE.SCENE_GAME:
+			    updateGameScene( );
+			    break;
+		    case SCENE.SCENE_FINISH:
+			    updateFinishScene( );
+			    break;
 		}
 
-		if ( _host_data != null ) {
-			if ( _mode == PROGRAM_MODE.MODE_ONE_CONNECT ) {
-                if ( _client_data[ 0 ] != null ) {
-				    // player側のシーン変更が完了したかどうか
-				    if ( _client_data[ 0 ].getRecvData( ).changed_scene == true ) {
-					    _host_data.setSendChangeFieldScene( false );
-				    }
-				    // player側のフェイズ変更が完了したかどうか
-				    if ( _client_data[ 0 ].getRecvData( ).changed_phase == true ) {
-					    _host_data.setSendChangeFieldPhase( false );
-				    }
-
-                    if ( _client_data[ 0 ].getRecvData( ).connect_ready ) {
-                        _host_data.send( );
-                    }
-                }
-			} else if ( _mode == PROGRAM_MODE.MODE_TWO_CONNECT ) {
-                if ( _client_data[ 0 ] != null && _client_data[ 1 ] != null ) {
-				    // player側のシーン変更が完了したかどうか
-				    if ( _client_data[ 0 ].getRecvData( ).changed_scene == true &&
-                         _client_data[ 1 ].getRecvData( ).changed_scene == true ) {
-					    _host_data.setSendChangeFieldScene( false );
-				    }
-				    // player側のフェイズ変更が完了したかどうか
-				    if ( _client_data[ 0 ].getRecvData( ).changed_phase == true &&
-                         _client_data[ 1 ].getRecvData( ).changed_phase == true ) {
-					    _host_data.setSendChangeFieldPhase( false );
-				    }
-
-                    if ( _client_data[ 0 ].getRecvData( ).connect_ready && _client_data[ 1 ].getRecvData( ).connect_ready ) {
-                        _host_data.send( );
-                    }
-                }
-            }
- 		}
+        _network_manager.checkChangeScene( );
+        _network_manager.checkChangePhase( );
+        _network_manager.sendHostData( );
 	}
 
 	/// <summary>
@@ -309,25 +248,12 @@ public class ApplicationManager : Manager< ApplicationManager > {
 				_network_gui_controll.setShowGUI( false );
                 _scene_init = false;
 			}
-		} else if ( _mode == PROGRAM_MODE.MODE_ONE_CONNECT ) {
-			if ( _network_manager.getPlayerNum( ) >= 1 ) {
+		} else  {
+			if ( _network_manager.getPlayerNum( ) >= ( int )_mode ) {
 				_scene = SCENE.SCENE_TITLE;
 				_network_gui_controll.setShowGUI( false );
 				try {
-					_host_data.setSendScene( _scene );
-	            	_host_data.setSendChangeFieldScene( true );
-				}
-				catch {
-					Debug.Log( "通信に失敗しまいました" );
-				}
-			}
-		} else if ( _mode == PROGRAM_MODE.MODE_TWO_CONNECT ) {
-			if ( _network_manager.getPlayerNum( ) >= 2 ) {
-				_scene = SCENE.SCENE_TITLE;
-				_network_gui_controll.setShowGUI( false );
-				try {
-					_host_data.setSendScene( _scene );
-	            	_host_data.setSendChangeFieldScene( true );
+                    _network_manager.changeScene( _scene );
 				}
 				catch {
 					Debug.Log( "通信に失敗しまいました" );
@@ -392,26 +318,10 @@ public class ApplicationManager : Manager< ApplicationManager > {
                 _graphic_manager.destroyTitleObj( );
                 _scene_init = false;
 		    }
-        } else if ( _mode == PROGRAM_MODE.MODE_ONE_CONNECT ) {
-            if ( _client_data[ 0 ] != null ) {
-		        if ( _client_data[ 0 ].getRecvData( ).start_game ) {
-                    if ( _host_data.getRecvData( ).game_finish ) {
-                        _host_data.setSendGameFinish( false );
-                    }
-			       connectTitleUpdate( );
-                   _send_status = true;
-		        }
-            }
-        } else if ( _mode == PROGRAM_MODE.MODE_TWO_CONNECT ) {
-            if ( _client_data[ 0 ] != null && _client_data[ 1 ] != null ) {
-		        if ( _client_data[ 0 ].getRecvData( ).start_game && 
-                     _client_data[ 1 ].getRecvData( ).start_game ) {
-                    if ( _host_data.getRecvData( ).game_finish ) {
-                        _host_data.setSendGameFinish( false );
-                    }
-			       connectTitleUpdate( );
-                   _send_status = true;
-		        }
+        } else {
+            if ( _network_manager.okStartGame( ) ) {
+			    connectTitleUpdate( );
+                _send_status = true;
             }
         }
 	}
@@ -456,8 +366,7 @@ public class ApplicationManager : Manager< ApplicationManager > {
 		_player_manager.init( ref pos, ref _graphic_manager );
 
 		try {
-			_host_data.setSendScene( _scene );
-			_host_data.setSendChangeFieldScene( true );
+			_network_manager.changeScene( _scene );
 		} catch {
 			Debug.Log( "通信に失敗しまいました" );
 		}
@@ -482,31 +391,14 @@ public class ApplicationManager : Manager< ApplicationManager > {
 			        _scene = SCENE.SCENE_TITLE;
                     _scene_init = false;
 		        }
-            } else if ( _mode == PROGRAM_MODE.MODE_ONE_CONNECT ) {
-		        if ( _client_data[ 0 ].getRecvData( ).ready ) {
+            } else {
+		        if ( _network_manager.isReady( ) ) {
 			        _scene = SCENE.SCENE_TITLE;
-			        if ( _mode != PROGRAM_MODE.MODE_NO_CONNECT ) {
-				        try {
-					        _host_data.setSendScene( _scene );
-					        _host_data.setSendChangeFieldScene( true );
-				        } catch {
-					        Debug.Log( "通信に失敗しまいました" );
-				        }
-			        }
-                    _scene_init = false;
-		        }
-            } else if ( _mode == PROGRAM_MODE.MODE_TWO_CONNECT ) {
-		        if ( _client_data[ 0 ].getRecvData( ).ready &&
-                     _client_data[ 1 ].getRecvData( ).ready ) {
-			        _scene = SCENE.SCENE_TITLE;
-			        if ( _mode != PROGRAM_MODE.MODE_NO_CONNECT ) {
-				        try {
-					        _host_data.setSendScene( _scene );
-					        _host_data.setSendChangeFieldScene( true );
-				        } catch {
-					        Debug.Log( "通信に失敗しまいました" );
-				        }
-			        }
+				    try {
+					    _network_manager.changeScene( _scene );
+				    } catch {
+					    Debug.Log( "通信に失敗しまいました" );
+				    }
                     _scene_init = false;
 		        }
             }
@@ -633,8 +525,7 @@ public class ApplicationManager : Manager< ApplicationManager > {
                 _graphic_manager.destroyMainGameObj( );
                 if ( _mode != PROGRAM_MODE.MODE_NO_CONNECT ) {
 			        try {
-				        _host_data.setSendScene( _scene );
-				        _host_data.setSendChangeFieldScene( true );
+				        _network_manager.changeScene( _scene );
 			        } catch {
 				        Debug.Log( "通信に失敗しまいました" );
 			        }
@@ -652,8 +543,7 @@ public class ApplicationManager : Manager< ApplicationManager > {
                 _graphic_manager.destroyMainGameObj( );
 		        _scene = SCENE.SCENE_FINISH;
 		        try {
-			        _host_data.setSendScene( _scene );
-			        _host_data.setSendChangeFieldScene( true );
+			        _network_manager.changeScene( _scene );
 		        } catch {
 			        Debug.Log( "通信に失敗しまいました" );
 		        }
