@@ -120,6 +120,8 @@ public class ApplicationManager : Manager< ApplicationManager > {
 	[ SerializeField ]
     private bool _debug_player_move = false;
     
+    private EVENT_TYPE _last_time_event_text = EVENT_TYPE.EVENT_NONE;
+
     BATTLE_RESULT _debug_result;
 
     [ SerializeField ]
@@ -1108,10 +1110,15 @@ public class ApplicationManager : Manager< ApplicationManager > {
 		}
 
         // 時間更新
-		if ( !_client_data.getRecvData( ).battle_ready ) {
-			_battle_manager.changeBattleTimeImageNum( _battle_time_image[ 0 ], _battle_time_image[ 1 ] );
+        if ( _mode != PROGRAM_MODE.MODE_NO_CONNECT ) { 
+		    if ( !_client_data.getRecvData( ).battle_ready ) {
+			    _battle_manager.changeBattleTimeImageNum( _battle_time_image[ 0 ], _battle_time_image[ 1 ] );
+			    _battle_manager.battleTimeCount( );
+		    }
+        } else {
+            _battle_manager.changeBattleTimeImageNum( _battle_time_image[ 0 ], _battle_time_image[ 1 ] );
 			_battle_manager.battleTimeCount( );
-		}
+        }
 
 		if ( _battle_manager.isComplete( ) ) {
             //拡大画像を削除
@@ -1186,7 +1193,7 @@ public class ApplicationManager : Manager< ApplicationManager > {
                 _map_manager.allMassReject( );
             }
             _map_manager.setVisibleSprite( true );
-            _debug_result = ( BATTLE_RESULT )( ( int )Random.Range( 1, 3 ) );
+            _debug_result = BATTLE_RESULT.WIN;
             _phase_init  = true;
 			_result_init = false;
         }
@@ -1349,18 +1356,21 @@ public class ApplicationManager : Manager< ApplicationManager > {
             }
 		}
 
-        // マスの効果を可視化
-        if ( _map_manager.getOveredMassData( ).event_type != EVENT_TYPE.EVENT_NONE ) {
-            if ( !_create_mass_text ) {
-                MapManager.MASS_DATA data = _map_manager.getOveredMassData( );
-                // 素材不足により
-                if ( data.event_type == EVENT_TYPE.EVENT_DRAW ||
-                     data.event_type == EVENT_TYPE.EVENT_MOVE ) {
-                    createMassText( data.event_type, data.normal_value );
-                }
+        //マス説明が生成されていなければ生成
+        if ( !_create_mass_text ) {
+            createMassText( );
+        }
+
+        // 現在マウスオーバーされているかどうか
+        MapManager.MASS_DATA data = _map_manager.getOveredMassData( );
+        //前回のマス説明と同じかどうか
+        if ( _last_time_event_text != data.event_type ) {
+            // 素材不足により
+            if ( data.mass_type != MASS_TYPE.MASS_START &&
+                 data.mass_type != MASS_TYPE.MASS_GOAL ) {
+                _last_time_event_text = data.event_type;
+                changeMassText( data.event_type, data.normal_value );
             }
-        } else {
-            destroyMassText( );
         }
 	}
 
@@ -1748,7 +1758,11 @@ public class ApplicationManager : Manager< ApplicationManager > {
         _map_info_pref = null;
     }
     
-    private void createMassText( EVENT_TYPE type, int num ) {
+    private void changeMassText( EVENT_TYPE type, int num ) {
+        _mass_text_obj.GetComponent< Image >( ).sprite = Resources.Load< Sprite >( "Graphics/UI/Text/Mass/maptext_"+ ( int )type + "_" + num );
+    }
+
+    private void createMassText( ) {
         _mass_text_pref = Resources.Load< GameObject >( "Prefabs/UI/Mass/MassText" );
         Vector3 pos = _mass_text_pref.GetComponent< RectTransform >( ).localPosition;
             
@@ -1757,7 +1771,7 @@ public class ApplicationManager : Manager< ApplicationManager > {
         _mass_text_obj.GetComponent< RectTransform >( ).anchoredPosition = new Vector3( 0, 0, 0 );
         _mass_text_obj.GetComponent< RectTransform >( ).localScale = new Vector3( 1, 1, 1 );
         _mass_text_obj.GetComponent< RectTransform >( ).localPosition = pos;
-        _mass_text_obj.GetComponent< Image >( ).sprite = Resources.Load< Sprite >( "Graphics/UI/Text/Mass/maptext_"+ ( int )type + "_" + num );
+        _mass_text_obj.GetComponent< Image >( ).sprite = Resources.Load< Sprite >( "Graphics/UI/Text/Mass/maptext_0_0" );
         _create_mass_text = true;
     }
 
