@@ -799,6 +799,7 @@ public class ClientPlayerManager : MonoBehaviour {
                 if ( _player_card.hand_obj_list[ i ].GetComponent< Card >( ).isMouseOvered( ) ) {
                     // カード生成
 			        _expantion_card = ( GameObject )Instantiate( _card_obj );
+                    _expantion_card.name = "ExpantionCard";
                     _expantion_card.transform.position = _expantion_card_area.transform.position;
                     _expantion_card.transform.localScale = new Vector3( _card_obj.transform.localScale.x * EXPANTION_MAGNIFICATION,
                                                                         1, _card_obj.transform.localScale.z * EXPANTION_MAGNIFICATION );
