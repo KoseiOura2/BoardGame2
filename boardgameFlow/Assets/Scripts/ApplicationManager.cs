@@ -1386,7 +1386,7 @@ public class ApplicationManager : Manager< ApplicationManager > {
                     _host_data.refreshCardList( player_one );
                 }
                 if ( _client_data[ player_two ] != null && _client_data[ player_two ].getRecvData( ).ok_event ) {
-                    _host_data.setSendEventType( PLAYER_ORDER.PLAYER_ONE, _event_type[ player_two ] );
+                    _host_data.setSendEventType( PLAYER_ORDER.PLAYER_TWO, _event_type[ player_two ] );
                     _host_data.refreshCardList( player_two );
                 }
             }
