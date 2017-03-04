@@ -143,18 +143,20 @@ public class NetworkMNG : NetworkManager  {
 	/// ホスト側の描画
 	/// </summary>
 	public void hostStateDraw( ) {
-		// 文字の設定
-		string text = _ip_address.ToString( );
-		int width   = 500;
-		int height  = 30;
-		GUIStyle style = new GUIStyle( );
-		style.fontSize = 50;
-		GUIStyleState style_state = new GUIStyleState( );
-		style_state.textColor = Color.black;
-		style.normal = style_state;
+        if ( _host_data != null && _host_data.getServerState( ) == SERVER_STATE.STATE_HOST ) {
+		    // 文字の設定
+		    string text = _ip_address.ToString( );
+		    int width   = 500;
+		    int height  = 30;
+		    GUIStyle style = new GUIStyle( );
+		    style.fontSize = 50;
+		    GUIStyleState style_state = new GUIStyleState( );
+		    style_state.textColor = Color.black;
+		    style.normal = style_state;
 
-		// IPアドレスの表示
-		GUI.Label( new Rect( Screen.width / 2 - text.Length / 2, Screen.height / 2, width, height ), text, style );
+		    // IPアドレスの表示
+		    GUI.Label( new Rect( Screen.width / 2 - text.Length / 2, Screen.height / 2, width, height ), text, style );
+        }
 	}
     
     /// <summary>
@@ -225,6 +227,58 @@ public class NetworkMNG : NetworkManager  {
         _host_data.setSendChangeFieldScene( true );
     }
 
+    public void changePhase( MAIN_GAME_PHASE phase ) {
+		_host_data.setSendGamePhase( phase );
+		_host_data.setSendChangeFieldPhase( true );
+    }
+
+    /// <summary>
+    /// プレイヤーの現在のマスをhost_dataに設定
+    /// </summary>
+    /// <param name="player_num"></param>
+    /// <param name="mass_count"></param>
+    public void setMassCount( int player_num, int mass_count ) {
+        if ( _host_data != null ) {
+            _host_data.setSendMassCount( ( PLAYER_ORDER )player_num, mass_count );
+        }
+    }
+
+    /// <summary>
+    /// プレイヤーの現在のステータスをhost_dataに設定
+    /// </summary>
+    public void setPlayerStatus( bool flag ) {
+        for ( int i = 0; i < _client_data.Count; i++ ) {
+            if ( _client_data[ i ] != null ) {
+                _host_data.setSendPlayerStatus( i, _client_data[ i ].getRecvData( ).player_power,
+                                                _client_data[ i ].getRecvData( ).hand_num, flag );
+            }
+        }
+    }
+
+    public void setGameFinish( bool flag ) {
+        _host_data.setSendGameFinish( flag );
+    }
+
+    public void refreshCard( int player_num ) {
+        _host_data.refreshCardList( player_num );
+    }
+
+    public void setCardList( int player_num, List< int > card_list ) {
+        _host_data.setSendCardlist( player_num, card_list );
+    }
+
+    public NETWORK_PLAYER_DATA getClientData( int player_num ) {
+        return _client_data[ player_num ].getRecvData( );
+    } 
+
+    public void setResult( BATTLE_RESULT[ ] result, bool flag ) {
+        _host_data.setSendBattleResult( result, flag );
+    }
+
+    public void setEventType( int player_num, EVENT_TYPE type ) {
+        _host_data.setSendEventType( ( PLAYER_ORDER )player_num, type );
+    }
+
     /// <summary>
     /// ゲームを開始してよいか
     /// </summary>
@@ -271,6 +325,82 @@ public class NetworkMNG : NetworkManager  {
 
         return false;
     }
+    
+    /// <summary>
+    /// 全てのクライアントの戦闘準備が完了したかどうか
+    /// </summary>
+    /// <returns></returns>
+    public bool isBattleReady( ) {
+        int count = 0;
+        for ( int i = 0; i < _client_data.Count; i++ ) {
+            if ( _client_data[ i ] != null ) {
+                if ( _client_data[ i ].getRecvData( ).battle_ready ) {
+                    count++;
+                }
+            }
+        }
+
+        //  全てのクライアントの準備が完了したら
+        if ( count == _client_data.Count ) {
+            return true;
+        }
+
+        return false;
+    }
+    
+    /// <summary>
+    /// 全てのクライアントの戦闘準備が完了したかどうか
+    /// </summary>
+    /// <returns></returns>
+    public bool isFinishGame( ) {
+        int count = 0;
+        for ( int i = 0; i < _client_data.Count; i++ ) {
+            if ( _client_data[ i ] != null ) {
+                if ( _client_data[ i ].getRecvData( ).finish_game ) {
+                    count++;
+                }
+            }
+        }
+
+        //  全てのクライアントの準備が完了したら
+        if ( count == _client_data.Count ) {
+            return true;
+        }
+
+        return false;
+    }
+
+    /// <summary>
+    /// タイトルへ戻るかどうか
+    /// </summary>
+    /// <returns></returns>
+    public bool isGoTitle( ) {
+        for ( int i = 0; i < _client_data.Count; i++ ) {
+            if ( _client_data[ i ] != null ) {
+                if ( _client_data[ i ].getRecvData( ).go_title ) {
+                    return true;
+                }
+            }
+        }
+
+        return false;
+    }
+
+    public bool isSendCard( int player_num ) {
+        if ( _host_data.isSendCard( player_num ) ) {
+            return true;
+        }
+
+        return false;
+    }
+
+    public bool isSendResult( ) {
+        if ( _host_data.getRecvData( ).send_result ) {
+            return true;
+        }
+
+        return false;
+    }
 
 	/// <summary>
 	/// 接続されたかどうか返す
@@ -295,6 +425,5 @@ public class NetworkMNG : NetworkManager  {
     public int getPlayerNum( ) {
         return _player_num;
     }
-
 }
 

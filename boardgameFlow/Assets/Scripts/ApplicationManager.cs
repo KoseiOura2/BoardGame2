@@ -412,11 +412,10 @@ public class ApplicationManager : Manager< ApplicationManager > {
 	private void updateGameScene( ) {
         if ( !_scene_init ) {
             _game_playing = true;
-            if ( _host_data != null ) {
-                for ( int i = 0; i < ( int )PLAYER_ORDER.MAX_PLAYER_NUM; i++ ) {
-                    _host_data.setSendMassCount( ( PLAYER_ORDER )i, 0 );
-                }
+            for ( int i = 0; i < ( int )PLAYER_ORDER.MAX_PLAYER_NUM; i++ ) {
+                _network_manager.setMassCount( i, 0 );
             }
+
             _scene_init = true;
         }
 
@@ -453,8 +452,7 @@ public class ApplicationManager : Manager< ApplicationManager > {
 		// 通信データのセット
 		if ( _phase_manager.isPhaseChanged( ) && _mode != PROGRAM_MODE.MODE_NO_CONNECT ) {
             _phase_init = false;
-			_host_data.setSendGamePhase( _phase_manager.getMainGamePhase( ) );
-			_host_data.setSendChangeFieldPhase( true );
+            _network_manager.changePhase( _phase_manager.getMainGamePhase( ) );
 		}
 
         // プレイヤーのモーションを更新
@@ -490,29 +488,15 @@ public class ApplicationManager : Manager< ApplicationManager > {
         _stage_manager.updateBubble( );
 
         if ( _send_status ) {
-            if ( _mode == PROGRAM_MODE.MODE_ONE_CONNECT ) {
-                _host_data.setSendPlayerStatus( 0, _client_data[ 0 ].getRecvData( ).player_power,
-                                                _client_data[ 0 ].getRecvData( ).hand_num, true );
-            } else if ( _mode == PROGRAM_MODE.MODE_TWO_CONNECT ) {
-                _host_data.setSendPlayerStatus( 0, _client_data[ 0 ].getRecvData( ).player_power,
-                                                _client_data[ 0 ].getRecvData( ).hand_num, true );
-                _host_data.setSendPlayerStatus( 1, _client_data[ 1 ].getRecvData( ).player_power,
-                                                _client_data[ 1 ].getRecvData( ).hand_num, true );
-            }
+            _network_manager.setPlayerStatus( true );
 
             _send_status = false;
         }
+
         // タイトルへ戻るが送られて来たらタイトルへ
         if ( _game_playing ) {
-            if ( _mode == PROGRAM_MODE.MODE_ONE_CONNECT ) {
-                if ( _client_data[ 0 ].getRecvData( ).go_title ) {
-                    goTitle( );
-                }
-            } else if ( _mode == PROGRAM_MODE.MODE_TWO_CONNECT ) {
-                if ( _client_data[ 0 ].getRecvData( ).go_title ||
-                     _client_data[ 1 ].getRecvData( ).go_title ) {
-                    goTitle( );
-                }
+            if ( _network_manager.isGoTitle( ) ) {
+                goTitle( );
             }
         }
 
@@ -562,7 +546,7 @@ public class ApplicationManager : Manager< ApplicationManager > {
             _connect_wait_time = 0;
             _phase_init = false;
             _game_playing = false;
-            _host_data.setSendGameFinish( true );
+            _network_manager.setGameFinish( true );
         }
     }
 
@@ -605,8 +589,8 @@ public class ApplicationManager : Manager< ApplicationManager > {
 		if ( _mode == PROGRAM_MODE.MODE_TWO_CONNECT ) {
             // 送られてきた賽の目の数
             int[ ] dice_value = new int[ ( int )PLAYER_ORDER.MAX_PLAYER_NUM ];
-            dice_value[ 0 ] = _client_data[ 0 ].getRecvData( ).dice_value;
-            dice_value[ 1 ] = _client_data[ 1 ].getRecvData( ).dice_value;
+            dice_value[ 0 ] = _network_manager.getClientData( 0 ).dice_value;
+            dice_value[ 1 ] = _network_manager.getClientData( 1 ).dice_value;
 		    // ダイスを振ったら(通信)
 		    if ( dice_value[ 0 ] > 0 && dice_value[ 1 ] > 0  ) {
                 _dice_value[ 0 ] = dice_value[ 0 ];
@@ -622,7 +606,7 @@ public class ApplicationManager : Manager< ApplicationManager > {
 		} else if ( _mode == PROGRAM_MODE.MODE_ONE_CONNECT ) {
             // 送られてきた賽の目の数
             int[ ] dice_value = new int[ ( int )PLAYER_ORDER.MAX_PLAYER_NUM ];
-            dice_value[ 0 ] = _client_data[ 0 ].getRecvData( ).dice_value;
+            dice_value[ 0 ] = _network_manager.getClientData( 0 ).dice_value;
 		    // ダイスを振ったら(通信)
 		    if ( dice_value[ 0 ] > 0 ) {
                 _dice_value[ 0 ] = dice_value[ 0 ];
@@ -716,19 +700,14 @@ public class ApplicationManager : Manager< ApplicationManager > {
         // 現在のマスをクライアントに送信
         if ( _mode == PROGRAM_MODE.MODE_ONE_CONNECT ) {
             if ( _player_manager.isChangeCount( PLAYER_ORDER.PLAYER_ONE ) ) {
-                _host_data.setSendMassCount( PLAYER_ORDER.PLAYER_ONE,
-                                             _player_manager.getPlayerCount( 0, _stage_manager.getMassCount( ) ) );
+                _network_manager.setMassCount( 0, _player_manager.getPlayerCount( 0, _stage_manager.getMassCount( ) ) );
             }
         } else if ( _mode == PROGRAM_MODE.MODE_TWO_CONNECT ) {
             if ( _player_manager.isChangeCount( PLAYER_ORDER.PLAYER_ONE ) ) {
-                _host_data.setSendMassCount( PLAYER_ORDER.PLAYER_ONE,
-                                             _player_manager.getPlayerCount( ( int )PLAYER_ORDER.PLAYER_ONE,
-                                                                             _stage_manager.getMassCount( ) ) );
+                _network_manager.setMassCount( 0, _player_manager.getPlayerCount( 0, _stage_manager.getMassCount( ) ) );
             }
             if ( _player_manager.isChangeCount( PLAYER_ORDER.PLAYER_TWO ) ) {
-                _host_data.setSendMassCount( PLAYER_ORDER.PLAYER_TWO,
-                                             _player_manager.getPlayerCount( ( int )PLAYER_ORDER.PLAYER_TWO,
-                                                                             _stage_manager.getMassCount( ) ) );
+                _network_manager.setMassCount( 1, _player_manager.getPlayerCount( 1, _stage_manager.getMassCount( ) ) );
             }
         }
        
@@ -777,39 +756,30 @@ public class ApplicationManager : Manager< ApplicationManager > {
 		if ( _mode == PROGRAM_MODE.MODE_TWO_CONNECT ) {
             // ドローアニメーションが終了したら
             if ( _graphic_manager.isFinishDrawCardMove( ) ) {
-                // 1Pにカード配布
-			    if ( !_host_data.isSendCard( 0 ) ) {
-				    for ( int i = 0; i < MAX_DRAW_VALUE - _dice_value[ 0 ]; i++ ) {
-			            // デッキのカード数が０になったらリフレッシュ
-			            if ( _card_manager.getDeckCardNum( ) <= 0 ) {
-				            _card_manager.createDeck( );
-			            }
-                        card_list.Add( _card_manager.distributeCard( ).id );
-				    }
-				    _host_data.refreshCardList( 0 );
-                    _host_data.setSendCardlist( ( int )PLAYER_ORDER.PLAYER_ONE, card_list );
-                    // カードリストを初期化
-                    card_list.Clear( );
-                }
-            
-                // 2Pにカード配布
-			    if ( !_host_data.isSendCard( 1 ) ) {
-				    for ( int i = 0; i < MAX_DRAW_VALUE - _dice_value[ 1 ]; i++ ) {
-			            // デッキのカード数が０になったらリフレッシュ
-			            if ( _card_manager.getDeckCardNum( ) <= 0 ) {
-				            _card_manager.createDeck( );
-			            }
-                        card_list.Add( _card_manager.distributeCard( ).id );
-				    }
-				    _host_data.refreshCardList( 1 );
-                    _host_data.setSendCardlist( ( int )PLAYER_ORDER.PLAYER_TWO, card_list );
+                for ( int i = 0; i < ( int )PLAYER_ORDER.MAX_PLAYER_NUM; i++ ) {
+                    // プレイヤーにカード配布
+			        if ( !_network_manager.isSendCard( i ) ) {
+				        for ( int j = 0; j < MAX_DRAW_VALUE - _dice_value[ i ]; j++ ) {
+			                // デッキのカード数が０になったらリフレッシュ
+			                if ( _card_manager.getDeckCardNum( ) <= 0 ) {
+				                _card_manager.createDeck( );
+			                }
+                            card_list.Add( _card_manager.distributeCard( ).id );
+				        }
+                        _network_manager.refreshCard( i );
+                        _network_manager.setCardList( i, card_list );
+                        // カードリストを初期化
+                        card_list.Clear( );
+                    }
                 }
             }
+
             // 両方の準備が終わったら次のフェイズへ
-			if ( _client_data[ 0 ].getRecvData( ).ready == true && _client_data[ 1 ].getRecvData( ).ready == true ) {
+			if ( _network_manager.isReady( ) ) {
 				if ( _connect_wait_time >= CONNECT_WAIT_TIME && !_refresh_card_list ) {
-					_host_data.refreshCardList( 0 );
-					_host_data.refreshCardList( 1 );
+                    for ( int i = 0; i < ( int )PLAYER_ORDER.MAX_PLAYER_NUM; i++ ) {
+                        _network_manager.refreshCard( i );
+                    }
 					_refresh_card_list = true;
 				}
 				_connect_wait_time++;
@@ -825,7 +795,7 @@ public class ApplicationManager : Manager< ApplicationManager > {
             // ドローアニメーションが終了したら
             if ( _graphic_manager.isFinishDrawCardMove( ) ) {
                 // 1Pにカード配布
-			    if ( !_host_data.isSendCard( 0 ) ) {
+			    if ( !_network_manager.isSendCard( 0 ) ) {
 				    for ( int i = 0; i < MAX_DRAW_VALUE - _dice_value[ 0 ]; i++ ) {
 			            // デッキのカード数が０になったらリフレッシュ
 			            if ( _card_manager.getDeckCardNum( ) <= 0 ) {
@@ -833,17 +803,17 @@ public class ApplicationManager : Manager< ApplicationManager > {
 			            }
                         card_list.Add( _card_manager.distributeCard( ).id );
 		            }
-				    _host_data.refreshCardList( 0 );
-                    _host_data.setSendCardlist( ( int )PLAYER_ORDER.PLAYER_ONE, card_list );
+                    _network_manager.refreshCard( 0 );
+                    _network_manager.setCardList( 0, card_list );
                 }
             }
 
             //Debug.Log( _client_data[ 0 ].getRecvData( ).ready );
             // 準備が終わったら次のフェイズへ
-			if ( _client_data[ 0 ].getRecvData( ).ready == true ) {
+			if ( _network_manager.isReady( ) ) {
 				if ( _connect_wait_time >= CONNECT_WAIT_TIME && !_refresh_card_list ) {
                     try {
-					    _host_data.refreshCardList( 0 );
+					    _network_manager.refreshCard( 0 );
 					    _refresh_card_list = true;
                     }
                     catch {
@@ -880,8 +850,9 @@ public class ApplicationManager : Manager< ApplicationManager > {
         if ( !_phase_init ) {
             _graphic_manager.destroyDrawPhaseUI( );
             if ( _mode != PROGRAM_MODE.MODE_NO_CONNECT ) {
-                _host_data.refreshCardList( 0 );
-                _host_data.refreshCardList( 1 );
+                for ( int i = 0; i < ( int )PLAYER_ORDER.MAX_PLAYER_NUM; i++ ) {
+                    _network_manager.refreshCard( i );
+                }
             }
             // ラベルUIの削除
             _graphic_manager.destroyAllPlayerLabels( );
@@ -889,24 +860,18 @@ public class ApplicationManager : Manager< ApplicationManager > {
             _phase_init = true;
         }
 		if ( _mode == PROGRAM_MODE.MODE_TWO_CONNECT ) {
-            if ( _client_data[ 0 ].getRecvData( ).battle_ready &&
-				 _client_data[ 1 ].getRecvData( ).battle_ready )  {
+            if ( _network_manager.isBattleReady( ) )  {
 				//バトルUIを作成する
 				if ( _go_result_ui == null ) { 
 					createResultUI( );
-					// 1Pのステータスを設定
-					for ( int i = 0; i < _client_data[ 0 ].getRecvData( ).used_card_list.Length; i++ ) {
-						_player_manager.adaptaCard( 0, _card_manager.getCardData( _client_data[ 0 ].getRecvData( ).used_card_list[ i ] ) );
-					}
-					_player_manager.endStatus( 0 );
-					Debug.Log( "1Pのpower:" + _player_manager.getPlayerPower( )[ 0 ].ToString( ) );
-
-					// 2Pのステータスを設定
-					for ( int i = 0; i < _client_data[ 1 ].getRecvData( ).used_card_list.Length; i++ ) {
-						_player_manager.adaptaCard( 1, _card_manager.getCardData( _client_data[ 1 ].getRecvData( ).used_card_list[ i ] ) );
-					}
-					_player_manager.endStatus( 1 );
-					Debug.Log( "2Pのpower:" + _player_manager.getPlayerPower( )[ 1 ].ToString( ) );
+					// プレイヤーのステータスを設定
+                    for ( int i = 0; i < ( int )PLAYER_ORDER.MAX_PLAYER_NUM; i++ ) {
+					    for ( int j = 0; j < _network_manager.getClientData( i ).used_card_list.Length; j++ ) {
+						    _player_manager.adaptaCard( 0, _card_manager.getCardData( _network_manager.getClientData( i ).used_card_list[ j ] ) );
+					    }
+					    _player_manager.endStatus( i );
+					    Debug.Log( ( i + 1 ) + "Pのpower:" + _player_manager.getPlayerPower( )[ i ].ToString( ) );
+                    }
 					// プラスバリューの初期化
 					_player_manager.allPlusValueInit( );
 
@@ -921,23 +886,18 @@ public class ApplicationManager : Manager< ApplicationManager > {
                 //_phase_init = false;
             }
 		} else if ( _mode == PROGRAM_MODE.MODE_ONE_CONNECT ) {
-			if ( _client_data[ 0 ].getRecvData( ).battle_ready == true )  {
+			if ( _network_manager.isBattleReady( ) )  {
 				//バトルUIを作成する
 				if ( _go_result_ui == null ) { 
 					createResultUI( );
-					// 1Pのステータスを設定
-					for ( int i = 0; i < _client_data[ 0 ].getRecvData( ).used_card_list.Length; i++ ) {
-						_player_manager.adaptaCard( 0, _card_manager.getCardData( _client_data[ 0 ].getRecvData( ).used_card_list[ i ] ) );
-					}
-					_player_manager.endStatus( 0 );
-					Debug.Log( "1Pのpower:" + _player_manager.getPlayerPower( )[ 0 ].ToString( ) );
-
-					// 2Pのステータスを設定
-					for ( int i = 0; i < _client_data[ 0 ].getRecvData( ).used_card_list.Length; i++ ) {
-						_player_manager.adaptaCard( 1, _card_manager.getCardData( _client_data[ 0 ].getRecvData( ).used_card_list[ i ] ) );
-					}
-					_player_manager.endStatus( 1 );
-					Debug.Log( "2Pのpower:" + _player_manager.getPlayerPower( )[ 1 ].ToString( ) );
+					// プレイヤーのステータスを設定
+                    for ( int i = 0; i < ( int )PLAYER_ORDER.MAX_PLAYER_NUM; i++ ) {
+					    for ( int j = 0; j < _network_manager.getClientData( 0 ).used_card_list.Length; j++ ) {
+						    _player_manager.adaptaCard( 0, _card_manager.getCardData( _network_manager.getClientData( 0 ).used_card_list[ j ] ) );
+					    }
+					    _player_manager.endStatus( i );
+					    Debug.Log( ( i + 1 ) + "Pのpower:" + _player_manager.getPlayerPower( )[ i ].ToString( ) );
+                    }
 					// プラスバリューの初期化
 					_player_manager.allPlusValueInit( );
 
@@ -999,33 +959,32 @@ public class ApplicationManager : Manager< ApplicationManager > {
 
         if ( _mode != PROGRAM_MODE.MODE_NO_CONNECT ) {
             // 戦闘結果を送信
-            if ( _host_data.getRecvData( ).send_result == false ) {
+            if ( !_network_manager.isSendResult( ) ) {
                 _connect_wait_time++;
                 if ( _connect_wait_time > CONNECT_WAIT_TIME ) {
                     _connect_wait_time = 0;
                     BATTLE_RESULT[ ] result = new BATTLE_RESULT[ ]{ _player_manager.getPlayerResult( 0 ), _player_manager.getPlayerResult( 1 ) };
-                    _host_data.setSendBattleResult( result, true );
+                    _network_manager.setResult( result, true );
                 }
             }
         }
 
 		if ( _mode == PROGRAM_MODE.MODE_TWO_CONNECT ) {
-            if ( _client_data[ 0 ].getRecvData( ).ready &&
-                 _client_data[ 1 ].getRecvData( ).ready &&
+            if ( _network_manager.isReady( ) &&
                  _player_manager.getPlayerOrder( ) != PLAYER_ORDER.NO_PLAYER ) {
-                if ( _client_data[ ( int )_player_manager.getPlayerOrder( ) ].getRecvData( ).mass_adjust == MASS_ADJUST.ADVANCE &&
+                if ( _network_manager.getClientData( ( int )_player_manager.getPlayerOrder( ) ).mass_adjust == MASS_ADJUST.ADVANCE &&
                      !_player_manager.isMoveStart( ) ) {
                     // Pを前に動かす
 		            _player_manager.setLimitValue( 1 );
 		            _player_manager.setAdvanceFlag( true );
 					_event_count[ ( int )_player_manager.getPlayerOrder( ) ] = 0;
-                } else if ( _client_data[ ( int )_player_manager.getPlayerOrder( ) ].getRecvData( ).mass_adjust == MASS_ADJUST.BACK &&
+                } else if ( _network_manager.getClientData( ( int )_player_manager.getPlayerOrder( ) ).mass_adjust == MASS_ADJUST.BACK &&
                             !_player_manager.isMoveStart( ) ) {
                     // Pを後ろに動かす
 		            _player_manager.setLimitValue( 1 );
 		            _player_manager.setAdvanceFlag( false );
 					_event_count[ ( int )_player_manager.getPlayerOrder( ) ] = 0;
-                } else if ( _client_data[ ( int )_player_manager.getPlayerOrder( ) ].getRecvData( ).mass_adjust == MASS_ADJUST.NO_ADJUST &&
+                } else if ( _network_manager.getClientData( ( int )_player_manager.getPlayerOrder( ) ).mass_adjust == MASS_ADJUST.NO_ADJUST &&
                             !_player_manager.isMoveStart( ) ) {
                     // プレイヤーを変える
 		            _player_manager.setLimitValue( 0 );
@@ -1036,21 +995,21 @@ public class ApplicationManager : Manager< ApplicationManager > {
                 }
             }
 		} else if ( _mode == PROGRAM_MODE.MODE_ONE_CONNECT ) {
-            if ( _client_data[ 0 ].getRecvData( ).ready  &&
+            if ( _network_manager.isReady( ) &&
                  _player_manager.getPlayerOrder( ) != PLAYER_ORDER.NO_PLAYER )  {
-                if ( _client_data[ 0 ].getRecvData( ).mass_adjust == MASS_ADJUST.ADVANCE &&
+                if ( _network_manager.getClientData( ( int )_player_manager.getPlayerOrder( ) ).mass_adjust == MASS_ADJUST.ADVANCE &&
                      !_player_manager.isMoveStart( ) ) {
                     // 1Pを前に動かす
 		            _player_manager.setLimitValue( 1 );
 		            _player_manager.setAdvanceFlag( true );
 					_event_count[ ( int )_player_manager.getPlayerOrder( ) ] = 0;
-                } else if ( _client_data[ 0 ].getRecvData( ).mass_adjust == MASS_ADJUST.BACK &&
+                } else if ( _network_manager.getClientData( ( int )_player_manager.getPlayerOrder( ) ).mass_adjust == MASS_ADJUST.BACK &&
                             !_player_manager.isMoveStart( ) ) {
                     // 1Pを後ろに動かす
 		            _player_manager.setLimitValue( 1 );
 		            _player_manager.setAdvanceFlag( false );
 					_event_count[ ( int )_player_manager.getPlayerOrder( ) ] = 0;
-                } else if ( _client_data[ 0 ].getRecvData( ).mass_adjust == MASS_ADJUST.NO_ADJUST &&
+                } else if ( _network_manager.getClientData( ( int )_player_manager.getPlayerOrder( ) ).mass_adjust == MASS_ADJUST.NO_ADJUST &&
                             !_player_manager.isMoveStart( ) ) {
                     // プレイヤーを変える
 		            _player_manager.setLimitValue( 0 );
@@ -1107,21 +1066,13 @@ public class ApplicationManager : Manager< ApplicationManager > {
             _phase_init = false;
 			if ( _mode != PROGRAM_MODE.MODE_NO_CONNECT ) {
                 BATTLE_RESULT[ ] result = new BATTLE_RESULT[ ]{ BATTLE_RESULT.BATTLE_RESULT_NONE, BATTLE_RESULT.BATTLE_RESULT_NONE };
-				_host_data.setSendBattleResult( result, false );
+                _network_manager.setResult( result, false );
 			}
             
             _phase_manager.changeMainGamePhase( MAIN_GAME_PHASE.GAME_PHASE_EVENT, "EventPhase" );
             _player_manager.allMovedRefresh( );
 
-            if ( _mode == PROGRAM_MODE.MODE_ONE_CONNECT ) {
-                _host_data.setSendPlayerStatus( 0, _client_data[ 0 ].getRecvData( ).player_power,
-                                                _client_data[ 0 ].getRecvData( ).hand_num, false );
-            } else if ( _mode == PROGRAM_MODE.MODE_TWO_CONNECT ) {
-                _host_data.setSendPlayerStatus( 0, _client_data[ 0 ].getRecvData( ).player_power,
-                                                _client_data[ 0 ].getRecvData( ).hand_num, false );
-                _host_data.setSendPlayerStatus( 1, _client_data[ 1 ].getRecvData( ).player_power,
-                                                _client_data[ 1 ].getRecvData( ).hand_num, false );
-            }
+            _network_manager.setPlayerStatus( false );
         }
 	}
 
@@ -1132,8 +1083,9 @@ public class ApplicationManager : Manager< ApplicationManager > {
         if ( !_phase_init ) {
             
             if ( _mode != PROGRAM_MODE.MODE_NO_CONNECT ) {
-                _host_data.refreshCardList( 0 );
-                _host_data.refreshCardList( 1 );
+                for ( int i = 0; i < ( int )PLAYER_ORDER.MAX_PLAYER_NUM; i++ ) {
+                    _network_manager.refreshCard( i );
+                }
             }
             // 行動順1Pに設定する
             _player_manager.startPlayerOrder( );
@@ -1241,22 +1193,24 @@ public class ApplicationManager : Manager< ApplicationManager > {
              _goal_flag == false && _connect_wait_time >= CONNECT_WAIT_TIME ) {
             // カードドロー完了したら
             if ( _mode == PROGRAM_MODE.MODE_ONE_CONNECT ) {
-                if ( !_client_data[ player_one ].getRecvData( ).ok_event &&
+                if ( !_network_manager.getClientData( 0 ).ok_event &&
                      _event_type[ player_one ] == EVENT_TYPE.EVENT_DRAW ) {
                     return;
                 }
-                if ( !_client_data[ player_one ].getRecvData( ).ok_event &&
+                if ( !_network_manager.getClientData( 0 ).ok_event &&
                      _event_type[ player_one ] == EVENT_TYPE.EVENT_DISCARD ) {
                     return;
                 }
             } else if ( _mode == PROGRAM_MODE.MODE_TWO_CONNECT ) {
-                if ( ( !_client_data[ player_one ].getRecvData( ).ok_event && _event_type[ player_one ] == EVENT_TYPE.EVENT_DRAW ) ||
-                     ( !_client_data[ player_two ].getRecvData( ).ok_event && _event_type[ player_two ] == EVENT_TYPE.EVENT_DRAW ) ) {
-                    return;
-                }
-                if ( ( !_client_data[ player_one ].getRecvData( ).ok_event && _event_type[ player_one ] == EVENT_TYPE.EVENT_DISCARD ) ||
-                     ( !_client_data[ player_two ].getRecvData( ).ok_event && _event_type[ player_two ] == EVENT_TYPE.EVENT_DISCARD ) ) {
-                    return;
+                for ( int i = 0; i < ( int )PLAYER_ORDER.MAX_PLAYER_NUM; i++ ) {
+                    if ( !_network_manager.getClientData( i ).ok_event &&
+                         _event_type[ i ] == EVENT_TYPE.EVENT_DRAW ) {
+                        return;
+                    }
+                    if ( _network_manager.getClientData( i ).ok_event &&
+                         _event_type[ i ] == EVENT_TYPE.EVENT_DISCARD ) {
+                        return;
+                    }
                 }
             }
 
@@ -1270,14 +1224,17 @@ public class ApplicationManager : Manager< ApplicationManager > {
 				_player_manager.setEventType( i, _event_type[ i ] );
 			}
 
-            if ( _mode != PROGRAM_MODE.MODE_NO_CONNECT ) {
-                if ( _client_data[ player_one ] != null && _client_data[ player_one ].getRecvData( ).ok_event ) {
-                    _host_data.setSendEventType( PLAYER_ORDER.PLAYER_ONE, _event_type[ player_one ] );
-                    _host_data.refreshCardList( player_one );
+            if ( _mode == PROGRAM_MODE.MODE_TWO_CONNECT ) {
+                for ( int i = 0; i < ( int )PLAYER_ORDER.MAX_PLAYER_NUM; i++ ) {
+                    if ( _network_manager.getClientData( i ).ok_event ) {
+                        _network_manager.setEventType( i, _event_type[ i ] );
+                        _network_manager.refreshCard( i );
+                    }
                 }
-                if ( _client_data[ player_two ] != null && _client_data[ player_two ].getRecvData( ).ok_event ) {
-                    _host_data.setSendEventType( PLAYER_ORDER.PLAYER_ONE, _event_type[ player_two ] );
-                    _host_data.refreshCardList( player_two );
+            } else if ( _mode == PROGRAM_MODE.MODE_ONE_CONNECT ) {
+                if ( _network_manager.getClientData( player_one ).ok_event ) {
+                    _network_manager.setEventType( player_one, _event_type[ player_one ] );
+                    _network_manager.refreshCard( player_one );
                 }
             }
             _player_manager.refreshPlayerResult( );
@@ -1304,7 +1261,7 @@ public class ApplicationManager : Manager< ApplicationManager > {
             case EVENT_TYPE.EVENT_START:
                 _event_type[ id ] = EVENT_TYPE.EVENT_START;
                 if ( _mode != PROGRAM_MODE.MODE_NO_CONNECT ) {
-                    _host_data.setSendEventType( _player_manager.getPlayerOrder( ), _event_type[ id ] );
+                    _network_manager.setEventType( id, _event_type[ id ] );
                 }
                 _player_manager.setEventStart( true );
                 _player_manager.setEventFinish( true );
@@ -1313,7 +1270,7 @@ public class ApplicationManager : Manager< ApplicationManager > {
             case EVENT_TYPE.EVENT_DRAW:
                 _event_type[ id ] = EVENT_TYPE.EVENT_DRAW;
                 if ( _mode != PROGRAM_MODE.MODE_NO_CONNECT ) {
-                    _host_data.setSendEventType( _player_manager.getPlayerOrder( ), _event_type[ id ] );
+                    _network_manager.setEventType( id, _event_type[ id ] );
                 }
                 _player_manager.setEventType( id, _event_type[ id ] );
 
@@ -1341,9 +1298,9 @@ public class ApplicationManager : Manager< ApplicationManager > {
                 if ( _animation_end ) {
                     // カードを送信
                     if ( _mode != PROGRAM_MODE.MODE_NO_CONNECT ) {
-                        if ( !_host_data.isSendCard( id ) ) {
-			                _host_data.refreshCardList( id );
-                            _host_data.setSendCardlist( id, _player_manager.getDrawCard( ) );
+                        if ( !_network_manager.isSendCard( id ) ) {
+                            _network_manager.refreshCard( id );
+                            _network_manager.setCardList( id, _player_manager.getDrawCard( ) );
                             Debug.Log( "korosu" + _player_manager.getDrawCard( ).Count );
                         }
                     }
@@ -1357,7 +1314,7 @@ public class ApplicationManager : Manager< ApplicationManager > {
             case EVENT_TYPE.EVENT_MOVE:
                 _event_type[ id ] = EVENT_TYPE.EVENT_MOVE;
                 if ( _mode != PROGRAM_MODE.MODE_NO_CONNECT ) {
-                    _host_data.setSendEventType( _player_manager.getPlayerOrder( ), _event_type[ id ] );
+                    _network_manager.setEventType( id, _event_type[ id ] );
                 }
 
                 // パーティクルの生成
@@ -1376,7 +1333,7 @@ public class ApplicationManager : Manager< ApplicationManager > {
 		    case EVENT_TYPE.EVENT_TRAP_ONE:
                 _event_type[ id ] = EVENT_TYPE.EVENT_TRAP_ONE;
                 if ( _mode != PROGRAM_MODE.MODE_NO_CONNECT ) {
-                    _host_data.setSendEventType( _player_manager.getPlayerOrder( ), _event_type[ id ] );
+                    _network_manager.setEventType( id, _event_type[ id ] );
                 }
                 
                 // パーティクルの生成
@@ -1395,7 +1352,7 @@ public class ApplicationManager : Manager< ApplicationManager > {
                 // カードドロー
                 _event_type[ id ] = EVENT_TYPE.EVENT_TRAP_TWO;
                 if ( _mode != PROGRAM_MODE.MODE_NO_CONNECT ) {
-                    _host_data.setSendEventType( _player_manager.getPlayerOrder( ), _event_type[ id ] );
+                    _network_manager.setEventType( id, _event_type[ id ] );
                 }
                 _player_manager.setEventType( id, _event_type[ id ] );
                 value = _file_manager.getMassValue( mass_count )[ 0 ];
@@ -1423,9 +1380,9 @@ public class ApplicationManager : Manager< ApplicationManager > {
                 if ( _animation_end ) {
                     // カードを送信
                     if ( _mode != PROGRAM_MODE.MODE_NO_CONNECT ) {
-                        if ( !_host_data.isSendCard( id ) ) {
-			                _host_data.refreshCardList( id );
-                            _host_data.setSendCardlist( id, _player_manager.getDrawCard( ) );
+                        if ( !_network_manager.isSendCard( id ) ) {
+                            _network_manager.refreshCard( id );
+                            _network_manager.setCardList( id, _player_manager.getDrawCard( ) );
                         }
                     }
                     _anim_card_num = 0;
@@ -1562,7 +1519,7 @@ public class ApplicationManager : Manager< ApplicationManager > {
 			case EVENT_TYPE.EVENT_DISCARD:
                 _event_type[ id ] = EVENT_TYPE.EVENT_DISCARD;
                 if ( _mode != PROGRAM_MODE.MODE_NO_CONNECT ) {
-                    _host_data.setSendEventType( _player_manager.getPlayerOrder( ), _event_type[ id ] );
+                    _network_manager.setEventType( id, _event_type[ id ] );
                 }
                 Debug.Log( "カード" + "捨てる" );
 				//if ( _player_manager.getAnimationEnd( id ) == true ) {
@@ -1644,19 +1601,8 @@ public class ApplicationManager : Manager< ApplicationManager > {
 					_particle_manager.particleTypeDelete( PARTICLE_TYPE.PARTICLE_FIREWORKS1 );
                     _particle_manager.particleTypeDelete( PARTICLE_TYPE.PARTICLE_FIREWORKS2 );
 				}
-			} else if ( _mode == PROGRAM_MODE.MODE_ONE_CONNECT ) {
-				if ( _client_data[ 0 ].getRecvData( ).finish_game ) {
-					_phase_manager.changeMainGamePhase( MAIN_GAME_PHASE.GAME_PHASE_NO_PLAY, "NoPlay" );
-					_phase_init        = false;
-					_connect_wait_time = 0;
-					_go_finish_scene   = true;
-					_goal_time         = 0;
-					_phase_manager.deletePhaseImage( );
-					_particle_manager.particleTypeDelete( PARTICLE_TYPE.PARTICLE_FIREWORKS1 );
-                    _particle_manager.particleTypeDelete( PARTICLE_TYPE.PARTICLE_FIREWORKS2 );
-				}
-			} else if ( _mode == PROGRAM_MODE.MODE_TWO_CONNECT ) { 
-				if ( _client_data[ 0 ].getRecvData( ).finish_game && _client_data[ 1 ].getRecvData( ).finish_game ) {
+			} else {
+				if ( _network_manager.isFinishGame( ) ) {
 					_phase_manager.changeMainGamePhase( MAIN_GAME_PHASE.GAME_PHASE_NO_PLAY, "NoPlay" );
 					_phase_init        = false;
 					_connect_wait_time = 0;
@@ -1673,7 +1619,7 @@ public class ApplicationManager : Manager< ApplicationManager > {
 	}
 
 	public void OnGUI( ) {
-		if ( _host_data != null && _scene == SCENE.SCENE_CONNECT ) {
+		if ( _scene == SCENE.SCENE_CONNECT ) {
 			drawConnectScene( );
 		}
 	}
@@ -1683,13 +1629,7 @@ public class ApplicationManager : Manager< ApplicationManager > {
 	/// </summary>
 	private void drawConnectScene( ) {
 		if ( _mode != PROGRAM_MODE.MODE_NO_CONNECT ) {
-			if ( !_network_manager.isConnected( ) && _host_data.getServerState( ) != SERVER_STATE.STATE_HOST ) {
-				//_network_manager.noConnectDraw( );
-			}
-
-			if ( _host_data.getServerState( ) == SERVER_STATE.STATE_HOST ) {
-				_network_manager.hostStateDraw( );
-			}
+			_network_manager.hostStateDraw( );
 		}
 	}
 
@@ -1726,9 +1666,9 @@ public class ApplicationManager : Manager< ApplicationManager > {
 
 			for ( var i = 0; i < ( int )PLAYER_ORDER.MAX_PLAYER_NUM; i++ ) {
 				int player_id = i;
-				for ( int j = 0; j < _client_data[ player_id ].getRecvData( ).used_card_list.Length; j++ ) {
-					if ( _client_data[ player_id ].getRecvData( ).used_card_list[ j ] > 0 ) {
-						use_card_id.Add( _client_data[ player_id ].getRecvData( ).used_card_list[ j ] );
+				for ( int j = 0; j < _network_manager.getClientData( player_id ).used_card_list.Length; j++ ) {
+					if ( _network_manager.getClientData( player_id ).used_card_list[ j ] > 0 ) {
+						use_card_id.Add( _network_manager.getClientData( player_id ).used_card_list[ j ] );
 					}
 				}
 				_result_UI_maneger.Init( use_card_id , player_id );
