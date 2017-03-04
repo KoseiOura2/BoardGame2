@@ -1108,7 +1108,7 @@ public class ApplicationManager : Manager< ApplicationManager > {
 		}
 
         // 時間更新
-		if ( _client_data.getRecvData( ).battle_ready ) {
+		if ( !_client_data.getRecvData( ).battle_ready ) {
 			_battle_manager.changeBattleTimeImageNum( _battle_time_image[ 0 ], _battle_time_image[ 1 ] );
 			_battle_manager.battleTimeCount( );
 		}
