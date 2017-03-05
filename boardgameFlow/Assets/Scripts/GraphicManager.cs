@@ -214,9 +214,10 @@ public class GraphicManager : Manager< GraphicManager > {
 
     public void createMiniMassObj( ) {
         // マスとマスのつなぎを生成
-		for( int i = 0; i < _mass_obj_list.Count - 1; i++ ) {
+		for ( int i = 0; i < _mass_obj_list.Count - 1; i++ ) {
 			_mass_prefab = ( GameObject )Resources.Load( "Prefabs/Mass/mass_mini" );
 			Vector3 mini_pos = Vector3.Lerp( _mass_obj_list[ i ].transform.localPosition, _mass_obj_list[ i + 1 ].transform.localPosition, 0.5f );
+            mini_pos = new Vector3( mini_pos.x, 0, mini_pos.z );
 			GameObject mini_obj = ( GameObject )Instantiate( _mass_prefab, mini_pos, _mass_prefab.transform.localRotation );
 			mini_obj.transform.SetParent( _mass_obj_list[ i ].transform );
 		}

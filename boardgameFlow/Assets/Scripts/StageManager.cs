@@ -67,10 +67,13 @@ public class StageManager : MonoBehaviour {
 	public void massCreate( int num, MASS_TYPE type, EVENT_TYPE event_type, Vector3 pos ) {
         // オブジェクトの生成
 		_graphic_manager.createMassObj( num, type, event_type, pos );
-        _graphic_manager.createMiniMassObj( );
 
         // マスのリストに追加
         _mass_pos_list.Add( pos );
+    }
+
+    public void createMiniMass( ) {
+        _graphic_manager.createMiniMassObj( );
     }
 
     /// <summary>
