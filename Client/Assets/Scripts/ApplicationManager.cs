@@ -1193,7 +1193,7 @@ public class ApplicationManager : Manager< ApplicationManager > {
                 _map_manager.allMassReject( );
             }
             _map_manager.setVisibleSprite( true );
-            _debug_result = BATTLE_RESULT.WIN;
+			_debug_result = ( BATTLE_RESULT )( ( int )Random.Range( 1, 3 ) );
             _phase_init  = true;
 			_result_init = false;
         }
