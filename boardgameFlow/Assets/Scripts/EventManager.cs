@@ -19,6 +19,7 @@ public class EventManager : MonoBehaviour {
 	private CardManager _card_manager;
     
     private GameObject _anim_draw_card;
+    private Vector3 _return_card_scale;
     private PROGRAM_MODE _mode     = PROGRAM_MODE.MODE_NO_CONNECT;
     private EVENT_TYPE _event_type = EVENT_TYPE.EVENT_NONE;
     private int[ ] _mass_value = new int[ ] { 0, 0 };
@@ -161,7 +162,7 @@ public class EventManager : MonoBehaviour {
             _animation_running = true;
         }
                 
-        eventAnimation( _draw_card_list[ _anim_card_num ] );
+        drawAnimation( _draw_card_list[ _anim_card_num ] );
         if ( _anim_card_num >= _draw_card_list.Count ) {
             _animation_end = true;
         }
@@ -308,23 +309,27 @@ public class EventManager : MonoBehaviour {
     /// <summary>
     /// マス効果のコルーチン
     /// </summary>
-    private void eventAnimation( int card_id ) {
+    private void drawAnimation( int card_id ) {
         if ( _animation_time == 0.0f ) {
             GameObject treasure_chest = GameObject.Find( "TreasureChest:" + _mass_count );
 
             _anim_draw_card = Instantiate( ( GameObject )Resources.Load( "Prefabs/AnimationCard" ) );
+            //事前に大きなサイズにしていたカードサイズを取得
+            _return_card_scale = _anim_draw_card.transform.localScale;
             _anim_draw_card.GetComponent< Card >( ).setCardData( _card_manager.getCardData( card_id ) );
             _anim_draw_card.transform.parent = treasure_chest.transform;
             _anim_draw_card.transform.position = treasure_chest.transform.position;
+            //カードサイズを宝箱用のサイズに
             _anim_draw_card.transform.localScale = Vector3.one;
         }
         _animation_time += Time.deltaTime;
         
         if ( Mathf.Approximately( _animation_time, 3.0f ) ) {
+            //アニメーターを削除してアニメーションを終了
             Destroy( _anim_draw_card.GetComponent< Animator >( ) );
             //カメラの前に表示
-            Vector3 returnScale = _anim_draw_card.transform.localScale;
-            _anim_draw_card.transform.localScale = returnScale;
+            //元の大きいサイズに
+            _anim_draw_card.transform.localScale = _return_card_scale;
             _anim_draw_card.transform.rotation = Camera.main.transform.rotation;
             _anim_draw_card.transform.parent = Camera.main.transform;
             _anim_draw_card.transform.localPosition = new Vector3( 0, 0, 5 );
